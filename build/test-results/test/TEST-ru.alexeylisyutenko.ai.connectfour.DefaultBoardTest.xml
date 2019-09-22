@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ru.alexeylisyutenko.ai.connectfour.DefaultBoardTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-09-22T19:38:59" hostname="Alexeys-MBP" time="0.022">
+  <properties/>
+  <testcase name="someOperationsDemo()" classname="ru.alexeylisyutenko.ai.connectfour.DefaultBoardTest" time="0.022"/>
+  <system-out><![CDATA[  0 1 2 3 4 5 6 
+0               
+1               
+2               
+3               
+4               
+5               
+
+6
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,5 +1,8 @@
 package ru.alexeylisyutenko.ai.connectfour;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Connect-Four game board.
  * <p>
@@ -62,10 +65,45 @@ public interface Board {
     Board makeMove(int column);
 
     /**
+     * Returns the length of the longest contiguous chain of tokens held by the player with the specified player ID.
+     * A 'chain' is as defined by the Connect Four rules, meaning that the first player to build a chain of length 4 wins the game.
      *
-     * @return
+     * @param playerId player ID
+     * @return the length of the longest contiguous chain of tokens held by the player with the specified player ID
      */
-    int getLongestChain();
+    int getLongestChain(int playerId);
+
+    /**
+     * Returns a set containing cells for each distinct chain (of length 1 or greater) of tokens controlled
+     * by the current player on the board.
+     *
+     * @param playerId player ID
+     * @return a set containing cells for each distinct chain (of length 1 or greater) of tokens controlled
+     * by the current player on the board
+     */
+    Set<List<Cell>> getChainCells(int playerId);
+
+    /**
+     * Returns the total number of tokens on the board (for either player).
+     * This can be used as a game progress meter of sorts, since the number increases by exactly one each turn.
+     *
+     * @return the total number of tokens on the board.
+     */
+    int getNumberOfTokensOnBoard();
+
+    /**
+     * Returns the player ID number of the player who has won, or 0.
+     *
+     * @return player ID who won the game
+     */
+    int getWinnerId();
+
+    /**
+     * Returns true if the game has come to a conclusion. Use getWinnerId() to determine the winner.
+     *
+     * @return true if the game has come to a conclusion, otherwise false
+     */
+    boolean isGameOver();
 
     /**
      * Visualizes the board.
