@@ -2,7 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cac5d90e-2429-4326-b8d3-c47f05ac5528" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.gradle/5.2.1/fileContent/fileContent.lock" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gradle/5.2.1/fileHashes/resourceHashesCache.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gradle/5.2.1/javaCompile/classAnalysis.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gradle/5.2.1/javaCompile/jarAnalysis.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gradle/5.2.1/javaCompile/javaCompile.lock" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gradle/5.2.1/javaCompile/taskHistory.bin" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/classes/java/main/ru/alexeylisyutenko/ai/connectfour/Board.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/classes/java/main/ru/alexeylisyutenko/ai/connectfour/BoardVisualizer.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/classes/java/main/ru/alexeylisyutenko/ai/connectfour/Cell.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/classes/java/main/ru/alexeylisyutenko/ai/connectfour/ConsoleBoardVisualizer.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/classes/java/main/ru/alexeylisyutenko/ai/connectfour/Constants.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/classes/java/main/ru/alexeylisyutenko/ai/connectfour/DefaultBoard.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/classes/java/main/ru/alexeylisyutenko/ai/connectfour/Player.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/classes/java/test/ru/alexeylisyutenko/ai/connectfour/DefaultBoardTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/reports/tests/test/classes/ru.alexeylisyutenko.ai.connectfour.DefaultBoardTest.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/reports/tests/test/css/base-style.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/reports/tests/test/css/style.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/reports/tests/test/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/reports/tests/test/js/report.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/reports/tests/test/packages/ru.alexeylisyutenko.ai.connectfour.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/test-results/test/TEST-ru.alexeylisyutenko.ai.connectfour.DefaultBoardTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/test-results/test/binary/output.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/test-results/test/binary/output.bin.idx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/test-results/test/binary/results.bin" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/java/ru/alexeylisyutenko/ai/connectfour/Cell.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/java/ru/alexeylisyutenko/ai/connectfour/ConsoleBoardVisualizer.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/java/ru/alexeylisyutenko/ai/connectfour/DefaultBoard.java" afterDir="false" />
@@ -84,6 +108,7 @@
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="JUnit5" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5" value="" />
     <property name="extract.method.default.visibility" value="private" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
   </component>
@@ -164,7 +189,7 @@
       <workItem from="1569168695108" duration="95000" />
       <workItem from="1569168863685" duration="2888000" />
       <workItem from="1569174339230" duration="607000" />
-      <workItem from="1569174963529" duration="5322000" />
+      <workItem from="1569174963529" duration="5843000" />
     </task>
     <servers />
   </component>
