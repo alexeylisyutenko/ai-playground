@@ -1,5 +1,7 @@
 package ru.alexeylisyutenko.ai.connectfour;
 
+import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
+
 import java.util.List;
 import java.util.Set;
 
@@ -10,18 +12,15 @@ public class DefaultBoard implements Board {
     private final static int EMPTY_CELL_PLAYER_ID = 0;
 
     private final int[] boardArray;
-    private final BoardVisualizer visualizer;
     private final int currentPlayerId;
 
     public DefaultBoard() {
         this.boardArray = new int[BOARD_HEIGHT * BOARD_WIDTH];
-        this.visualizer = new ConsoleBoardVisualizer();
         this.currentPlayerId = 1;
     }
 
-    public DefaultBoard(int[] boardArray, BoardVisualizer visualizer, int currentPlayerId) {
+    public DefaultBoard(int[] boardArray, int currentPlayerId) {
         this.boardArray = boardArray;
-        this.visualizer = visualizer;
         this.currentPlayerId = currentPlayerId;
     }
 
@@ -36,7 +35,7 @@ public class DefaultBoard implements Board {
     }
 
     @Override
-    public int getCell(int row, int column) {
+    public int getCellPlayerId(int row, int column) {
         validateRowNumber(row);
         validateColumnNumber(column);
 
@@ -58,38 +57,46 @@ public class DefaultBoard implements Board {
     @Override
     public int getTopEltInColumn(int column) {
         validateColumnNumber(column);
-
-
+        for (int i = 0; i < BOARD_HEIGHT; i++) {
+            int playerId = getCellPlayerId(i, column);
+            if (playerId != EMPTY_CELL_PLAYER_ID) {
+                return playerId;
+            }
+        }
         return 0;
     }
 
     @Override
     public int getHeightOfColumn(int column) {
         validateColumnNumber(column);
-
         for (int i = 0; i < BOARD_HEIGHT; i++) {
-            if (getCell(i, column) != EMPTY_CELL_PLAYER_ID) {
-                return i-1;
+            if (getCellPlayerId(i, column) != EMPTY_CELL_PLAYER_ID) {
+                return i - 1;
             }
         }
         return BOARD_HEIGHT;
-
-        /**
-         *      * Returns the row number for the highest-numbered unoccupied row in the specified column.
-         *      * Returns -1 if the column is full, returns 6 if the column is empty.
-         *      * <p>
-         *      * NOTE: this is the row index number not the actual "height" of the column, and that row
-         *      * indices count from 0 at the top-most row down to 5 at the bottom-most row.
-         */
     }
 
     @Override
     public Board makeMove(int column) {
-        return null;
+        validateColumnNumber(column);
+
+        int columnHeight = getHeightOfColumn(column);
+        if (columnHeight == -1) {
+            throw new InvalidMoveException(column, this);
+        }
+
+        int[] newBoardArray = boardArray.clone();
+        int row = Math.min(5, columnHeight);
+        newBoardArray[BOARD_WIDTH * row + column] = currentPlayerId;
+        return new DefaultBoard(newBoardArray, getOtherPlayerId());
     }
 
     @Override
     public int getLongestChain(int playerId) {
+//           * Returns the length of the longest contiguous chain of tokens held by the player with the specified player ID.
+//                * A 'chain' is as defined by the Connect Four rules, meaning that the first player to build a chain of length 4 wins the game.
+
         return 0;
     }
 
@@ -111,10 +118,5 @@ public class DefaultBoard implements Board {
     @Override
     public boolean isGameOver() {
         return false;
-    }
-
-    @Override
-    public void visualize() {
-        visualizer.visualize(this);
     }
 }

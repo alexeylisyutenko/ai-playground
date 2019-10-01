@@ -32,7 +32,7 @@ public interface Board {
      * @param column column of a cell
      * @return the id# of the player owning the token in the specified cell
      */
-    int getCell(int row, int column);
+    int getCellPlayerId(int row, int column);
 
     /**
      * Returns the player ID of the player whose token is the topmost token in the specified column.
@@ -104,9 +104,4 @@ public interface Board {
      * @return true if the game has come to a conclusion, otherwise false
      */
     boolean isGameOver();
-
-    /**
-     * Visualizes the board.
-     */
-    void visualize();
 }

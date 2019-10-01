@@ -18,7 +18,7 @@ public class ConsoleBoardVisualizer implements BoardVisualizer {
     private void printRow(Board board, int row) {
         System.out.print(row + " ");
         for (int column = 0; column < Constants.BOARD_WIDTH; column++) {
-            int cell = board.getCell(row, column);
+            int cell = board.getCellPlayerId(row, column);
             if (cell < 0 || cell >= boardSymbolMapping.length) {
                 throw new IllegalStateException("Incorrect cell value: " + cell);
             }
