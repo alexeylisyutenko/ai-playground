@@ -1,9 +1,9 @@
 package ru.alexeylisyutenko.ai.connectfour;
 
+import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_WIDTH;
@@ -94,29 +94,87 @@ public class DefaultBoard implements Board {
 
     @Override
     public int getLongestChain(int playerId) {
-//           * Returns the length of the longest contiguous chain of tokens held by the player with the specified player ID.
-//                * A 'chain' is as defined by the Connect Four rules, meaning that the first player to build a chain of length 4 wins the game.
+        int longestChain = 0;
+        for (int row = 0; row < BOARD_HEIGHT; row++) {
+            for (int column = 0; column < BOARD_WIDTH; column++) {
+                if (getCellPlayerId(row, column) == playerId) {
+                    longestChain = Math.max(longestChain, calculateMaximumLengthFromCell(row, column));
+                }
+            }
+        }
+        return longestChain;
+    }
 
-        return 0;
+    private int calculateMaximumLengthFromCell(int row, int column) {
+        int length1 = calculateDirectionalVectorLength(row, column, Pair.of(0, 1)) + calculateDirectionalVectorLength(row, column, Pair.of(0, -1)) + 1;
+        int length2 = calculateDirectionalVectorLength(row, column, Pair.of(1, 1)) + calculateDirectionalVectorLength(row, column, Pair.of(-1, -1)) + 1;
+        int length3 = calculateDirectionalVectorLength(row, column, Pair.of(1, 0)) + calculateDirectionalVectorLength(row, column, Pair.of(-1, 0)) + 1;
+        int length4 = calculateDirectionalVectorLength(row, column, Pair.of(1, -1)) + calculateDirectionalVectorLength(row, column, Pair.of(-1, 1)) + 1;
+
+        return Math.max(Math.max(length1, length2), Math.max(length3, length4));
+    }
+
+    private int calculateDirectionalVectorLength(int row, int column, Pair<Integer, Integer> direction) {
+        int count = 0;
+        int playerId = getCellPlayerId(row, column);
+        while (row >= 0 && row < BOARD_HEIGHT
+                && column >= 0 && column < BOARD_WIDTH
+                && getCellPlayerId(row, column) == playerId) {
+
+            row += direction.getLeft();
+            column += direction.getRight();
+            count++;
+        }
+        return count - 1;
     }
 
     @Override
     public Set<List<Cell>> getChainCells(int playerId) {
+
+
         return null;
     }
 
     @Override
     public int getNumberOfTokensOnBoard() {
-        return 0;
+        int tokens = 0;
+        for (int row = 0; row < BOARD_HEIGHT; row++) {
+            for (int column = 0; column < BOARD_WIDTH; column++) {
+                if (getCellPlayerId(row, column) != EMPTY_CELL_PLAYER_ID) {
+                    tokens++;
+                }
+            }
+        }
+        return tokens;
     }
 
     @Override
     public int getWinnerId() {
+        for (int row = 0; row < BOARD_HEIGHT; row++) {
+            for (int column = 0; column < BOARD_WIDTH; column++) {
+                int currentCellPlayerId = getCellPlayerId(row, column);
+                if (currentCellPlayerId != EMPTY_CELL_PLAYER_ID) {
+                    boolean winFound = calculateMaximumLengthFromCell(row, column) >= 4;
+                    if (winFound) {
+                        return currentCellPlayerId;
+                    }
+                }
+            }
+        }
         return 0;
     }
 
     @Override
     public boolean isGameOver() {
-        return false;
+        return getWinnerId() != 0 || isTie();
+    }
+
+    private boolean isTie() {
+        for (int i = 0; i < BOARD_WIDTH; i++) {
+            if (getCellPlayerId(0, i) == EMPTY_CELL_PLAYER_ID) {
+                return false;
+            }
+        }
+        return true;
     }
 }
