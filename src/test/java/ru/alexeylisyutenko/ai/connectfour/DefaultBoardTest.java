@@ -1,6 +1,8 @@
 package ru.alexeylisyutenko.ai.connectfour;
 
 import org.junit.jupiter.api.Test;
+import ru.alexeylisyutenko.ai.connectfour.visualizer.BoardVisualizer;
+import ru.alexeylisyutenko.ai.connectfour.visualizer.ConsoleBoardVisualizer;
 
 class DefaultBoardTest {
 

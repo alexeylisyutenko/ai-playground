@@ -1,4 +1,7 @@
-package ru.alexeylisyutenko.ai.connectfour;
+package ru.alexeylisyutenko.ai.connectfour.visualizer;
+
+import ru.alexeylisyutenko.ai.connectfour.Board;
+import ru.alexeylisyutenko.ai.connectfour.Constants;
 
 public class ConsoleBoardVisualizer implements BoardVisualizer {
     private final char[] boardSymbolMapping = {' ', '\u263B', '\u263A'};
@@ -34,5 +37,4 @@ public class ConsoleBoardVisualizer implements BoardVisualizer {
         }
         System.out.println();
     }
-
 }
