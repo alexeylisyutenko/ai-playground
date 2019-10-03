@@ -1,5 +1,6 @@
 package ru.alexeylisyutenko.ai.connectfour;
 
+import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 
@@ -8,6 +9,7 @@ import java.util.*;
 import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_WIDTH;
 
+@EqualsAndHashCode(exclude = "currentPlayerId")
 public class DefaultBoard implements Board {
     private final static int EMPTY_CELL_PLAYER_ID = 0;
 
