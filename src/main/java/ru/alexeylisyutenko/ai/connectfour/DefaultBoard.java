@@ -1,5 +1,7 @@
 package ru.alexeylisyutenko.ai.connectfour;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
@@ -132,9 +134,53 @@ public class DefaultBoard implements Board {
 
     @Override
     public Set<List<Cell>> getChainCells(int playerId) {
+        HashSet<List<Cell>> chains = new HashSet<>();
+
+        for (int row = 0; row < BOARD_HEIGHT; row++) {
+            for (int column = 0; column < BOARD_WIDTH; column++) {
+                if (getCellPlayerId(row, column) == playerId) {
+                    //
+
+                }
+            }
+        }
+
+        return chains;
+    }
+
+    protected Set<List<Cell>> getChainSetsFromCell(int row, int column) {
+        HashSet<List<Cell>> chains = new HashSet<>();
+
+        List<Cell> chain1 = Lists.newArrayList(Iterables.concat(
+                Lists.reverse(getDirectionalVectorCells(row, column, Pair.of(0, -1))),
+                List.of(new Cell(row, column)),
+                getDirectionalVectorCells(row, column, Pair.of(0, 1))
+        ));
+
+        List<Cell> chain2 = Lists.newArrayList(Iterables.concat(
+                Lists.reverse(getDirectionalVectorCells(row, column, Pair.of(1, -1))),
+                List.of(new Cell(row, column)),
+                getDirectionalVectorCells(row, column, Pair.of(-1, 1))
+        ));
 
 
-        return null;
+
+        return chains;
+    }
+
+    private List<Cell> getDirectionalVectorCells(int row, int column, Pair<Integer, Integer> direction) {
+        List<Cell> chain = new ArrayList<>();
+        int playerId = getCellPlayerId(row, column);
+        while (row >= 0 && row < BOARD_HEIGHT
+                && column >= 0 && column < BOARD_WIDTH
+                && getCellPlayerId(row, column) == playerId) {
+
+            chain.add(new Cell(row, column));
+            row += direction.getLeft();
+            column += direction.getRight();
+        }
+        chain.remove(0);
+        return chain;
     }
 
     @Override
