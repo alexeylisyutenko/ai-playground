@@ -6,7 +6,10 @@ import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_WIDTH;
@@ -135,36 +138,44 @@ public class DefaultBoard implements Board {
     @Override
     public Set<List<Cell>> getChainCells(int playerId) {
         HashSet<List<Cell>> chains = new HashSet<>();
-
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             for (int column = 0; column < BOARD_WIDTH; column++) {
                 if (getCellPlayerId(row, column) == playerId) {
-                    //
-
+                    Set<List<Cell>> chainSetsFromCell = getChainSetsFromCell(row, column);
+                    chains.addAll(chainSetsFromCell);
                 }
             }
         }
-
         return chains;
     }
 
-    protected Set<List<Cell>> getChainSetsFromCell(int row, int column) {
-        HashSet<List<Cell>> chains = new HashSet<>();
-
+    private Set<List<Cell>> getChainSetsFromCell(int row, int column) {
         List<Cell> chain1 = Lists.newArrayList(Iterables.concat(
-                Lists.reverse(getDirectionalVectorCells(row, column, Pair.of(0, -1))),
+                Lists.reverse(getDirectionalVectorCells(row, column, Pair.of(0, 1))),
                 List.of(new Cell(row, column)),
-                getDirectionalVectorCells(row, column, Pair.of(0, 1))
+                getDirectionalVectorCells(row, column, Pair.of(0, -1))
         ));
-
         List<Cell> chain2 = Lists.newArrayList(Iterables.concat(
+                Lists.reverse(getDirectionalVectorCells(row, column, Pair.of(1, 1))),
+                List.of(new Cell(row, column)),
+                getDirectionalVectorCells(row, column, Pair.of(-1, -1))
+        ));
+        List<Cell> chain3 = Lists.newArrayList(Iterables.concat(
+                Lists.reverse(getDirectionalVectorCells(row, column, Pair.of(1, 0))),
+                List.of(new Cell(row, column)),
+                getDirectionalVectorCells(row, column, Pair.of(-1, 0))
+        ));
+        List<Cell> chain4 = Lists.newArrayList(Iterables.concat(
                 Lists.reverse(getDirectionalVectorCells(row, column, Pair.of(1, -1))),
                 List.of(new Cell(row, column)),
                 getDirectionalVectorCells(row, column, Pair.of(-1, 1))
         ));
 
-
-
+        HashSet<List<Cell>> chains = new HashSet<>();
+        chains.add(chain1);
+        chains.add(chain2);
+        chains.add(chain3);
+        chains.add(chain4);
         return chains;
     }
 

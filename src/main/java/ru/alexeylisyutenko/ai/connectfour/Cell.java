@@ -9,4 +9,9 @@ import lombok.Value;
 public final class Cell {
     private final int row;
     private final int column;
+
+    @Override
+    public String toString() {
+        return "(" + row + ", " + column + ")";
+    }
 }

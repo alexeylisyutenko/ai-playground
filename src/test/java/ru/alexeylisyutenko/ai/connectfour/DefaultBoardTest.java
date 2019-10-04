@@ -5,6 +5,9 @@ import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 import ru.alexeylisyutenko.ai.connectfour.visualizer.BoardVisualizer;
 import ru.alexeylisyutenko.ai.connectfour.visualizer.ConsoleBoardVisualizer;
 
+import java.util.List;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_WIDTH;
@@ -13,19 +16,26 @@ import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.constructBo
 
 class DefaultBoardTest {
 
-    BoardVisualizer visualizer = new ConsoleBoardVisualizer();
-
     @Test
     void someOperationsDemo() {
-        Board board = new DefaultBoard();
+        BoardVisualizer visualizer = new ConsoleBoardVisualizer();
 
-        Board board1 = board.makeMove(3).makeMove(4).makeMove(3).makeMove(0).makeMove(3).makeMove(1).makeMove(3);
-        visualizer.visualize(board1);
+        int[] boardArray = constructBoardArray(new int[][]{
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 2, 1, 2, 0, 0},
+                {0, 0, 1, 2, 1, 0, 0},
+                {2, 1, 2, 2, 2, 1, 0}
+        });
 
-        System.out.println();
-        System.out.println("Longest chain: " + board1.getLongestChain(1));
-        System.out.println("Is game over: " + board1.isGameOver());
-        System.out.println("Winner ID: " + board1.getWinnerId());
+        DefaultBoard board = new DefaultBoard(boardArray, 1);
+        visualizer.visualize(board);
+
+        Set<List<Cell>> chains = board.getChainCells(1);
+        for (List<Cell> cells : chains) {
+            System.out.println(cells);
+        }
     }
 
     @Test
@@ -187,7 +197,43 @@ class DefaultBoardTest {
 
     @Test
     void getChainCellsMustWorkProperly() {
-        throw new IllegalStateException("Not implemented yet");
+        int[] boardArray = constructBoardArray(new int[][]{
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 2, 1, 2, 0, 0},
+                {0, 0, 1, 2, 1, 0, 0},
+                {2, 1, 2, 2, 2, 1, 0}
+        });
+        Board board = new DefaultBoard(boardArray, 1);
+
+        Set<List<Cell>> chainCellsPlayer2 = board.getChainCells(2);
+        Set<List<Cell>> expectedSetPlayer2 = Set.of(
+                List.of(new Cell(5, 0)),
+                List.of(new Cell(5, 2)),
+                List.of(new Cell(5, 3)),
+                List.of(new Cell(5, 4)),
+                List.of(new Cell(4, 3)),
+                List.of(new Cell(3, 2)),
+                List.of(new Cell(3, 4)),
+                List.of(new Cell(5, 4), new Cell(5, 3), new Cell(5, 2)),
+                List.of(new Cell(5, 3), new Cell(4, 3)),
+                List.of(new Cell(5, 2), new Cell(4, 3), new Cell(3, 4)),
+                List.of(new Cell(5, 4), new Cell(4, 3), new Cell(3, 2))
+        );
+        assertEquals(expectedSetPlayer2, chainCellsPlayer2);
+
+        Set<List<Cell>> chainCellsPlayer1 = board.getChainCells(1);
+        Set<List<Cell>> expectedSetPlayer1 = Set.of(
+                List.of(new Cell(5, 1)),
+                List.of(new Cell(4, 2)),
+                List.of(new Cell(3, 3)),
+                List.of(new Cell(4, 4)),
+                List.of(new Cell(5, 5)),
+                List.of(new Cell(5, 1), new Cell(4, 2), new Cell(3, 3)),
+                List.of(new Cell(5, 5), new Cell(4, 4), new Cell(3, 3))
+        );
+        assertEquals(expectedSetPlayer1, chainCellsPlayer1);
     }
 
     @Test
