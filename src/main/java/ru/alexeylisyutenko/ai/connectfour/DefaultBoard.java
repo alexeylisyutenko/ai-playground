@@ -228,7 +228,8 @@ public class DefaultBoard implements Board {
         return getWinnerId() != 0 || isTie();
     }
 
-    private boolean isTie() {
+    @Override
+    public boolean isTie() {
         for (int i = 0; i < BOARD_WIDTH; i++) {
             if (getCellPlayerId(0, i) == EMPTY_CELL_PLAYER_ID) {
                 return false;

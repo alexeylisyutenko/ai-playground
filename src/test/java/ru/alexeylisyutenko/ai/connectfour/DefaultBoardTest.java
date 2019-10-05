@@ -333,4 +333,29 @@ class DefaultBoardTest {
         assertTrue(board3.isGameOver());
     }
 
+    @Test
+    void isTieMustWorkProperly() {
+        int[] boardArray1 = constructBoardArray(new int[][]{
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 2, 0, 2},
+                {0, 0, 1, 0, 1, 2, 1},
+                {0, 0, 2, 0, 2, 1, 2},
+                {0, 1, 1, 1, 2, 2, 1}
+        });
+        Board board1 = new DefaultBoard(boardArray1, 1);
+        assertFalse(board1.isTie());
+
+        int[] boardArray2 = constructBoardArray(new int[][]{
+                {1, 1, 2, 2, 2, 1, 2},
+                {2, 2, 1, 1, 2, 1, 1},
+                {1, 1, 1, 2, 1, 2, 1},
+                {1, 1, 2, 2, 1, 1, 1},
+                {2, 1, 2, 1, 2, 1, 2},
+                {1, 2, 1, 2, 1, 2, 1}
+        });
+        Board board2 = new DefaultBoard(boardArray2, 1);
+        assertTrue(board2.isTie());
+    }
+
 }

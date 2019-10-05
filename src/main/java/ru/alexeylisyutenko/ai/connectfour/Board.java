@@ -99,6 +99,13 @@ public interface Board {
     int getWinnerId();
 
     /**
+     * Return true if the game has reached a stalemate.
+     *
+     * @return true if the game has reached a stalemate, false otherwise
+     */
+    boolean isTie();
+
+    /**
      * Returns true if the game has come to a conclusion. Use getWinnerId() to determine the winner.
      *
      * @return true if the game has come to a conclusion, otherwise false
