@@ -2,7 +2,7 @@ package ru.alexeylisyutenko.ai.connectfour.player;
 
 import ru.alexeylisyutenko.ai.connectfour.Board;
 import ru.alexeylisyutenko.ai.connectfour.runner.GameRunner;
-import ru.alexeylisyutenko.ai.connectfour.runner.MoveMaker;
+import ru.alexeylisyutenko.ai.connectfour.runner.GameContext;
 
 /**
  * Connect four game player.
@@ -17,14 +17,12 @@ public interface Player {
 
     /**
      * This method is called by {@link GameRunner} when it's this player's turn to make a move.
-     * In response this player must call {@link MoveMaker#makeMove(int)} method to make an appropriate move.
+     * In response this player must call {@link GameContext#makeMove(int)} method to make an appropriate move.
      * A move must be made within some time limit, otherwise this player loses the game because of timeout.
      *
-     * @param moveMaker object that allows this player to make moves
-     * @param timeout   time period within the player must make a move after it was requested
-     * @param board     current board
+     * @param gameContext object that allows this player to make moves
      */
-    void requestMove(MoveMaker moveMaker, int timeout, Board board);
+    void requestMove(GameContext gameContext);
 
     /**
      * Called by {@link GameRunner} when game is finished.

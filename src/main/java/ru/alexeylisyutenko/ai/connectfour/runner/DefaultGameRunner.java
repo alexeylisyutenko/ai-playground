@@ -50,7 +50,7 @@ public class DefaultGameRunner implements GameRunner {
     @Override
     public void startGame() {
         // You can start the game only when it is in the STOPPED state.
-        if (state != GameState.STOPPED && state != GameState.FINISHED) {
+        if (state != GameState.STOPPED) {
             throw new IllegalStateException("Game is already started. You should stop current game first.");
         }
 
@@ -66,37 +66,7 @@ public class DefaultGameRunner implements GameRunner {
         boardVisualizer.visualize(board);
         System.out.println();
 
-        // Check if game is already over.
-        int winnerId = board.getWinnerId();
-        if (winnerId != 0) {
-            // We already have a winner on a board.
-            if (winnerId == 1) {
-                player1.gameFinished(GameResult.PLAYER_WON);
-                player2.gameFinished(GameResult.PLAYER_LOST);
-            } else {
-                player1.gameFinished(GameResult.PLAYER_LOST);
-                player2.gameFinished(GameResult.PLAYER_WON);
-            }
-
-            state = GameState.FINISHED;
-
-        } else if (board.isTie()) {
-            // It's a tie.
-            player1.gameFinished(GameResult.TIE);
-            player2.gameFinished(GameResult.TIE);
-
-            state = GameState.FINISHED;
-        } else {
-            if (board.getCurrentPlayerId() == 1) {
-                player1.requestMove(new DefaultMoveMaker(), timeout, board);
-
-                state = GameState.WAITING_FOR_PLAYER1_MOVE;
-            } else {
-                player2.requestMove(new DefaultMoveMaker(), timeout, board);
-
-                state = GameState.WAITING_FOR_PLAYER2_MOVE;
-            }
-        }
+        processCurrentBoardState();
     }
 
     @Override
@@ -114,10 +84,10 @@ public class DefaultGameRunner implements GameRunner {
 
             // Request for a move again.
             if (board.getCurrentPlayerId() == 1) {
-                player1.requestMove(new DefaultMoveMaker(), timeout, board);
+                player1.requestMove(new DefaultGameContext());
                 state = GameState.WAITING_FOR_PLAYER1_MOVE;
             } else {
-                player2.requestMove(new DefaultMoveMaker(), timeout, board);
+                player2.requestMove(new DefaultGameContext());
                 state = GameState.WAITING_FOR_PLAYER2_MOVE;
             }
             return;
@@ -133,6 +103,12 @@ public class DefaultGameRunner implements GameRunner {
         boardVisualizer.visualize(board);
         System.out.println();
 
+        processCurrentBoardState();
+
+    }
+
+    // TODO: Rename this method. Refactor.
+    private void processCurrentBoardState() {
         int winnerId = board.getWinnerId();
         if (winnerId != 0) {
             // We already have a winner on a board.
@@ -147,7 +123,7 @@ public class DefaultGameRunner implements GameRunner {
             // TODO: Remove debug output.
             System.out.println(String.format("Win for player %d!", winnerId));
 
-            state = GameState.FINISHED;
+            state = GameState.STOPPED;
 
         } else if (board.isTie()) {
             // It's a tie.
@@ -157,21 +133,29 @@ public class DefaultGameRunner implements GameRunner {
             // TODO: Remove debug output.
             System.out.println("It's a tie!  No winner is declared.");
 
-            state = GameState.FINISHED;
+            state = GameState.STOPPED;
         } else {
             if (board.getCurrentPlayerId() == 1) {
-                player1.requestMove(new DefaultMoveMaker(), timeout, board);
-
+                player1.requestMove(new DefaultGameContext());
                 state = GameState.WAITING_FOR_PLAYER1_MOVE;
             } else {
-                player2.requestMove(new DefaultMoveMaker(), timeout, board);
-
+                player2.requestMove(new DefaultGameContext());
                 state = GameState.WAITING_FOR_PLAYER2_MOVE;
             }
         }
     }
 
-    private class DefaultMoveMaker implements MoveMaker {
+    private class DefaultGameContext implements GameContext {
+        @Override
+        public int getTimeout() {
+            return DefaultGameRunner.this.timeout;
+        }
+
+        @Override
+        public Board getBoard() {
+            return DefaultGameRunner.this.board;
+        }
+
         @Override
         public void makeMove(int column) {
             DefaultGameRunner.this.makeMove(column);

@@ -1,7 +1,9 @@
-package ru.alexeylisyutenko.ai.connectfour.player;
+package ru.alexeylisyutenko.ai.connectfour.player.impl;
 
 import ru.alexeylisyutenko.ai.connectfour.Board;
-import ru.alexeylisyutenko.ai.connectfour.runner.MoveMaker;
+import ru.alexeylisyutenko.ai.connectfour.player.GameResult;
+import ru.alexeylisyutenko.ai.connectfour.player.Player;
+import ru.alexeylisyutenko.ai.connectfour.runner.GameContext;
 
 import java.util.Scanner;
 
@@ -16,10 +18,10 @@ public class ConsolePlayer implements Player {
     }
 
     @Override
-    public void requestMove(MoveMaker moveMaker, int timeout, Board board) {
+    public void requestMove(GameContext gameContext) {
         System.out.print(String.format("Player %d: Pick a column #: --> ", playerId));
         int column = scanner.nextInt();
-        moveMaker.makeMove(column);
+        gameContext.makeMove(column);
     }
 
     @Override
