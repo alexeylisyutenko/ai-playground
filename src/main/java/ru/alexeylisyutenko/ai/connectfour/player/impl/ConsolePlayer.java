@@ -26,6 +26,6 @@ public class ConsolePlayer implements Player {
 
     @Override
     public void gameFinished(GameResult gameResult) {
-        System.out.println(String.format("Player %d: Game finished: %s", playerId, gameResult));
+//        System.out.println(String.format("Player %d: Game finished: %s", playerId, gameResult));
     }
 }

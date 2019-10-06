@@ -8,6 +8,7 @@ import ru.alexeylisyutenko.ai.connectfour.player.GameResult;
 import ru.alexeylisyutenko.ai.connectfour.player.Player;
 import ru.alexeylisyutenko.ai.connectfour.runner.GameContext;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,13 +28,58 @@ public class RandomPlayer implements Player {
 
     @Override
     public void requestMove(GameContext gameContext) {
+        Optional<Integer> winningMove = calculateWinningMove(gameContext);
+        if (winningMove.isPresent()) {
+            gameContext.makeMove(winningMove.get());
+            return;
+        }
+
         Optional<Integer> blockingMove = calculateBlockingMove(gameContext);
         if (blockingMove.isPresent()) {
             gameContext.makeMove(blockingMove.get());
             return;
         }
 
+        Optional<Integer> increasingMove = calculateIncreasingChainMove(gameContext);
+        if (increasingMove.isPresent()) {
+            gameContext.makeMove(increasingMove.get());
+            return;
+        }
+
         makeRandomMove(gameContext);
+    }
+
+    private Optional<Integer> calculateIncreasingChainMove(GameContext gameContext) {
+        Board board = gameContext.getBoard();
+
+        Comparator<List<Cell>> listSizeComparator = Comparator.comparing(List::size);
+        Comparator<List<Cell>> listSizeComparatorReversed = listSizeComparator.reversed();
+        List<List<Cell>> chains = board.getChainCells(playerId).stream()
+                .filter(cells -> cells.size() > 1)
+                .sorted(listSizeComparatorReversed)
+                .collect(Collectors.toList());
+
+        for (List<Cell> chain : chains) {
+            Optional<Integer> move = calculateMoveForChainEnds(board, chain);
+            if (move.isPresent()) {
+                return move;
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<Integer> calculateMoveForChainEnds(Board board, List<Cell> chain) {
+        Pair<Cell, Cell> chainEnds = calculateChainEnds(chain);
+        Cell lastChainEnd = chainEnds.getLeft();
+        Cell firstChainEnd = chainEnds.getRight();
+
+        if (isValidCell(lastChainEnd) && isPossibleToOccupyCell(board, lastChainEnd)) {
+            return Optional.of(lastChainEnd.getColumn());
+        } else if (isValidCell(firstChainEnd) && isPossibleToOccupyCell(board, firstChainEnd)) {
+            return Optional.of(firstChainEnd.getColumn());
+        }
+        return Optional.empty();
     }
 
     private Optional<Integer> calculateBlockingMove(GameContext gameContext) {
@@ -46,13 +92,9 @@ public class RandomPlayer implements Player {
 
         for (List<Cell> chain : chains) {
             if (!isDangerousChainAlreadyBlocked(board, chain)) {
-                Cell firstBlockingCell = calculateFirstCellToBlockChain(chain);
-                Cell secondBlockingCell = calculateSecondCellToBlockChain(chain);
-
-                if (isValidCell(firstBlockingCell) && isPossibleToBlock(board, firstBlockingCell)) {
-                    return Optional.of(firstBlockingCell.getColumn());
-                } else if (isValidCell(secondBlockingCell) && isPossibleToBlock(board, secondBlockingCell)) {
-                    return Optional.of(secondBlockingCell.getColumn());
+                Optional<Integer> move = calculateMoveForChainEnds(board, chain);
+                if (move.isPresent()) {
+                    return move;
                 }
             }
         }
@@ -60,9 +102,24 @@ public class RandomPlayer implements Player {
         return Optional.empty();
     }
 
+    private Optional<Integer> calculateWinningMove(GameContext gameContext) {
+        Board board = gameContext.getBoard();
+
+        Set<List<Cell>> winningChains = board.getChainCells(playerId).stream()
+                .filter(cells -> cells.size() == 3).collect(Collectors.toSet());
+        for (List<Cell> chain : winningChains) {
+            Optional<Integer> move = calculateMoveForChainEnds(board, chain);
+            if (move.isPresent()) {
+                return move;
+            }
+        }
+        return Optional.empty();
+    }
+
     private boolean isDangerousChainAlreadyBlocked(Board board, List<Cell> dangerousChain) {
-        Cell firstBlockingCell = calculateFirstCellToBlockChain(dangerousChain);
-        Cell secondBlockingCell = calculateSecondCellToBlockChain(dangerousChain);
+        Pair<Cell, Cell> chainEnds = calculateChainEnds(dangerousChain);
+        Cell firstBlockingCell = chainEnds.getLeft();
+        Cell secondBlockingCell = chainEnds.getRight();
 
         boolean firstIsBlocked;
         if (isValidCell(firstBlockingCell)) {
@@ -81,7 +138,7 @@ public class RandomPlayer implements Player {
         return firstIsBlocked && secondIsBlocked;
     }
 
-    private boolean isPossibleToBlock(Board board, Cell blockingCell) {
+    private boolean isPossibleToOccupyCell(Board board, Cell blockingCell) {
         int heightOfColumn = board.getHeightOfColumn(blockingCell.getColumn());
         return heightOfColumn == blockingCell.getRow() || heightOfColumn == 6;
     }
@@ -101,20 +158,22 @@ public class RandomPlayer implements Player {
         }
     }
 
-    private Cell calculateFirstCellToBlockChain(List<Cell> dangerousChain) {
-        Cell cell1 = dangerousChain.get(0);
-        Cell cell2 = dangerousChain.get(1);
-        Pair<Integer, Integer> direction = Pair.of(cell2.getRow() - cell1.getRow(), cell2.getColumn() - cell1.getColumn());
-        Cell lastCell = dangerousChain.get(dangerousChain.size() - 1);
-        return new Cell(lastCell.getRow() + direction.getLeft(), lastCell.getColumn() + direction.getRight());
+    private Pair<Cell, Cell> calculateChainEnds(List<Cell> chain) {
+        Pair<Integer, Integer> direction = calculateChainDirection(chain);
+
+        Cell lastCell = chain.get(chain.size() - 1);
+        Cell lastChainEnd = new Cell(lastCell.getRow() + direction.getLeft(), lastCell.getColumn() + direction.getRight());
+
+        Cell firstCell = chain.get(0);
+        Cell firstChainEnd = new Cell(firstCell.getRow() - direction.getLeft(), firstCell.getColumn() - direction.getRight());
+
+        return Pair.of(lastChainEnd, firstChainEnd);
     }
 
-    private Cell calculateSecondCellToBlockChain(List<Cell> dangerousChain) {
-        Cell cell1 = dangerousChain.get(0);
-        Cell cell2 = dangerousChain.get(1);
-        Pair<Integer, Integer> direction = Pair.of(cell2.getRow() - cell1.getRow(), cell2.getColumn() - cell1.getColumn());
-        Cell lastCell = dangerousChain.get(0);
-        return new Cell(lastCell.getRow() - direction.getLeft(), lastCell.getColumn() - direction.getRight());
+    private Pair<Integer, Integer> calculateChainDirection(List<Cell> chain) {
+        Cell cell1 = chain.get(0);
+        Cell cell2 = chain.get(1);
+        return Pair.of(cell2.getRow() - cell1.getRow(), cell2.getColumn() - cell1.getColumn());
     }
 
     @Override
