@@ -4,7 +4,7 @@ import ru.alexeylisyutenko.ai.connectfour.Board;
 import ru.alexeylisyutenko.ai.connectfour.Constants;
 
 public class ConsoleBoardVisualizer implements BoardVisualizer {
-    private final char[] boardSymbolMapping = {' ', '\u263B', '\u263A'};
+    public static final char[] BOARD_SYMBOL_MAPPING = {' ', '\u263B', '\u263A'};
 
     @Override
     public void visualize(Board board) {
@@ -22,10 +22,10 @@ public class ConsoleBoardVisualizer implements BoardVisualizer {
         System.out.print(row + " ");
         for (int column = 0; column < Constants.BOARD_WIDTH; column++) {
             int cell = board.getCellPlayerId(row, column);
-            if (cell < 0 || cell >= boardSymbolMapping.length) {
+            if (cell < 0 || cell >= BOARD_SYMBOL_MAPPING.length) {
                 throw new IllegalStateException("Incorrect cell value: " + cell);
             }
-            System.out.print(boardSymbolMapping[cell] + " ");
+            System.out.print(BOARD_SYMBOL_MAPPING[cell] + " ");
         }
         System.out.println();
     }

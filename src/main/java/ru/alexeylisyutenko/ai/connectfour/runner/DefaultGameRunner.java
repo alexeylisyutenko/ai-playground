@@ -7,6 +7,8 @@ import ru.alexeylisyutenko.ai.connectfour.player.Player;
 
 // TODO: Refactor the code.
 // TODO: Add move history.
+// TODO: Add move timeout check.
+// TODO: Test this class.
 
 public class DefaultGameRunner implements GameRunner {
     private static final int DEFAULT_TIMEOUT = 10;
@@ -54,49 +56,35 @@ public class DefaultGameRunner implements GameRunner {
 
     @Override
     public void startGame() {
-        // You can start the game only when it is in the STOPPED state.
         if (state != GameState.STOPPED) {
             throw new IllegalStateException("Game is already started. You should stop current game first.");
         }
-
-        // Call gameStarted methods for both players.
-        notifyPlayersGameStarted();
-
-        // Initialize board.
         board = initialBoard;
-
-        // Invoke game started event.
+        notifyPlayersGameStarted();
         invokeGameStartedEvent();
-
-        // Process further game state transitions.
         processGameStateTransition();
     }
 
     @Override
     public void stopGame() {
-        // TODO: Implement.
+        if (state == GameState.STOPPED) {
+            return;
+        }
+        finishGame(GameResult.stoppedGame());
     }
 
     private void makeMove(int column) {
-        Board newBoard;
+        Board nextBoard;
         try {
-            newBoard = this.board.makeMove(column);
+            nextBoard = this.board.makeMove(column);
         } catch (InvalidMoveException e) {
-            // Invoke illegal move attempted event.
             invokeIllegalMoveAttemptedEvent(e.getColumn());
-
-            // Request for a move again.
             requestNextPlayerMove();
-
             return;
         }
 
-        board = newBoard;
-
-        // Invoke move made event.
+        board = nextBoard;
         invokeMoveMadeEvent(column);
-
-        //
         processGameStateTransition();
     }
 
@@ -133,13 +121,13 @@ public class DefaultGameRunner implements GameRunner {
         player2.gameStarted(2);
     }
 
-    private int getLoserId(int winnerId) {
-        return winnerId == 1 ? 2 : 1;
-    }
-
     private void notifyPlayersGameFinished(GameResult gameResult) {
         player1.gameFinished(gameResult);
         player2.gameFinished(gameResult);
+    }
+
+    private int getLoserId(int winnerId) {
+        return winnerId == 1 ? 2 : 1;
     }
 
     private void invokeGameStartedEvent() {
