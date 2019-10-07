@@ -1,9 +1,8 @@
-package ru.alexeylisyutenko.ai.connectfour.player.impl;
+package ru.alexeylisyutenko.ai.connectfour.console.player;
 
-import ru.alexeylisyutenko.ai.connectfour.Board;
-import ru.alexeylisyutenko.ai.connectfour.player.GameResult;
 import ru.alexeylisyutenko.ai.connectfour.player.Player;
 import ru.alexeylisyutenko.ai.connectfour.runner.GameContext;
+import ru.alexeylisyutenko.ai.connectfour.runner.GameResult;
 
 import java.util.Scanner;
 
@@ -13,7 +12,7 @@ public class ConsolePlayer implements Player {
     private int playerId;
 
     @Override
-    public void setId(int playerId) {
+    public void gameStarted(int playerId) {
         this.playerId = playerId;
     }
 

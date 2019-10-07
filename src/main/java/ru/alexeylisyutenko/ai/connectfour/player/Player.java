@@ -1,6 +1,6 @@
 package ru.alexeylisyutenko.ai.connectfour.player;
 
-import ru.alexeylisyutenko.ai.connectfour.Board;
+import ru.alexeylisyutenko.ai.connectfour.runner.GameResult;
 import ru.alexeylisyutenko.ai.connectfour.runner.GameRunner;
 import ru.alexeylisyutenko.ai.connectfour.runner.GameContext;
 
@@ -9,11 +9,11 @@ import ru.alexeylisyutenko.ai.connectfour.runner.GameContext;
  */
 public interface Player {
     /**
-     * Called by {@link GameRunner} to setup current player id.
+     * Called by {@link GameRunner} when a game starts.
      *
      * @param playerId this player id
      */
-    void setId(int playerId);
+    void gameStarted(int playerId);
 
     /**
      * This method is called by {@link GameRunner} when it's this player's turn to make a move.
@@ -27,7 +27,7 @@ public interface Player {
     /**
      * Called by {@link GameRunner} when game is finished.
      *
-     * @param gameResult result of the game from the perspective of this player
+     * @param gameResult result of the game
      */
     void gameFinished(GameResult gameResult);
 }

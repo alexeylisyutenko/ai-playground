@@ -1,12 +1,12 @@
-package ru.alexeylisyutenko.ai.connectfour.player.impl;
+package ru.alexeylisyutenko.ai.connectfour.player;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.Board;
 import ru.alexeylisyutenko.ai.connectfour.Cell;
-import ru.alexeylisyutenko.ai.connectfour.player.GameResult;
 import ru.alexeylisyutenko.ai.connectfour.player.Player;
 import ru.alexeylisyutenko.ai.connectfour.runner.GameContext;
+import ru.alexeylisyutenko.ai.connectfour.runner.GameResult;
 
 import java.util.Comparator;
 import java.util.List;
@@ -22,7 +22,7 @@ public class RandomPlayer implements Player {
     private int playerId;
 
     @Override
-    public void setId(int playerId) {
+    public void gameStarted(int playerId) {
         this.playerId = playerId;
     }
 
@@ -178,6 +178,6 @@ public class RandomPlayer implements Player {
 
     @Override
     public void gameFinished(GameResult gameResult) {
-        // Do nothing.
+        // Do nothing
     }
 }

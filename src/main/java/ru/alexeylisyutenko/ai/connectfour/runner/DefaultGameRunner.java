@@ -3,11 +3,10 @@ package ru.alexeylisyutenko.ai.connectfour.runner;
 import ru.alexeylisyutenko.ai.connectfour.Board;
 import ru.alexeylisyutenko.ai.connectfour.DefaultBoard;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
-import ru.alexeylisyutenko.ai.connectfour.player.GameResult;
 import ru.alexeylisyutenko.ai.connectfour.player.Player;
-import ru.alexeylisyutenko.ai.connectfour.visualizer.ConsoleBoardVisualizer;
 
 // TODO: Refactor the code.
+// TODO: Add move history.
 
 public class DefaultGameRunner implements GameRunner {
     private static final int DEFAULT_TIMEOUT = 10;
@@ -16,20 +15,26 @@ public class DefaultGameRunner implements GameRunner {
     private final Player player1;
     private final Player player2;
     private final Board initialBoard;
+    private final GameEventListener gameEventListener;
 
     private GameState state;
     private Board board;
 
-    public DefaultGameRunner(Player player1, Player player2, int timeout, Board initialBoard) {
+    public DefaultGameRunner(Player player1, Player player2, int timeout, Board initialBoard, GameEventListener gameEventListener) {
         this.player1 = player1;
         this.player2 = player2;
         this.timeout = timeout;
         this.initialBoard = initialBoard;
         this.state = GameState.STOPPED;
+        this.gameEventListener = gameEventListener;
     }
 
     public DefaultGameRunner(Player player1, Player player2) {
-        this(player1, player2, DEFAULT_TIMEOUT, new DefaultBoard());
+        this(player1, player2, DEFAULT_TIMEOUT, new DefaultBoard(), null);
+    }
+
+    public DefaultGameRunner(Player player1, Player player2, GameEventListener gameEventListener) {
+        this(player1, player2, DEFAULT_TIMEOUT, new DefaultBoard(), gameEventListener);
     }
 
     @Override
@@ -54,19 +59,17 @@ public class DefaultGameRunner implements GameRunner {
             throw new IllegalStateException("Game is already started. You should stop current game first.");
         }
 
-        // Initialize ids.
-        player1.setId(1);
-        player2.setId(2);
+        // Call gameStarted methods for both players.
+        notifyPlayersGameStarted();
 
         // Initialize board.
         board = initialBoard;
 
-        // TODO: Remove.
-        ConsoleBoardVisualizer boardVisualizer = new ConsoleBoardVisualizer();
-        boardVisualizer.visualize(board);
-        System.out.println();
+        // Invoke game started event.
+        invokeGameStartedEvent();
 
-        processCurrentBoardState();
+        // Process further game state transitions.
+        processGameStateTransition();
     }
 
     @Override
@@ -79,72 +82,97 @@ public class DefaultGameRunner implements GameRunner {
         try {
             newBoard = this.board.makeMove(column);
         } catch (InvalidMoveException e) {
-            // TODO: Event should be called here.
-            System.out.println("Illegal move attempted.  Please try again.");
+            // Invoke illegal move attempted event.
+            invokeIllegalMoveAttemptedEvent(e.getColumn());
 
             // Request for a move again.
-            if (board.getCurrentPlayerId() == 1) {
-                player1.requestMove(new DefaultGameContext());
-                state = GameState.WAITING_FOR_PLAYER1_MOVE;
-            } else {
-                player2.requestMove(new DefaultGameContext());
-                state = GameState.WAITING_FOR_PLAYER2_MOVE;
-            }
+            requestNextPlayerMove();
+
             return;
         }
 
         board = newBoard;
 
-        // TODO: Remove this demo console output.
-        System.out.println(String.format("Player %d puts a token in column %d", board.getOtherPlayerId(), column));
+        // Invoke move made event.
+        invokeMoveMadeEvent(column);
 
-        // TODO: Here a player made a move. We shuld add event here.
-        ConsoleBoardVisualizer boardVisualizer = new ConsoleBoardVisualizer();
-        boardVisualizer.visualize(board);
-        System.out.println();
-
-        processCurrentBoardState();
-
+        //
+        processGameStateTransition();
     }
 
-    // TODO: Rename this method. Refactor.
-    private void processCurrentBoardState() {
+    private void processGameStateTransition() {
         int winnerId = board.getWinnerId();
         if (winnerId != 0) {
-            // We already have a winner on a board.
-            if (winnerId == 1) {
-                player1.gameFinished(GameResult.PLAYER_WON);
-                player2.gameFinished(GameResult.PLAYER_LOST);
-            } else {
-                player1.gameFinished(GameResult.PLAYER_LOST);
-                player2.gameFinished(GameResult.PLAYER_WON);
-            }
-
-            // TODO: Remove debug output.
-            System.out.println(String.format("Win for player %d!", winnerId));
-
-            state = GameState.STOPPED;
-
+            finishGame(GameResult.normalVictory(winnerId, getLoserId(winnerId)));
         } else if (board.isTie()) {
-            // It's a tie.
-            player1.gameFinished(GameResult.TIE);
-            player2.gameFinished(GameResult.TIE);
-
-            // TODO: Remove debug output.
-            System.out.println("It's a tie!  No winner is declared.");
-
-            state = GameState.STOPPED;
+            finishGame(GameResult.tie());
         } else {
-            if (board.getCurrentPlayerId() == 1) {
-                player1.requestMove(new DefaultGameContext());
-                state = GameState.WAITING_FOR_PLAYER1_MOVE;
-            } else {
-                player2.requestMove(new DefaultGameContext());
-                state = GameState.WAITING_FOR_PLAYER2_MOVE;
-            }
+            requestNextPlayerMove();
         }
     }
 
+    private void finishGame(GameResult gameResult) {
+        notifyPlayersGameFinished(gameResult);
+        invokeGameFinishedEvent(gameResult);
+        state = GameState.STOPPED;
+    }
+
+    private void requestNextPlayerMove() {
+        if (board.getCurrentPlayerId() == 1) {
+            player1.requestMove(new DefaultGameContext());
+            state = GameState.WAITING_FOR_PLAYER1_MOVE;
+        } else {
+            player2.requestMove(new DefaultGameContext());
+            state = GameState.WAITING_FOR_PLAYER2_MOVE;
+        }
+        invokeMoveRequestedEvent();
+    }
+
+    private void notifyPlayersGameStarted() {
+        player1.gameStarted(1);
+        player2.gameStarted(2);
+    }
+
+    private int getLoserId(int winnerId) {
+        return winnerId == 1 ? 2 : 1;
+    }
+
+    private void notifyPlayersGameFinished(GameResult gameResult) {
+        player1.gameFinished(gameResult);
+        player2.gameFinished(gameResult);
+    }
+
+    private void invokeGameStartedEvent() {
+        if (gameEventListener != null) {
+            gameEventListener.gameStarted(this, board);
+        }
+    }
+
+    private void invokeMoveMadeEvent(int column) {
+        if (gameEventListener != null) {
+            gameEventListener.moveMade(this, board.getOtherPlayerId(), column, board);
+        }
+    }
+
+    private void invokeIllegalMoveAttemptedEvent(int column) {
+        if (gameEventListener != null) {
+            gameEventListener.illegalMoveAttempted(this, board.getCurrentPlayerId(), column, board);
+        }
+    }
+
+    private void invokeGameFinishedEvent(GameResult gameResult) {
+        if (gameEventListener != null) {
+            gameEventListener.gameFinished(this, gameResult);
+        }
+    }
+
+    private void invokeMoveRequestedEvent() {
+        if (gameEventListener != null) {
+            gameEventListener.moveRequested(this, board.getCurrentPlayerId(), board);
+        }
+    }
+
+    // TODO: Add playerId here and add check so that only player whose turn it is could make a move.
     private class DefaultGameContext implements GameContext {
         @Override
         public int getTimeout() {

@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour.visualizer;
+package ru.alexeylisyutenko.ai.connectfour.console.visualizer;
 
 import ru.alexeylisyutenko.ai.connectfour.Board;
 
