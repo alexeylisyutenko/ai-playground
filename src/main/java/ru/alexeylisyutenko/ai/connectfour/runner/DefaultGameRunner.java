@@ -31,10 +31,6 @@ public class DefaultGameRunner implements GameRunner {
         this.gameEventListener = gameEventListener;
     }
 
-    public DefaultGameRunner(Player player1, Player player2) {
-        this(player1, player2, DEFAULT_TIMEOUT, new DefaultBoard(), null);
-    }
-
     public DefaultGameRunner(Player player1, Player player2, GameEventListener gameEventListener) {
         this(player1, player2, DEFAULT_TIMEOUT, new DefaultBoard(), gameEventListener);
     }
