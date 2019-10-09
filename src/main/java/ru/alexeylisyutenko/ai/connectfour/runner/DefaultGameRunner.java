@@ -7,7 +7,6 @@ import ru.alexeylisyutenko.ai.connectfour.player.Player;
 
 // TODO: Refactor the code.
 // TODO: Add move history.
-// TODO: Add move timeout check.
 // TODO: Test this class.
 
 public class DefaultGameRunner implements GameRunner {
@@ -48,6 +47,11 @@ public class DefaultGameRunner implements GameRunner {
     @Override
     public Player getPlayer2() {
         return player2;
+    }
+
+    @Override
+    public GameState getState() {
+        return state;
     }
 
     @Override
@@ -156,7 +160,6 @@ public class DefaultGameRunner implements GameRunner {
         }
     }
 
-    // TODO: Add playerId here and add check so that only player whose turn it is could make a move.
     private class DefaultGameContext implements GameContext {
         @Override
         public int getTimeout() {

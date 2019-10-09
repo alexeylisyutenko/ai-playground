@@ -15,14 +15,16 @@ public interface GameContext {
     int getTimeout();
 
     /**
+     * Returns current board state.
      *
-     * @return
+     * @return current board state
      */
     Board getBoard();
 
     /**
+     * {@link Player} must call this method to make a move when it is player's turn to make a move.
      *
-     * @param column
+     * @param column a column where a player wants to place a token
      */
     void makeMove(int column);
 }

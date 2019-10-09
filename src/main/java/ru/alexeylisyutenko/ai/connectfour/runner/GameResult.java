@@ -1,5 +1,6 @@
 package ru.alexeylisyutenko.ai.connectfour.runner;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -15,6 +16,7 @@ import lombok.ToString;
  */
 @Getter
 @ToString
+@EqualsAndHashCode
 public final class GameResult {
     /**
      * Type of a game outcome.
