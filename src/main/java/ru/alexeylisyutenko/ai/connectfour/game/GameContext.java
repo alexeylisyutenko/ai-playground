@@ -1,7 +1,6 @@
-package ru.alexeylisyutenko.ai.connectfour.runner;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
-import ru.alexeylisyutenko.ai.connectfour.Board;
-import ru.alexeylisyutenko.ai.connectfour.player.Player;
+import java.util.List;
 
 /**
  * An interface of an object passed to players {@link Player} when a move is requested.
@@ -20,6 +19,13 @@ public interface GameContext {
      * @return current board state
      */
     Board getBoard();
+
+    /**
+     * Returns board history of the current main.
+     *
+     * @return current main's boards
+     */
+    List<Board> getBoardHistory();
 
     /**
      * {@link Player} must call this method to make a move when it is player's turn to make a move.

@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_HEIGHT;
-import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_WIDTH;
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
 @EqualsAndHashCode(exclude = "currentPlayerId")
 public class DefaultBoard implements Board {

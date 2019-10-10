@@ -1,8 +1,8 @@
-package ru.alexeylisyutenko.ai.connectfour.console.player;
+package ru.alexeylisyutenko.ai.connectfour.player;
 
-import ru.alexeylisyutenko.ai.connectfour.player.Player;
-import ru.alexeylisyutenko.ai.connectfour.runner.GameContext;
-import ru.alexeylisyutenko.ai.connectfour.runner.GameResult;
+import ru.alexeylisyutenko.ai.connectfour.game.Player;
+import ru.alexeylisyutenko.ai.connectfour.game.GameContext;
+import ru.alexeylisyutenko.ai.connectfour.game.GameResult;
 
 import java.util.Scanner;
 

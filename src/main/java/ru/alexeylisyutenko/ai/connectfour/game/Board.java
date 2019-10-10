@@ -1,10 +1,10 @@
-package ru.alexeylisyutenko.ai.connectfour;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
 import java.util.List;
 import java.util.Set;
 
 /**
- * Connect-Four game board.
+ * Connect-Four main board.
  * <p>
  * Implementations of this interface must be immutable.
  * </p>
@@ -66,7 +66,7 @@ public interface Board {
 
     /**
      * Returns the length of the longest contiguous chain of tokens held by the player with the specified player ID.
-     * A 'chain' is as defined by the Connect Four rules, meaning that the first player to build a chain of length 4 wins the game.
+     * A 'chain' is as defined by the Connect Four rules, meaning that the first player to build a chain of length 4 wins the main.
      *
      * @param playerId player ID
      * @return the length of the longest contiguous chain of tokens held by the player with the specified player ID
@@ -85,7 +85,7 @@ public interface Board {
 
     /**
      * Returns the total number of tokens on the board (for either player).
-     * This can be used as a game progress meter of sorts, since the number increases by exactly one each turn.
+     * This can be used as a main progress meter of sorts, since the number increases by exactly one each turn.
      *
      * @return the total number of tokens on the board.
      */
@@ -94,21 +94,21 @@ public interface Board {
     /**
      * Returns the player ID number of the player who has won, or 0.
      *
-     * @return player ID who won the game
+     * @return player ID who won the main
      */
     int getWinnerId();
 
     /**
-     * Return true if the game has reached a stalemate.
+     * Return true if the main has reached a stalemate.
      *
-     * @return true if the game has reached a stalemate, false otherwise
+     * @return true if the main has reached a stalemate, false otherwise
      */
     boolean isTie();
 
     /**
-     * Returns true if the game has come to a conclusion. Use getWinnerId() to determine the winner.
+     * Returns true if the main has come to a conclusion. Use getWinnerId() to determine the winner.
      *
-     * @return true if the game has come to a conclusion, otherwise false
+     * @return true if the main has come to a conclusion, otherwise false
      */
     boolean isGameOver();
 }

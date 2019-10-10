@@ -1,6 +1,7 @@
-package ru.alexeylisyutenko.ai.connectfour.runner;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
 import org.junit.jupiter.api.Test;
+import ru.alexeylisyutenko.ai.connectfour.game.GameResult;
 
 import static org.junit.jupiter.api.Assertions.*;
 

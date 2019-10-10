@@ -1,7 +1,7 @@
-package ru.alexeylisyutenko.ai.connectfour;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
 /**
- * Constants related to the Connect-Four game.
+ * Constants related to the Connect-Four main.
  */
 public final class Constants {
     /**

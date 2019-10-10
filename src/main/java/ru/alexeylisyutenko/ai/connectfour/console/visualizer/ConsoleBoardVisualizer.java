@@ -1,7 +1,7 @@
 package ru.alexeylisyutenko.ai.connectfour.console.visualizer;
 
-import ru.alexeylisyutenko.ai.connectfour.Board;
-import ru.alexeylisyutenko.ai.connectfour.Constants;
+import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.game.Constants;
 
 public class ConsoleBoardVisualizer implements BoardVisualizer {
     public static final char[] BOARD_SYMBOL_MAPPING = {' ', '\u263B', '\u263A'};

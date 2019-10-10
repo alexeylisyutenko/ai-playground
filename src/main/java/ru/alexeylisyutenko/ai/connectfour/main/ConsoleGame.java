@@ -1,10 +1,10 @@
-package ru.alexeylisyutenko.ai.connectfour.game;
+package ru.alexeylisyutenko.ai.connectfour.main;
 
 import ru.alexeylisyutenko.ai.connectfour.console.gamelistener.ConsoleGameEventListener;
-import ru.alexeylisyutenko.ai.connectfour.console.player.ConsolePlayer;
-import ru.alexeylisyutenko.ai.connectfour.player.Player;
+import ru.alexeylisyutenko.ai.connectfour.player.ConsolePlayer;
+import ru.alexeylisyutenko.ai.connectfour.game.Player;
 import ru.alexeylisyutenko.ai.connectfour.player.RandomPlayer;
-import ru.alexeylisyutenko.ai.connectfour.runner.DefaultGameRunner;
+import ru.alexeylisyutenko.ai.connectfour.game.DefaultGameRunner;
 
 public class ConsoleGame {
     public static void main(String[] args) {

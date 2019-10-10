@@ -2,11 +2,7 @@ package ru.alexeylisyutenko.ai.connectfour.player;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import ru.alexeylisyutenko.ai.connectfour.Board;
-import ru.alexeylisyutenko.ai.connectfour.Cell;
-import ru.alexeylisyutenko.ai.connectfour.player.Player;
-import ru.alexeylisyutenko.ai.connectfour.runner.GameContext;
-import ru.alexeylisyutenko.ai.connectfour.runner.GameResult;
+import ru.alexeylisyutenko.ai.connectfour.game.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -14,8 +10,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_HEIGHT;
-import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_WIDTH;
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
 public class RandomPlayer implements Player {
 

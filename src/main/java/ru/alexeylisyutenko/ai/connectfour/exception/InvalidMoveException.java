@@ -1,7 +1,7 @@
 package ru.alexeylisyutenko.ai.connectfour.exception;
 
 import lombok.Getter;
-import ru.alexeylisyutenko.ai.connectfour.Board;
+import ru.alexeylisyutenko.ai.connectfour.game.Board;
 
 @Getter
 public class InvalidMoveException extends RuntimeException {

@@ -1,15 +1,13 @@
-package ru.alexeylisyutenko.ai.connectfour.runner;
-
-import ru.alexeylisyutenko.ai.connectfour.Board;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
 /**
- * The listener interface for receiving game events.
+ * The listener interface for receiving main events.
  */
 public interface GameEventListener {
     /**
-     * Invoked when game starts.
+     * Invoked when main starts.
      *
-     * @param gameRunner a game runner which controls current game
+     * @param gameRunner a main runner which controls current main
      * @param board an initial board state
      */
     void gameStarted(GameRunner gameRunner, Board board);
@@ -17,7 +15,7 @@ public interface GameEventListener {
     /**
      * Invoked when a player tries to make an illegal move.
      *
-     * @param gameRunner a game runner which controls current game
+     * @param gameRunner a main runner which controls current main
      * @param playerId player's id who tried to make an illegal move
      * @param column a column which a player tried to put a token in
      * @param board a board right before and after illegal move attempt
@@ -25,9 +23,9 @@ public interface GameEventListener {
     void illegalMoveAttempted(GameRunner gameRunner, int playerId, int column, Board board);
 
     /**
-     * Invoked when a game runner requests a player to make a move.
+     * Invoked when a main runner requests a player to make a move.
      *
-     * @param gameRunner a game runner which controls current game
+     * @param gameRunner a main runner which controls current main
      * @param playerId player's id whose turn it is to make a move
      * @param board a board before the move
      */
@@ -36,7 +34,7 @@ public interface GameEventListener {
     /**
      * Invoked when a move is made.
      *
-     * @param gameRunner a game runner which controls current game
+     * @param gameRunner a main runner which controls current main
      * @param playerId player's id who made a move
      * @param column a column where a player put a token
      * @param board a board right after the player's move
@@ -44,10 +42,10 @@ public interface GameEventListener {
     void moveMade(GameRunner gameRunner, int playerId, int column, Board board);
 
     /**
-     * Invoked when a game is finished.
+     * Invoked when a main is finished.
      *
-     * @param gameRunner a game runner which controls current game
-     * @param gameResult a game result
+     * @param gameRunner a main runner which controls current main
+     * @param gameResult a main result
      */
     void gameFinished(GameRunner gameRunner, GameResult gameResult);
 }

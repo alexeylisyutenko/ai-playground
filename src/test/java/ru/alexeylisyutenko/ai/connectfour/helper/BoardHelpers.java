@@ -1,10 +1,10 @@
 package ru.alexeylisyutenko.ai.connectfour.helper;
 
-import ru.alexeylisyutenko.ai.connectfour.Board;
+import ru.alexeylisyutenko.ai.connectfour.game.Board;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_HEIGHT;
-import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_WIDTH;
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
 public final class BoardHelpers {
     private BoardHelpers() {

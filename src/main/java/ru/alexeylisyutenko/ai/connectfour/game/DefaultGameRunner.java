@@ -1,13 +1,12 @@
-package ru.alexeylisyutenko.ai.connectfour.runner;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
-import ru.alexeylisyutenko.ai.connectfour.Board;
-import ru.alexeylisyutenko.ai.connectfour.DefaultBoard;
+import com.google.common.collect.ImmutableList;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
-import ru.alexeylisyutenko.ai.connectfour.player.Player;
+
+import java.util.LinkedList;
+import java.util.List;
 
 // TODO: Refactor the code.
-// TODO: Add move history.
-// TODO: Test this class.
 
 public class DefaultGameRunner implements GameRunner {
     private static final int DEFAULT_TIMEOUT = 10;
@@ -17,6 +16,7 @@ public class DefaultGameRunner implements GameRunner {
     private final Player player2;
     private final Board initialBoard;
     private final GameEventListener gameEventListener;
+    private final List<Board> boardHistory;
 
     private GameState state;
     private Board board;
@@ -28,6 +28,7 @@ public class DefaultGameRunner implements GameRunner {
         this.initialBoard = initialBoard;
         this.state = GameState.STOPPED;
         this.gameEventListener = gameEventListener;
+        this.boardHistory = new LinkedList<>();
     }
 
     public DefaultGameRunner(Player player1, Player player2, GameEventListener gameEventListener) {
@@ -55,11 +56,18 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     @Override
+    public List<Board> getBoardHistory() {
+        return ImmutableList.copyOf(boardHistory);
+    }
+
+    @Override
     public void startGame() {
         if (state != GameState.STOPPED) {
-            throw new IllegalStateException("Game is already started. You should stop current game first.");
+            throw new IllegalStateException("Game is already started. You should stop current main first.");
         }
+        boardHistory.clear();
         board = initialBoard;
+        boardHistory.add(board);
         notifyPlayersGameStarted();
         invokeGameStartedEvent();
         processGameStateTransition();
@@ -82,8 +90,8 @@ public class DefaultGameRunner implements GameRunner {
             requestNextPlayerMove();
             return;
         }
-
         board = nextBoard;
+        boardHistory.add(board);
         invokeMoveMadeEvent(column);
         processGameStateTransition();
     }
@@ -169,6 +177,11 @@ public class DefaultGameRunner implements GameRunner {
         @Override
         public Board getBoard() {
             return DefaultGameRunner.this.board;
+        }
+
+        @Override
+        public List<Board> getBoardHistory() {
+            return DefaultGameRunner.this.getBoardHistory();
         }
 
         @Override

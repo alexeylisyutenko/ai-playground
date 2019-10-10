@@ -1,16 +1,16 @@
 package ru.alexeylisyutenko.ai.connectfour.console.gamelistener;
 
-import ru.alexeylisyutenko.ai.connectfour.Board;
-import ru.alexeylisyutenko.ai.connectfour.runner.GameEventListener;
-import ru.alexeylisyutenko.ai.connectfour.runner.GameResult;
-import ru.alexeylisyutenko.ai.connectfour.runner.GameRunner;
+import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.game.GameEventListener;
+import ru.alexeylisyutenko.ai.connectfour.game.GameResult;
+import ru.alexeylisyutenko.ai.connectfour.game.GameRunner;
 import ru.alexeylisyutenko.ai.connectfour.console.visualizer.BoardVisualizer;
 import ru.alexeylisyutenko.ai.connectfour.console.visualizer.ConsoleBoardVisualizer;
 
 import static ru.alexeylisyutenko.ai.connectfour.console.visualizer.ConsoleBoardVisualizer.BOARD_SYMBOL_MAPPING;
 
 /**
- * A game event listener which prints game process into console.
+ * A main event listener which prints main process into console.
  */
 public class ConsoleGameEventListener implements GameEventListener {
     private final BoardVisualizer boardVisualizer = new ConsoleBoardVisualizer();

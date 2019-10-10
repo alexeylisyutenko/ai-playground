@@ -1,16 +1,19 @@
-package ru.alexeylisyutenko.ai.connectfour;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
 import org.junit.jupiter.api.Test;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 import ru.alexeylisyutenko.ai.connectfour.console.visualizer.BoardVisualizer;
 import ru.alexeylisyutenko.ai.connectfour.console.visualizer.ConsoleBoardVisualizer;
+import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.game.Cell;
+import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;
 
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_HEIGHT;
-import static ru.alexeylisyutenko.ai.connectfour.Constants.BOARD_WIDTH;
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.assertBoardArrayEquals;
 import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.constructBoardArray;
 

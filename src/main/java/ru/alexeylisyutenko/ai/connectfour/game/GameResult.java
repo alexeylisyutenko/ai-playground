@@ -1,17 +1,17 @@
-package ru.alexeylisyutenko.ai.connectfour.runner;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
 /**
- * Result of a game.
+ * Result of a main.
  *
- * <p>There are several possible outcomes in a single game. Field {@link GameResult#type} represents particular type of
+ * <p>There are several possible outcomes in a single main. Field {@link GameResult#type} represents particular type of
  * an outcome.</p>
- * <p> For example, if a player wins a game by building four consecutive tokens in a row then a {@link GameResult#type}
+ * <p> For example, if a player wins a main by building four consecutive tokens in a row then a {@link GameResult#type}
  * field has a value {@link Type#NORMAL_VICTORY} and fields {@link GameResult#winnerId} and {@link GameResult#loserId}
- * represent winner's id and loser's id correspondingly. Or if a game ended in a tie then {@link GameResult#type} is
+ * represent winner's id and loser's id correspondingly. Or if a main ended in a tie then {@link GameResult#type} is
  * equal to {@link Type#TIE}.</p>
  */
 @Getter
@@ -19,7 +19,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 public final class GameResult {
     /**
-     * Type of a game outcome.
+     * Type of a main outcome.
      */
     private final Type type;
 
@@ -43,24 +43,48 @@ public final class GameResult {
         this.loserId = loserId;
     }
 
+    /**
+     * Create a new {@link GameResult} instance with type {@link Type#NORMAL_VICTORY}.
+     *
+     * @param winnerId winner's id
+     * @param loserId  loser's id
+     * @return new {@link GameResult} instance
+     */
     public static GameResult normalVictory(int winnerId, int loserId) {
         return new GameResult(Type.NORMAL_VICTORY, winnerId, loserId);
     }
 
+    /**
+     * Create a new {@link GameResult} instance with type {@link Type#TIMEOUT_VICTORY}.
+     *
+     * @param winnerId winner's id
+     * @param loserId  loser's id
+     * @return new {@link GameResult} instance
+     */
     public static GameResult timeoutVictory(int winnerId, int loserId) {
         return new GameResult(Type.TIMEOUT_VICTORY, winnerId, loserId);
     }
 
+    /**
+     * Create a new {@link GameResult} instance with type {@link Type#TIE}.
+     *
+     * @return new {@link GameResult} instance
+     */
     public static GameResult tie() {
         return new GameResult(Type.TIE, 0, 0);
     }
 
+    /**
+     * Create a new {@link GameResult} instance with type {@link Type#STOPPED_GAME}.
+     *
+     * @return new {@link GameResult} instance
+     */
     public static GameResult stoppedGame() {
         return new GameResult(Type.STOPPED_GAME, 0, 0);
     }
 
     /**
-     * Type of a game outcome.
+     * Type of a main outcome.
      */
     public enum Type {
         /**
@@ -74,12 +98,12 @@ public final class GameResult {
         TIMEOUT_VICTORY,
 
         /**
-         * A game ends in a tie when the board is full but there is no winner.
+         * A main ends in a tie when the board is full but there is no winner.
          */
         TIE,
 
         /**
-         * A game was stopped by calling {@link GameRunner#stopGame()} method.
+         * A main was stopped by calling {@link GameRunner#stopGame()} method.
          */
         STOPPED_GAME
     }

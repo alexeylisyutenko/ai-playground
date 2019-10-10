@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour;
+package ru.alexeylisyutenko.ai.connectfour.game;
 
 import lombok.Value;
 
