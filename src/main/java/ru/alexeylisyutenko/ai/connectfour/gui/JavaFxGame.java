@@ -54,6 +54,7 @@ public class JavaFxGame extends Application {
         drawTokenInBoardCoordinates(4, 3, 1, gc);
         drawTokenInBoardCoordinates(4, 4, 1, gc);
         drawTokenInBoardCoordinates(3, 4, 2, gc);
+        drawTokenInBoardCoordinates(5, 6, 2, gc);
 
         group.getChildren().add(canvas);
         return group;
