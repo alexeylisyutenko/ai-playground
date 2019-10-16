@@ -2,19 +2,15 @@ package ru.alexeylisyutenko.ai.connectfour.gui;
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -44,9 +40,15 @@ public class JavaFxGameOption2 extends Application {
 
     private Parent createContent() {
         StackPane stackPane = new StackPane();
+
+        Pane tokenRoot = new Pane();
+        addDemoTokens(tokenRoot);
+        stackPane.getChildren().add(tokenRoot);
+
         Shape grid = createGrid();
         stackPane.getChildren().add(grid);
         StackPane.setAlignment(grid, Pos.CENTER);
+
         return stackPane;
     }
 
@@ -66,7 +68,7 @@ public class JavaFxGameOption2 extends Application {
                 shape = Shape.subtract(shape, circle);
             }
         }
-        shape.setFill(Color.BLUE);
+        shape.setFill(Color.DARKBLUE);
 
         // Add light.
         Light.Distant light = new Light.Distant();
@@ -87,6 +89,33 @@ public class JavaFxGameOption2 extends Application {
         shape.setEffect(dropShadow);
 
         return shape;
+    }
+
+    private void addDemoTokens(Pane tokenRoot) {
+        Token token = new Token(Color.RED);
+        token.setCenterX(GRID_OUTER_MARGIN + TOKEN_MARGIN + TOKEN_RADIUS);
+        token.setCenterY(GRID_OUTER_MARGIN + TOKEN_MARGIN + TOKEN_RADIUS);
+        tokenRoot.getChildren().add(token);
+
+        Token token2 = new Token(Color.YELLOW);
+        token2.setCenterX(GRID_OUTER_MARGIN + TOKEN_MARGIN + TOKEN_RADIUS + CELL_SIZE);
+        token2.setCenterY(GRID_OUTER_MARGIN + TOKEN_MARGIN + TOKEN_RADIUS);
+        tokenRoot.getChildren().add(token2);
+    }
+
+    private static class Token extends Circle {
+        public Token(Color color) {
+            super(TOKEN_RADIUS);
+            setFill(color);
+
+            Light.Distant light = new Light.Distant();
+            light.setAzimuth(225.0);
+            light.setElevation(45.0);
+            Lighting lighting = new Lighting(light);
+            lighting.setSurfaceScale(0.5);
+            lighting.setSpecularConstant(0.8);
+            setEffect(lighting);
+        }
     }
 
 }
