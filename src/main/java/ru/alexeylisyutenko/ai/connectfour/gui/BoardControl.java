@@ -10,7 +10,10 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.util.Duration;
+import org.w3c.dom.css.Rect;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
@@ -28,22 +31,33 @@ class BoardControl extends Region {
 
     private final Token[][] tokens;
     private final Pane tokenPane;
+    private final List<Rectangle> columnRectangles;
 
     public BoardControl() {
         tokens = new Token[BOARD_HEIGHT][BOARD_WIDTH];
         tokenPane = createTokenPane();
+        columnRectangles = createColumnRectangles();
+
         getChildren().add(tokenPane);
         getChildren().add(createGrid());
+        getChildren().addAll(columnRectangles);
+
+        //!!!
+        for (Rectangle rectangle : columnRectangles) {
+            rectangle.setOnMouseEntered(event -> rectangle.setFill(Color.rgb(200, 200, 50, 0.2)));
+            rectangle.setOnMouseExited(event -> rectangle.setFill(Color.TRANSPARENT));
+        }
 
         setMinSize(GRID_WIDTH, GRID_HEIGHT);
         setMaxSize(GRID_WIDTH, GRID_HEIGHT);
     }
 
     /**
+     * Display a token in a particular position defined by row and column.
      *
-     * @param row
-     * @param column
-     * @param color
+     * @param row    row of the token
+     * @param column column of the token
+     * @param color  token color
      */
     public void displayToken(int row, int column, Color color) {
         Objects.requireNonNull(color, "color cannot be null");
@@ -59,7 +73,11 @@ class BoardControl extends Region {
     }
 
     /**
+     * Display and animate a token in a particular position defined by row and column.
      *
+     * @param row    row of the token
+     * @param column column of the token
+     * @param color  token color
      */
     public void displayTokenWithAnimation(int row, int column, Color color) {
         Objects.requireNonNull(color, "color cannot be null");
@@ -85,9 +103,10 @@ class BoardControl extends Region {
     }
 
     /**
+     * Hide a token in a particular position.
      *
-     * @param row
-     * @param column
+     * @param row token row
+     * @param column token column
      */
     public void hideToken(int row, int column) {
         validateRowNumber(row);
@@ -100,7 +119,7 @@ class BoardControl extends Region {
     }
 
     /**
-     *
+     * Hide all tokens on the board.
      */
     public void hideAll() {
         for (int row = 0; row < BOARD_HEIGHT; row++) {
@@ -109,6 +128,20 @@ class BoardControl extends Region {
             }
         }
         tokenPane.getChildren().clear();
+    }
+
+    private List<Rectangle> createColumnRectangles() {
+        List<Rectangle> rectangles = new ArrayList<>();
+        for (int column = 0; column < BOARD_WIDTH; column++) {
+            Rectangle rectangle = new Rectangle();
+            rectangle.setHeight(GRID_HEIGHT);
+            rectangle.setWidth(CELL_SIZE);
+            rectangle.setX(GRID_OUTER_MARGIN + column * CELL_SIZE);
+            rectangle.setY(0.0);
+            rectangle.setFill(Color.TRANSPARENT);
+            rectangles.add(rectangle);
+        }
+        return rectangles;
     }
 
     private double calculateTokenCenter(int boardCoordinate) {
