@@ -24,13 +24,11 @@ public class JavaFxGame extends Application {
     private Parent createContent() {
         StackPane root = new StackPane();
         BoardControl boardControl = new BoardControl();
-
-        boardControl.setOnMouseClicked(event -> {
+        boardControl.addEventHandler(BoardControl.ColumnClickEvent.COLUMN_CLICKED, event -> {
             int row = RandomUtils.nextInt(0, BOARD_HEIGHT);
-            int column = RandomUtils.nextInt(0, BOARD_WIDTH);
+            int column = event.getColumn();
             boardControl.displayTokenWithAnimation(row, column, randomTokenColor());
         });
-
         root.getChildren().add(boardControl);
         StackPane.setAlignment(boardControl, Pos.CENTER);
         return root;

@@ -1,8 +1,12 @@
 package ru.alexeylisyutenko.ai.connectfour.gui;
 
 import javafx.animation.TranslateTransition;
+import javafx.event.Event;
+import javafx.event.EventTarget;
+import javafx.event.EventType;
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -10,7 +14,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.util.Duration;
-import org.w3c.dom.css.Rect;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,15 +44,6 @@ class BoardControl extends Region {
         getChildren().add(tokenPane);
         getChildren().add(createGrid());
         getChildren().addAll(columnRectangles);
-
-        //!!!
-        for (Rectangle rectangle : columnRectangles) {
-            rectangle.setOnMouseEntered(event -> rectangle.setFill(Color.rgb(200, 200, 50, 0.2)));
-            rectangle.setOnMouseExited(event -> rectangle.setFill(Color.TRANSPARENT));
-        }
-
-        setMinSize(GRID_WIDTH, GRID_HEIGHT);
-        setMaxSize(GRID_WIDTH, GRID_HEIGHT);
     }
 
     /**
@@ -105,7 +99,7 @@ class BoardControl extends Region {
     /**
      * Hide a token in a particular position.
      *
-     * @param row token row
+     * @param row    token row
      * @param column token column
      */
     public void hideToken(int row, int column) {
@@ -130,6 +124,26 @@ class BoardControl extends Region {
         tokenPane.getChildren().clear();
     }
 
+    @Override
+    protected double computeMinWidth(double height) {
+        return GRID_WIDTH;
+    }
+
+    @Override
+    protected double computeMinHeight(double width) {
+        return GRID_HEIGHT;
+    }
+
+    @Override
+    protected double computeMaxWidth(double height) {
+        return GRID_WIDTH;
+    }
+
+    @Override
+    protected double computeMaxHeight(double width) {
+        return GRID_HEIGHT;
+    }
+
     private List<Rectangle> createColumnRectangles() {
         List<Rectangle> rectangles = new ArrayList<>();
         for (int column = 0; column < BOARD_WIDTH; column++) {
@@ -139,6 +153,16 @@ class BoardControl extends Region {
             rectangle.setX(GRID_OUTER_MARGIN + column * CELL_SIZE);
             rectangle.setY(0.0);
             rectangle.setFill(Color.TRANSPARENT);
+            rectangle.setOnMouseEntered(event -> rectangle.setFill(Color.rgb(200, 200, 50, 0.2)));
+            rectangle.setOnMouseExited(event -> rectangle.setFill(Color.TRANSPARENT));
+
+            int finalColumn = column;
+            rectangle.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.PRIMARY) {
+                    this.fireEvent(new ColumnClickEvent(finalColumn));
+                }
+            });
+
             rectangles.add(rectangle);
         }
         return rectangles;
@@ -197,8 +221,8 @@ class BoardControl extends Region {
         return shape;
     }
 
-    static class Token extends Circle {
-        public Token(Color color) {
+    private static class Token extends Circle {
+        Token(Color color) {
             super(TOKEN_RADIUS, color);
             setupLighting();
         }
@@ -210,6 +234,24 @@ class BoardControl extends Region {
             Lighting lighting = new Lighting(light);
             lighting.setSurfaceScale(1.5);
             setEffect(lighting);
+        }
+    }
+
+    /**
+     * An {@link Event} subclass used specifically in BoardControl for representing column click events.
+     */
+    public static class ColumnClickEvent extends Event {
+        public static final EventType<ColumnClickEvent> COLUMN_CLICKED = new EventType<>(Event.ANY, "COLUMN_CLICKED");
+
+        private final int column;
+
+        public ColumnClickEvent(int column) {
+            super(COLUMN_CLICKED);
+            this.column = column;
+        }
+
+        public int getColumn() {
+            return column;
         }
     }
 }
