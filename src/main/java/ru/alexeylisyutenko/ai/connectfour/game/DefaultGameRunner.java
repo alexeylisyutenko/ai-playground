@@ -114,6 +114,9 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     private void requestNextPlayerMove() {
+        // TODO: Fix a problem here. As soon as we call player1 request move and as soon as it is
+        //  blocking all the game goes inside recursive call chain. We need introduce asynchronous game event processing.
+
         if (board.getCurrentPlayerId() == 1) {
             player1.requestMove(new DefaultGameContext());
             state = GameState.WAITING_FOR_PLAYER1_MOVE;

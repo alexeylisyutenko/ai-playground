@@ -22,20 +22,26 @@ public class JavaFxGame extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Connect Four Game");
         primaryStage.setScene(new Scene(createContent(), BoardControl.SCENE_WIDTH, BoardControl.SCENE_HEIGHT));
+
+
+//        primaryStage.setOnShown(event -> {
+//            System.out.println("On showing");
+//            startGame();
+//        });
+
         primaryStage.show();
 
-        //!!!
         startGame();
     }
 
     private Parent createContent() {
         StackPane root = new StackPane();
         boardControl = new BoardControl();
-//        boardControl.addEventHandler(BoardControl.ColumnClickEvent.COLUMN_CLICKED, event -> {
-//            int row = RandomUtils.nextInt(0, BOARD_HEIGHT);
-//            int column = event.getColumn();
-//            boardControl.displayTokenWithAnimation(row, column, randomTokenColor());
-//        });
+        boardControl.addEventHandler(BoardControl.ColumnClickEvent.COLUMN_CLICKED, event -> {
+            int row = RandomUtils.nextInt(0, BOARD_HEIGHT);
+            int column = event.getColumn();
+            boardControl.displayTokenWithAnimation(row, column, randomTokenColor());
+        });
         root.getChildren().add(boardControl);
         StackPane.setAlignment(boardControl, Pos.CENTER);
         return root;
@@ -103,13 +109,11 @@ public class JavaFxGame extends Application {
 
         @Override
         public void moveRequested(GameRunner gameRunner, int playerId, Board board) {
-            System.out.println("Move requested: " + playerId);
+            System.out.println(String.format("Move requested! PlayerId: '%d', thread: '%s'", playerId, Thread.currentThread()));
         }
 
         @Override
         public void moveMade(GameRunner gameRunner, int playerId, int column, Board board) {
-            System.out.println("Move made: playerid = " + playerId + " column = " + column);
-
             Color tokenColor;
             if (playerId == 1) {
                 tokenColor = Color.RED;
@@ -117,16 +121,20 @@ public class JavaFxGame extends Application {
                 tokenColor = Color.DARKORANGE;
             }
             int heightOfColumn = board.getHeightOfColumn(column);
-            int row = heightOfColumn - 1;
+            int row = heightOfColumn;
 
+            System.out.println(String.format("Move made! PlayerId: '%d', column: '%d', row: '%d', thread: '%s'", playerId, column, row, Thread.currentThread()));
             displayBoard(board);
-//            boardControl.displayToken(row, column, tokenColor);
         }
 
         @Override
         public void gameFinished(GameRunner gameRunner, GameResult gameResult) {
             System.out.println("Game finished: " + gameResult);
         }
+    }
+
+    public static void main(String[] args) {
+        Application.launch(args);
     }
 
 }
