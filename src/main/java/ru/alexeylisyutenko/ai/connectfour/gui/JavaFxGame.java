@@ -1,6 +1,7 @@
 package ru.alexeylisyutenko.ai.connectfour.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -8,30 +9,26 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.RandomUtils;
+import ru.alexeylisyutenko.ai.connectfour.console.visualizer.ConsoleBoardVisualizer;
 import ru.alexeylisyutenko.ai.connectfour.game.*;
 import ru.alexeylisyutenko.ai.connectfour.player.RandomPlayer;
+
+import javax.swing.*;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
 public class JavaFxGame extends Application {
-
     private BoardControl boardControl;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Connect Four Game");
         primaryStage.setScene(new Scene(createContent(), BoardControl.SCENE_WIDTH, BoardControl.SCENE_HEIGHT));
-
-
-//        primaryStage.setOnShown(event -> {
-//            System.out.println("On showing");
-//            startGame();
-//        });
-
+        primaryStage.setOnShown(event -> {
+            startGame();
+        });
         primaryStage.show();
-
-        startGame();
     }
 
     private Parent createContent() {
@@ -121,20 +118,34 @@ public class JavaFxGame extends Application {
                 tokenColor = Color.DARKORANGE;
             }
             int heightOfColumn = board.getHeightOfColumn(column);
-            int row = heightOfColumn;
+            int row = heightOfColumn + 1;
 
+
+            boardControl.displayTokenWithAnimation(row, column, tokenColor);
+
+            ConsoleBoardVisualizer consoleBoardVisualizer = new ConsoleBoardVisualizer();
+            consoleBoardVisualizer.visualize(board);
             System.out.println(String.format("Move made! PlayerId: '%d', column: '%d', row: '%d', thread: '%s'", playerId, column, row, Thread.currentThread()));
-            displayBoard(board);
+
+            System.out.println("enterNestedEventLoop");
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Platform.runLater(() -> Platform.exitNestedEventLoop("some-key", null));
+                System.out.println("exitNestedEventLoop");
+            }).start();
+
+            Platform.enterNestedEventLoop("some-key");
+            System.out.println("Left nestedEventLoop");
         }
 
         @Override
         public void gameFinished(GameRunner gameRunner, GameResult gameResult) {
             System.out.println("Game finished: " + gameResult);
         }
-    }
-
-    public static void main(String[] args) {
-        Application.launch(args);
     }
 
 }
