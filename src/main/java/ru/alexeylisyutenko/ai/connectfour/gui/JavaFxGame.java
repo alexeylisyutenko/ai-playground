@@ -2,10 +2,12 @@ package ru.alexeylisyutenko.ai.connectfour.gui;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
+import javafx.scene.control.Button;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.RandomUtils;
@@ -20,28 +22,61 @@ import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
 public class JavaFxGame extends Application {
     private BoardControl boardControl;
+    private Button startGameButton;
+    private Button stopGameButton;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Connect Four Game");
         primaryStage.setScene(new Scene(createContent(), BoardControl.SCENE_WIDTH, BoardControl.SCENE_HEIGHT));
-        primaryStage.setOnShown(event -> {
-            startGame();
-        });
+
+        //
+        startGameButton.setOnMouseClicked(event -> startGame());
+
+
         primaryStage.show();
     }
 
     private Parent createContent() {
-        StackPane root = new StackPane();
+        HBox root = new HBox();
+
+        Parent controlArea = createControlArea();
+        root.getChildren().add(controlArea);
+
+        Parent gameArea = createGameArea();
+        root.getChildren().add(gameArea);
+        HBox.setHgrow(gameArea, Priority.ALWAYS);
+
+        return root;
+    }
+
+    private Parent createControlArea() {
+        startGameButton = new Button("Start Game");
+        startGameButton.setPrefWidth(200);
+        stopGameButton = new Button("Stop Game");
+        stopGameButton.setPrefWidth(200);
+
+        VBox vBox = new VBox(startGameButton, stopGameButton);
+        vBox.setAlignment(Pos.TOP_CENTER);
+        vBox.setSpacing(10);
+        vBox.setBackground(new Background(new BackgroundFill(Color.LIGHTGREY, null, null)));
+//        vBox.setStyle("-fx-background-color: gray");
+        vBox.setPadding(new Insets(10));
+
+        return vBox;
+    }
+
+    private Parent createGameArea() {
+        StackPane boardStackPane = new StackPane();
         boardControl = new BoardControl();
         boardControl.addEventHandler(BoardControl.ColumnClickEvent.COLUMN_CLICKED, event -> {
             int row = RandomUtils.nextInt(0, BOARD_HEIGHT);
             int column = event.getColumn();
             boardControl.displayTokenWithAnimation(row, column, randomTokenColor());
         });
-        root.getChildren().add(boardControl);
+        boardStackPane.getChildren().add(boardControl);
         StackPane.setAlignment(boardControl, Pos.CENTER);
-        return root;
+        return boardStackPane;
     }
 
     private Color randomTokenColor() {
@@ -130,7 +165,7 @@ public class JavaFxGame extends Application {
             System.out.println("enterNestedEventLoop");
             new Thread(() -> {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
