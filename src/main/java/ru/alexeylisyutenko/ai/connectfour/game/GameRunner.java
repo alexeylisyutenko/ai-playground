@@ -31,6 +31,20 @@ public interface GameRunner extends Closeable {
     int getTimeLimit();
 
     /**
+     * Returns the current game state.
+     *
+     * @return current game state
+     */
+    GameState getState();
+
+    /**
+     * Returns board history of the current game, or of the last game if the state is STOPPED.
+     *
+     * @return board history
+     */
+    List<Board> getBoardHistory();
+
+    /**
      * Start a game.
      */
     void startGame();

@@ -27,8 +27,8 @@ public class DefaultGameRunner implements GameRunner {
     private final Player player2;
     private final Board initialBoard;
     private final GameEventListener gameEventListener;
-    private final List<Board> boardHistory;
 
+    private final List<Board> boardHistory;
     private GameState state;
     private Board board;
 
@@ -63,6 +63,16 @@ public class DefaultGameRunner implements GameRunner {
     @Override
     public Player getPlayer2() {
         return player2;
+    }
+
+    @Override
+    public GameState getState() {
+        return state;
+    }
+
+    @Override
+    public List<Board> getBoardHistory() {
+        return ImmutableList.copyOf(boardHistory);
     }
 
     @Subscribe
