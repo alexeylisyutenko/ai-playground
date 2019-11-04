@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Runs a game of Connect Four.
  */
-public interface GameRunner extends Closeable {
+public interface GameRunner {
     /**
      * Returns the first player of the game.
      *
@@ -57,6 +57,5 @@ public interface GameRunner extends Closeable {
     /**
      * Close this {@link GameRunner} releasing all resources used by this {@link GameRunner}.
      */
-    @Override
-    void close();
+    void shutdown();
 }

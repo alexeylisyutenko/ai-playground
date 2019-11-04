@@ -7,6 +7,7 @@ import com.google.common.eventbus.Subscribe;
 import lombok.Value;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -14,23 +15,24 @@ import java.util.concurrent.Executors;
 
 // TODO: Refactor the code.
 // TODO: DefaultGameRunner must have a separate thread for event processing.
-// TODO: DefaultGameRunner must receive following events: 1. GameStartedEvent, 2. MoveMadeEvent, 3. GameStoppedEvent.
+// TODO: Check for concurrency issues.
 
 public class DefaultGameRunner implements GameRunner {
     private static final int DEFAULT_TIMEOUT = 10;
 
     private final ExecutorService eventExecutorService;
     private final EventBus eventBus;
-
     private final int timeout;
     private final Player player1;
     private final Player player2;
     private final Board initialBoard;
     private final GameEventListener gameEventListener;
 
+    // TODO: Extract this 3 fields to separate class and add synchronization.
     private final List<Board> boardHistory;
     private GameState state;
     private Board board;
+    //
 
     public DefaultGameRunner(Player player1, Player player2, int timeout, Board initialBoard, GameEventListener gameEventListener) {
         this.eventExecutorService = Executors.newSingleThreadExecutor();
@@ -39,9 +41,11 @@ public class DefaultGameRunner implements GameRunner {
         this.player2 = player2;
         this.timeout = timeout;
         this.initialBoard = initialBoard;
-        this.state = GameState.STOPPED;
         this.gameEventListener = gameEventListener;
-        this.boardHistory = new LinkedList<>();
+
+        this.boardHistory = Collections.synchronizedList(new LinkedList<>());
+        this.state = GameState.STOPPED;
+        this.board = null;
 
         eventBus.register(this);
     }
@@ -66,8 +70,12 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     @Override
-    public GameState getState() {
+    public synchronized GameState getState() {
         return state;
+    }
+
+    private synchronized void setState(GameState state) {
+        this.state = state;
     }
 
     @Override
@@ -75,17 +83,23 @@ public class DefaultGameRunner implements GameRunner {
         return ImmutableList.copyOf(boardHistory);
     }
 
+    private synchronized Board getBoard() {
+        return board;
+    }
+
+    private synchronized void setBoard(Board board) {
+        this.board = board;
+    }
+
     @Subscribe
     private void gameStartRequestedEvent(GameStartRequestedEvent event) {
-        System.out.println("Game started event: " + Thread.currentThread());
-
-        if (state != GameState.STOPPED) {
+        if (getState() != GameState.STOPPED) {
             return;
         }
 
         boardHistory.clear();
-        board = initialBoard;
-        boardHistory.add(board);
+        setBoard(initialBoard);
+        boardHistory.add(getBoard());
 
         notifyPlayersGameStarted();
         invokeGameStartedEvent();
@@ -94,9 +108,7 @@ public class DefaultGameRunner implements GameRunner {
 
     @Subscribe
     private void gameStopRequestedEvent(GameStopRequestedEvent event) {
-        System.out.println("Game stopped event: " + Thread.currentThread());
-
-        if (state == GameState.STOPPED) {
+        if (getState() == GameState.STOPPED) {
             return;
         }
         finishGame(GameResult.stoppedGame());
@@ -104,7 +116,9 @@ public class DefaultGameRunner implements GameRunner {
 
     @Subscribe
     private void moveRequestedEvent(MoveRequestedEvent event) {
-        System.out.println("Move made event: " + event + ": " + Thread.currentThread());
+        if (getState() == GameState.STOPPED) {
+            return;
+        }
 
         Board nextBoard;
         try {
@@ -114,8 +128,8 @@ public class DefaultGameRunner implements GameRunner {
             requestNextPlayerMove();
             return;
         }
-        board = nextBoard;
-        boardHistory.add(board);
+        setBoard(nextBoard);
+        boardHistory.add(getBoard());
         invokeMoveMadeEvent(event.getColumn());
         processGameStateTransition();
     }
@@ -131,15 +145,15 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     @Override
-    public void close() {
+    public void shutdown() {
         eventExecutorService.shutdown();
     }
 
     private void processGameStateTransition() {
-        int winnerId = board.getWinnerId();
+        int winnerId = getBoard().getWinnerId();
         if (winnerId != 0) {
             finishGame(GameResult.normalVictory(winnerId, getLoserId(winnerId)));
-        } else if (board.isTie()) {
+        } else if (getBoard().isTie()) {
             finishGame(GameResult.tie());
         } else {
             requestNextPlayerMove();
@@ -149,19 +163,17 @@ public class DefaultGameRunner implements GameRunner {
     private void finishGame(GameResult gameResult) {
         notifyPlayersGameFinished(gameResult);
         invokeGameFinishedEvent(gameResult);
-        state = GameState.STOPPED;
+        setState(GameState.STOPPED);
     }
 
     private void requestNextPlayerMove() {
         invokeMoveRequestedEvent();
-        if (board.getCurrentPlayerId() == 1) {
-            DefaultGameContext gameContext = new DefaultGameContext(eventBus, timeout, board, boardHistory, 1);
-            player1.requestMove(gameContext);
-            state = GameState.WAITING_FOR_PLAYER1_MOVE;
+        if (getBoard().getCurrentPlayerId() == 1) {
+            player1.requestMove(new DefaultGameContext(eventBus, timeout, getBoard(), boardHistory, 1));
+            setState(GameState.WAITING_FOR_PLAYER1_MOVE);
         } else {
-            DefaultGameContext gameContext = new DefaultGameContext(eventBus, timeout, board, boardHistory, 2);
-            player2.requestMove(gameContext);
-            state = GameState.WAITING_FOR_PLAYER2_MOVE;
+            player2.requestMove(new DefaultGameContext(eventBus, timeout, getBoard(), boardHistory, 2));
+            setState(GameState.WAITING_FOR_PLAYER2_MOVE);
         }
     }
 
@@ -181,19 +193,19 @@ public class DefaultGameRunner implements GameRunner {
 
     private void invokeGameStartedEvent() {
         if (gameEventListener != null) {
-            gameEventListener.gameStarted(this, board);
+            gameEventListener.gameStarted(this, getBoard());
         }
     }
 
     private void invokeMoveMadeEvent(int column) {
         if (gameEventListener != null) {
-            gameEventListener.moveMade(this, board.getOtherPlayerId(), column, board);
+            gameEventListener.moveMade(this, getBoard().getOtherPlayerId(), column, getBoard());
         }
     }
 
     private void invokeIllegalMoveAttemptedEvent(int column) {
         if (gameEventListener != null) {
-            gameEventListener.illegalMoveAttempted(this, board.getCurrentPlayerId(), column, board);
+            gameEventListener.illegalMoveAttempted(this, getBoard().getCurrentPlayerId(), column, getBoard());
         }
     }
 
@@ -205,10 +217,13 @@ public class DefaultGameRunner implements GameRunner {
 
     private void invokeMoveRequestedEvent() {
         if (gameEventListener != null) {
-            gameEventListener.moveRequested(this, board.getCurrentPlayerId(), board);
+            gameEventListener.moveRequested(this, getBoard().getCurrentPlayerId(), getBoard());
         }
     }
 
+    /**
+     *
+     */
     private static class DefaultGameContext implements GameContext {
         private final EventBus eventBus;
         private final int timeout;
@@ -216,7 +231,7 @@ public class DefaultGameRunner implements GameRunner {
         private final List<Board> boardHistory;
         private final int playerId;
 
-        public DefaultGameContext(EventBus eventBus, int timeout, Board board, List<Board> boardHistory, int playerId) {
+        DefaultGameContext(EventBus eventBus, int timeout, Board board, List<Board> boardHistory, int playerId) {
             this.eventBus = eventBus;
             this.timeout = timeout;
             this.board = board;
@@ -245,12 +260,21 @@ public class DefaultGameRunner implements GameRunner {
         }
     }
 
+    /**
+     *
+     */
     private final static class GameStartRequestedEvent {
     }
 
+    /**
+     *
+     */
     private final static class GameStopRequestedEvent {
     }
 
+    /**
+     *
+     */
     @Value
     private final static class MoveRequestedEvent {
         private final int column;

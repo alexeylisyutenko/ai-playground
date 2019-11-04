@@ -13,6 +13,6 @@ public class DefaultGameRunnerDemo {
         DefaultGameRunner defaultGameRunner = new DefaultGameRunner(player1, player2, null);
 
         defaultGameRunner.startGame();
-        defaultGameRunner.stopGame();
+//        defaultGameRunner.stopGame();
     }
 }

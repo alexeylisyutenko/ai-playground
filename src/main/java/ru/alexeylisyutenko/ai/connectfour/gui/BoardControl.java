@@ -82,7 +82,7 @@ class BoardControl extends Region {
 
         double startY = calculateTokenCenter(-1);
         double distance = calculateTokenCenter(row) - startY;
-        double speed = CELL_SIZE * BOARD_HEIGHT / 0.5;
+        double speed = CELL_SIZE * BOARD_HEIGHT / 0.3;
         double duration = distance / speed;
 
         Token token = new Token(color);
