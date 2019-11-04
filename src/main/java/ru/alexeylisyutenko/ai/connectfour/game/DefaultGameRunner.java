@@ -1,15 +1,26 @@
 package ru.alexeylisyutenko.ai.connectfour.game;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import lombok.Value;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 // TODO: Refactor the code.
+// TODO: DefaultGameRunner must have a separate thread for event processing.
+// TODO: DefaultGameRunner must receive following events: 1. GameStartedEvent, 2. MoveMadeEvent, 3. GameStoppedEvent.
 
 public class DefaultGameRunner implements GameRunner {
     private static final int DEFAULT_TIMEOUT = 10;
+
+    private final ExecutorService eventExecutorService;
+    private final EventBus eventBus;
 
     private final int timeout;
     private final Player player1;
@@ -22,6 +33,8 @@ public class DefaultGameRunner implements GameRunner {
     private Board board;
 
     public DefaultGameRunner(Player player1, Player player2, int timeout, Board initialBoard, GameEventListener gameEventListener) {
+        this.eventExecutorService = Executors.newSingleThreadExecutor();
+        this.eventBus = new AsyncEventBus(eventExecutorService);
         this.player1 = player1;
         this.player2 = player2;
         this.timeout = timeout;
@@ -29,6 +42,8 @@ public class DefaultGameRunner implements GameRunner {
         this.state = GameState.STOPPED;
         this.gameEventListener = gameEventListener;
         this.boardHistory = new LinkedList<>();
+
+        eventBus.register(this);
     }
 
     public DefaultGameRunner(Player player1, Player player2, GameEventListener gameEventListener) {
@@ -50,41 +65,40 @@ public class DefaultGameRunner implements GameRunner {
         return player2;
     }
 
-    @Override
-    public GameState getState() {
-        return state;
-    }
+    @Subscribe
+    private void gameStartRequestedEvent(GameStartRequestedEvent event) {
+        System.out.println("Game started event: " + Thread.currentThread());
 
-    @Override
-    public List<Board> getBoardHistory() {
-        return ImmutableList.copyOf(boardHistory);
-    }
-
-    @Override
-    public void startGame() {
         if (state != GameState.STOPPED) {
-            throw new IllegalStateException("Game is already started. You should stop current main first.");
+            return;
         }
+
         boardHistory.clear();
         board = initialBoard;
         boardHistory.add(board);
+
         notifyPlayersGameStarted();
         invokeGameStartedEvent();
         processGameStateTransition();
     }
 
-    @Override
-    public void stopGame() {
+    @Subscribe
+    private void gameStopRequestedEvent(GameStopRequestedEvent event) {
+        System.out.println("Game stopped event: " + Thread.currentThread());
+
         if (state == GameState.STOPPED) {
             return;
         }
         finishGame(GameResult.stoppedGame());
     }
 
-    private void makeMove(int column) {
+    @Subscribe
+    private void moveRequestedEvent(MoveRequestedEvent event) {
+        System.out.println("Move made event: " + event + ": " + Thread.currentThread());
+
         Board nextBoard;
         try {
-            nextBoard = this.board.makeMove(column);
+            nextBoard = this.board.makeMove(event.getColumn());
         } catch (InvalidMoveException e) {
             invokeIllegalMoveAttemptedEvent(e.getColumn());
             requestNextPlayerMove();
@@ -92,8 +106,23 @@ public class DefaultGameRunner implements GameRunner {
         }
         board = nextBoard;
         boardHistory.add(board);
-        invokeMoveMadeEvent(column);
+        invokeMoveMadeEvent(event.getColumn());
         processGameStateTransition();
+    }
+
+    @Override
+    public void startGame() {
+        eventBus.post(new GameStartRequestedEvent());
+    }
+
+    @Override
+    public void stopGame() {
+        eventBus.post(new GameStopRequestedEvent());
+    }
+
+    @Override
+    public void close() {
+        eventExecutorService.shutdown();
     }
 
     private void processGameStateTransition() {
@@ -114,14 +143,14 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     private void requestNextPlayerMove() {
-        // TODO: Fix a problem here. As soon as we call player1 request move and as soon as it is
-        //  blocking all the game goes inside recursive call chain. We need introduce asynchronous game event processing.
         invokeMoveRequestedEvent();
         if (board.getCurrentPlayerId() == 1) {
-            player1.requestMove(new DefaultGameContext());
+            DefaultGameContext gameContext = new DefaultGameContext(eventBus, timeout, board, boardHistory, 1);
+            player1.requestMove(gameContext);
             state = GameState.WAITING_FOR_PLAYER1_MOVE;
         } else {
-            player2.requestMove(new DefaultGameContext());
+            DefaultGameContext gameContext = new DefaultGameContext(eventBus, timeout, board, boardHistory, 2);
+            player2.requestMove(gameContext);
             state = GameState.WAITING_FOR_PLAYER2_MOVE;
         }
     }
@@ -170,26 +199,51 @@ public class DefaultGameRunner implements GameRunner {
         }
     }
 
-    private class DefaultGameContext implements GameContext {
+    private static class DefaultGameContext implements GameContext {
+        private final EventBus eventBus;
+        private final int timeout;
+        private final Board board;
+        private final List<Board> boardHistory;
+        private final int playerId;
+
+        public DefaultGameContext(EventBus eventBus, int timeout, Board board, List<Board> boardHistory, int playerId) {
+            this.eventBus = eventBus;
+            this.timeout = timeout;
+            this.board = board;
+            this.boardHistory = List.copyOf(boardHistory);
+            this.playerId = playerId;
+        }
+
         @Override
         public int getTimeout() {
-            return DefaultGameRunner.this.timeout;
+            return timeout;
         }
 
         @Override
         public Board getBoard() {
-            return DefaultGameRunner.this.board;
+            return board;
         }
 
         @Override
         public List<Board> getBoardHistory() {
-            return DefaultGameRunner.this.getBoardHistory();
+            return boardHistory;
         }
 
         @Override
         public void makeMove(int column) {
-            DefaultGameRunner.this.makeMove(column);
+            eventBus.post(new MoveRequestedEvent(column, playerId));
         }
     }
 
+    private final static class GameStartRequestedEvent {
+    }
+
+    private final static class GameStopRequestedEvent {
+    }
+
+    @Value
+    private final static class MoveRequestedEvent {
+        private final int column;
+        private final int playerId;
+    }
 }

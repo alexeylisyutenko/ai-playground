@@ -1,11 +1,13 @@
 package ru.alexeylisyutenko.ai.connectfour.game;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.List;
 
 /**
  * Runs a game of Connect Four.
  */
-public interface GameRunner {
+public interface GameRunner extends Closeable {
     /**
      * Returns the first player of the game.
      *
@@ -29,20 +31,6 @@ public interface GameRunner {
     int getTimeLimit();
 
     /**
-     * Returns the current game state.
-     *
-     * @return current game state
-     */
-    GameState getState();
-
-    /**
-     * Returns board history of the current game, or of the last game if the state is STOPPED.
-     *
-     * @return board history
-     */
-    List<Board> getBoardHistory();
-
-    /**
      * Start a game.
      */
     void startGame();
@@ -51,4 +39,10 @@ public interface GameRunner {
      * Stop a game.
      */
     void stopGame();
+
+    /**
+     * Close this {@link GameRunner} releasing all resources used by this {@link GameRunner}.
+     */
+    @Override
+    void close();
 }

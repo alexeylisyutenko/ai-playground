@@ -8,7 +8,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.DefaultGameRunner;
 
 public class ConsoleGame {
     public static void main(String[] args) {
-        Player player1 = new RandomPlayer();
+        Player player1 = new ConsolePlayer();
         Player player2 = new RandomPlayer();
 
         DefaultGameRunner gameRunner = new DefaultGameRunner(player1, player2, new ConsoleGameEventListener());
