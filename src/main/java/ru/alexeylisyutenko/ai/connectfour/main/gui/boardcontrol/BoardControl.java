@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour.gui;
+package ru.alexeylisyutenko.ai.connectfour.main.gui.boardcontrol;
 
 import javafx.animation.TranslateTransition;
 import javafx.event.Event;
@@ -22,9 +22,7 @@ import java.util.Objects;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
-class BoardControl extends Region {
-    public final static int SCENE_WIDTH = 1024;
-    public final static int SCENE_HEIGHT = 768;
+public class BoardControl extends Region {
     public final static int TOKEN_RADIUS = 20;
     public final static int TOKEN_MARGIN = 10;
     public final static int CELL_SIZE = (TOKEN_RADIUS + TOKEN_MARGIN) * 2;

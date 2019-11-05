@@ -1,7 +1,5 @@
 package ru.alexeylisyutenko.ai.connectfour.game;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -35,7 +33,7 @@ public interface GameRunner {
      *
      * @return current game state
      */
-    GameState getState();
+    GameState getGameState();
 
     /**
      * Returns board history of the current game, or of the last game if the state is STOPPED.

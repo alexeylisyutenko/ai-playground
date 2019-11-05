@@ -1,8 +1,8 @@
-package ru.alexeylisyutenko.ai.connectfour.main;
+package ru.alexeylisyutenko.ai.connectfour.main.console;
 
-import ru.alexeylisyutenko.ai.connectfour.console.gamelistener.ConsoleGameEventListener;
-import ru.alexeylisyutenko.ai.connectfour.player.ConsolePlayer;
+import ru.alexeylisyutenko.ai.connectfour.main.console.gamelistener.ConsoleGameEventListener;
 import ru.alexeylisyutenko.ai.connectfour.game.Player;
+import ru.alexeylisyutenko.ai.connectfour.main.console.player.ConsolePlayer;
 import ru.alexeylisyutenko.ai.connectfour.player.RandomPlayer;
 import ru.alexeylisyutenko.ai.connectfour.game.DefaultGameRunner;
 

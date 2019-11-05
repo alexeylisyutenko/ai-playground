@@ -13,10 +13,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// TODO: Refactor the code.
-// TODO: DefaultGameRunner must have a separate thread for event processing.
-// TODO: Check for concurrency issues.
-
 public class DefaultGameRunner implements GameRunner {
     private static final int DEFAULT_TIMEOUT = 10;
 
@@ -27,12 +23,7 @@ public class DefaultGameRunner implements GameRunner {
     private final Player player2;
     private final Board initialBoard;
     private final GameEventListener gameEventListener;
-
-    // TODO: Extract this 3 fields to separate class and add synchronization.
-    private final List<Board> boardHistory;
-    private GameState state;
-    private Board board;
-    //
+    private final MutableState mutableState;
 
     public DefaultGameRunner(Player player1, Player player2, int timeout, Board initialBoard, GameEventListener gameEventListener) {
         this.eventExecutorService = Executors.newSingleThreadExecutor();
@@ -42,11 +33,7 @@ public class DefaultGameRunner implements GameRunner {
         this.timeout = timeout;
         this.initialBoard = initialBoard;
         this.gameEventListener = gameEventListener;
-
-        this.boardHistory = Collections.synchronizedList(new LinkedList<>());
-        this.state = GameState.STOPPED;
-        this.board = null;
-
+        this.mutableState = new MutableState();
         eventBus.register(this);
     }
 
@@ -70,37 +57,24 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     @Override
-    public synchronized GameState getState() {
-        return state;
-    }
-
-    private synchronized void setState(GameState state) {
-        this.state = state;
+    public GameState getGameState() {
+        return mutableState.getGameState();
     }
 
     @Override
     public List<Board> getBoardHistory() {
-        return ImmutableList.copyOf(boardHistory);
-    }
-
-    private synchronized Board getBoard() {
-        return board;
-    }
-
-    private synchronized void setBoard(Board board) {
-        this.board = board;
+        return ImmutableList.copyOf(mutableState.getBoardHistory());
     }
 
     @Subscribe
     private void gameStartRequestedEvent(GameStartRequestedEvent event) {
-        if (getState() != GameState.STOPPED) {
+        if (getGameState() != GameState.STOPPED) {
             return;
         }
 
-        boardHistory.clear();
-        setBoard(initialBoard);
-        boardHistory.add(getBoard());
-
+        mutableState.getBoardHistory().clear();
+        mutableState.getBoardHistory().add(initialBoard);
+        mutableState.setBoard(initialBoard);
         notifyPlayersGameStarted();
         invokeGameStartedEvent();
         processGameStateTransition();
@@ -108,7 +82,7 @@ public class DefaultGameRunner implements GameRunner {
 
     @Subscribe
     private void gameStopRequestedEvent(GameStopRequestedEvent event) {
-        if (getState() == GameState.STOPPED) {
+        if (getGameState() == GameState.STOPPED) {
             return;
         }
         finishGame(GameResult.stoppedGame());
@@ -116,20 +90,20 @@ public class DefaultGameRunner implements GameRunner {
 
     @Subscribe
     private void moveRequestedEvent(MoveRequestedEvent event) {
-        if (getState() == GameState.STOPPED) {
+        if (getGameState() == GameState.STOPPED) {
             return;
         }
 
         Board nextBoard;
         try {
-            nextBoard = this.board.makeMove(event.getColumn());
+            nextBoard = mutableState.getBoard().makeMove(event.getColumn());
         } catch (InvalidMoveException e) {
             invokeIllegalMoveAttemptedEvent(e.getColumn());
             requestNextPlayerMove();
             return;
         }
-        setBoard(nextBoard);
-        boardHistory.add(getBoard());
+        mutableState.setBoard(nextBoard);
+        mutableState.getBoardHistory().add(nextBoard);
         invokeMoveMadeEvent(event.getColumn());
         processGameStateTransition();
     }
@@ -150,10 +124,10 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     private void processGameStateTransition() {
-        int winnerId = getBoard().getWinnerId();
+        int winnerId = mutableState.getBoard().getWinnerId();
         if (winnerId != 0) {
             finishGame(GameResult.normalVictory(winnerId, getLoserId(winnerId)));
-        } else if (getBoard().isTie()) {
+        } else if (mutableState.getBoard().isTie()) {
             finishGame(GameResult.tie());
         } else {
             requestNextPlayerMove();
@@ -163,18 +137,22 @@ public class DefaultGameRunner implements GameRunner {
     private void finishGame(GameResult gameResult) {
         notifyPlayersGameFinished(gameResult);
         invokeGameFinishedEvent(gameResult);
-        setState(GameState.STOPPED);
+        mutableState.setGameState(GameState.STOPPED);
     }
 
     private void requestNextPlayerMove() {
         invokeMoveRequestedEvent();
-        if (getBoard().getCurrentPlayerId() == 1) {
-            player1.requestMove(new DefaultGameContext(eventBus, timeout, getBoard(), boardHistory, 1));
-            setState(GameState.WAITING_FOR_PLAYER1_MOVE);
+        if (mutableState.getBoard().getCurrentPlayerId() == 1) {
+            player1.requestMove(createGameContext(1));
+            mutableState.setGameState(GameState.WAITING_FOR_PLAYER1_MOVE);
         } else {
-            player2.requestMove(new DefaultGameContext(eventBus, timeout, getBoard(), boardHistory, 2));
-            setState(GameState.WAITING_FOR_PLAYER2_MOVE);
+            player2.requestMove(createGameContext(2));
+            mutableState.setGameState(GameState.WAITING_FOR_PLAYER2_MOVE);
         }
+    }
+
+    private DefaultGameContext createGameContext(int playerId) {
+        return new DefaultGameContext(eventBus, timeout, mutableState.getBoard(), mutableState.getBoardHistory(), playerId);
     }
 
     private void notifyPlayersGameStarted() {
@@ -193,19 +171,19 @@ public class DefaultGameRunner implements GameRunner {
 
     private void invokeGameStartedEvent() {
         if (gameEventListener != null) {
-            gameEventListener.gameStarted(this, getBoard());
+            gameEventListener.gameStarted(this, mutableState.getBoard());
         }
     }
 
     private void invokeMoveMadeEvent(int column) {
         if (gameEventListener != null) {
-            gameEventListener.moveMade(this, getBoard().getOtherPlayerId(), column, getBoard());
+            gameEventListener.moveMade(this, mutableState.getBoard().getOtherPlayerId(), column, mutableState.getBoard());
         }
     }
 
     private void invokeIllegalMoveAttemptedEvent(int column) {
         if (gameEventListener != null) {
-            gameEventListener.illegalMoveAttempted(this, getBoard().getCurrentPlayerId(), column, getBoard());
+            gameEventListener.illegalMoveAttempted(this, mutableState.getBoard().getCurrentPlayerId(), column, mutableState.getBoard());
         }
     }
 
@@ -217,12 +195,48 @@ public class DefaultGameRunner implements GameRunner {
 
     private void invokeMoveRequestedEvent() {
         if (gameEventListener != null) {
-            gameEventListener.moveRequested(this, getBoard().getCurrentPlayerId(), getBoard());
+            gameEventListener.moveRequested(this, mutableState.getBoard().getCurrentPlayerId(), mutableState.getBoard());
+        }
+    }
+
+
+    /**
+     * Class which contains mutable state of the {@link DefaultGameRunner} and contains all required synchronization.
+     */
+    private static class MutableState {
+        private final List<Board> boardHistory;
+        private GameState gameState;
+        private Board board;
+
+        public MutableState() {
+            this.boardHistory = Collections.synchronizedList(new LinkedList<>());
+            this.gameState = GameState.STOPPED;
+            this.board = null;
+        }
+
+        public List<Board> getBoardHistory() {
+            return boardHistory;
+        }
+
+        public synchronized GameState getGameState() {
+            return gameState;
+        }
+
+        public synchronized void setGameState(GameState gameState) {
+            this.gameState = gameState;
+        }
+
+        public synchronized Board getBoard() {
+            return board;
+        }
+
+        public synchronized void setBoard(Board board) {
+            this.board = board;
         }
     }
 
     /**
-     *
+     * Context passed to {@link Player} objects when move is requested.
      */
     private static class DefaultGameContext implements GameContext {
         private final EventBus eventBus;
@@ -261,19 +275,19 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     /**
-     *
+     * Event that occurs when user request game start.
      */
     private final static class GameStartRequestedEvent {
     }
 
     /**
-     *
+     * Event that occurs when user request game stop.
      */
     private final static class GameStopRequestedEvent {
     }
 
     /**
-     *
+     * Event that occurs when a player {@link Player} makes a move.
      */
     @Value
     private final static class MoveRequestedEvent {

@@ -6,7 +6,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.alexeylisyutenko.ai.connectfour.game.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,7 +47,7 @@ class DefaultGameRunnerTest {
         assertSame(player1, gameRunner.getPlayer1());
         assertSame(player2, gameRunner.getPlayer2());
         assertEquals(10, gameRunner.getTimeLimit());
-        assertEquals(STOPPED, gameRunner.getState());
+        assertEquals(STOPPED, gameRunner.getGameState());
 
         //  -------- Start the main and verify events called  --------
         gameRunner.startGame();
@@ -82,7 +81,7 @@ class DefaultGameRunnerTest {
                         {1, 0, 2, 2, 0, 0, 0}
                 }), 1))
         );
-        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getState());
+        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getGameState());
 
         // -------- Make player 1 move and verify events called  --------
         gameContext.makeMove(0);
@@ -125,7 +124,7 @@ class DefaultGameRunnerTest {
                         {1, 0, 2, 2, 0, 0, 0}
                 }), 2))
         );
-        assertEquals(WAITING_FOR_PLAYER2_MOVE, gameRunner.getState());
+        assertEquals(WAITING_FOR_PLAYER2_MOVE, gameRunner.getGameState());
 
         // -------- Make player 2 move and verify events called  --------
         gameContext.makeMove(4);
@@ -168,7 +167,7 @@ class DefaultGameRunnerTest {
                         {1, 0, 2, 2, 2, 0, 0}
                 }), 1))
         );
-        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getState());
+        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getGameState());
 
         // -------- Make player 1 move, which finishes the main, and verify events called  --------
         gameContext.makeMove(0);
@@ -192,7 +191,7 @@ class DefaultGameRunnerTest {
                 same(gameRunner),
                 eq(GameResult.normalVictory(1, 2))
         );
-        assertEquals(STOPPED, gameRunner.getState());
+        assertEquals(STOPPED, gameRunner.getGameState());
         assertEquals(4, gameRunner.getBoardHistory().size());
         assertEquals(new DefaultBoard(constructBoardArray(new int[][]{
                 {0, 0, 0, 0, 0, 0, 0},
@@ -251,7 +250,7 @@ class DefaultGameRunnerTest {
         assertSame(player1, gameRunner.getPlayer1());
         assertSame(player2, gameRunner.getPlayer2());
         assertEquals(10, gameRunner.getTimeLimit());
-        assertEquals(STOPPED, gameRunner.getState());
+        assertEquals(STOPPED, gameRunner.getGameState());
 
         //  -------- Start the main and verify events called  --------
         gameRunner.startGame();
@@ -284,7 +283,7 @@ class DefaultGameRunnerTest {
                         {1, 2, 1, 2, 1, 2, 1}
                 }), 1))
         );
-        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getState());
+        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getGameState());
 
         // -------- Make player 1 move, which finishes the main, and verify events called  --------
         gameContext.makeMove(0);
@@ -308,7 +307,7 @@ class DefaultGameRunnerTest {
                 same(gameRunner),
                 eq(GameResult.tie())
         );
-        assertEquals(STOPPED, gameRunner.getState());
+        assertEquals(STOPPED, gameRunner.getGameState());
 
         verifyNoMoreInteractions(player1, player2, gameEventListener);
     }
@@ -334,7 +333,7 @@ class DefaultGameRunnerTest {
         assertSame(player1, gameRunner.getPlayer1());
         assertSame(player2, gameRunner.getPlayer2());
         assertEquals(10, gameRunner.getTimeLimit());
-        assertEquals(STOPPED, gameRunner.getState());
+        assertEquals(STOPPED, gameRunner.getGameState());
 
         //  -------- Start the main and verify events called  --------
         gameRunner.startGame();
@@ -367,7 +366,7 @@ class DefaultGameRunnerTest {
                         {1, 0, 2, 2, 0, 0, 0}
                 }), 1))
         );
-        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getState());
+        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getGameState());
 
         //  -------- Stop the main and verify events called  --------
         gameRunner.stopGame();
@@ -378,7 +377,7 @@ class DefaultGameRunnerTest {
                 same(gameRunner),
                 eq(GameResult.stoppedGame())
         );
-        assertEquals(STOPPED, gameRunner.getState());
+        assertEquals(STOPPED, gameRunner.getGameState());
 
         verifyNoMoreInteractions(player1, player2, gameEventListener);
     }
@@ -404,7 +403,7 @@ class DefaultGameRunnerTest {
         assertSame(player1, gameRunner.getPlayer1());
         assertSame(player2, gameRunner.getPlayer2());
         assertEquals(10, gameRunner.getTimeLimit());
-        assertEquals(STOPPED, gameRunner.getState());
+        assertEquals(STOPPED, gameRunner.getGameState());
 
         //  -------- Start the main and verify events called  --------
         gameRunner.startGame();
@@ -437,7 +436,7 @@ class DefaultGameRunnerTest {
                         {1, 0, 2, 2, 0, 0, 0}
                 }), 1))
         );
-        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getState());
+        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getGameState());
 
         //  -------- Make illegal move and verify events called  --------
         gameContext.makeMove(0);
@@ -479,7 +478,7 @@ class DefaultGameRunnerTest {
                         {1, 0, 2, 2, 0, 0, 0}
                 }), 1))
         );
-        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getState());
+        assertEquals(WAITING_FOR_PLAYER1_MOVE, gameRunner.getGameState());
 
         verifyNoMoreInteractions(player1, player2, gameEventListener);
     }

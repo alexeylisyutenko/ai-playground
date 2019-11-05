@@ -1,13 +1,13 @@
-package ru.alexeylisyutenko.ai.connectfour.console.gamelistener;
+package ru.alexeylisyutenko.ai.connectfour.main.console.gamelistener;
 
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.game.GameEventListener;
 import ru.alexeylisyutenko.ai.connectfour.game.GameResult;
 import ru.alexeylisyutenko.ai.connectfour.game.GameRunner;
-import ru.alexeylisyutenko.ai.connectfour.console.visualizer.BoardVisualizer;
-import ru.alexeylisyutenko.ai.connectfour.console.visualizer.ConsoleBoardVisualizer;
+import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.BoardVisualizer;
+import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
 
-import static ru.alexeylisyutenko.ai.connectfour.console.visualizer.ConsoleBoardVisualizer.BOARD_SYMBOL_MAPPING;
+import static ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer.BOARD_SYMBOL_MAPPING;
 
 /**
  * A main event listener which prints main process into console.

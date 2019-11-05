@@ -2,11 +2,8 @@ package ru.alexeylisyutenko.ai.connectfour.game;
 
 import org.junit.jupiter.api.Test;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
-import ru.alexeylisyutenko.ai.connectfour.console.visualizer.BoardVisualizer;
-import ru.alexeylisyutenko.ai.connectfour.console.visualizer.ConsoleBoardVisualizer;
-import ru.alexeylisyutenko.ai.connectfour.game.Board;
-import ru.alexeylisyutenko.ai.connectfour.game.Cell;
-import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;
+import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.BoardVisualizer;
+import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
 
 import java.util.List;
 import java.util.Set;

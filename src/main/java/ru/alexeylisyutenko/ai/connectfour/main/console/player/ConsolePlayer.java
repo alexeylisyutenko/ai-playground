@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour.player;
+package ru.alexeylisyutenko.ai.connectfour.main.console.player;
 
 import ru.alexeylisyutenko.ai.connectfour.game.Player;
 import ru.alexeylisyutenko.ai.connectfour.game.GameContext;
