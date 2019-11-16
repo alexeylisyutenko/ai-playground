@@ -13,14 +13,7 @@ import java.util.stream.Collectors;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
-public class RandomPlayer implements Player {
-
-    private int playerId;
-
-    @Override
-    public void gameStarted(int playerId) {
-        this.playerId = playerId;
-    }
+public class RandomPlayer extends AbstractPlayer {
 
     @Override
     public void requestMove(GameContext gameContext) {
@@ -170,10 +163,5 @@ public class RandomPlayer implements Player {
         Cell cell1 = chain.get(0);
         Cell cell2 = chain.get(1);
         return Pair.of(cell2.getRow() - cell1.getRow(), cell2.getColumn() - cell1.getColumn());
-    }
-
-    @Override
-    public void gameFinished(GameResult gameResult) {
-        // Do nothing
     }
 }

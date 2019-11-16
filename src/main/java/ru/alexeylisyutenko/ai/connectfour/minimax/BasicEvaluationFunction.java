@@ -27,7 +27,6 @@ public class BasicEvaluationFunction implements EvaluationFunction {
                 }
             }
 
-            score = 0;
         }
         return score;
     }

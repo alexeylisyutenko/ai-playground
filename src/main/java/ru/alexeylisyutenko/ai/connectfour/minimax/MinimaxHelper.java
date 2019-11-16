@@ -1,5 +1,6 @@
 package ru.alexeylisyutenko.ai.connectfour.minimax;
 
+import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 
@@ -11,6 +12,9 @@ import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 // TODO: Test this class.
 // TODO: Do we need a version of getAllNextMoves() method that returns Iterator<Board>?
 
+/**
+ * Helper methods used in minimax algorithms.
+ */
 public final class MinimaxHelper {
     private MinimaxHelper() {
     }
@@ -21,11 +25,12 @@ public final class MinimaxHelper {
      * @param board current position board
      * @return list of all possible moves from this position
      */
-    public static List<Board> getAllNextMoves(Board board) {
-        ArrayList<Board> moves = new ArrayList<>();
+    public static List<Pair<Integer, Board>> getAllNextMoves(Board board) {
+        ArrayList<Pair<Integer, Board>> moves = new ArrayList<>();
         for (int column = 0; column < BOARD_WIDTH; column++) {
             try {
-                moves.add(board.makeMove(column));
+                Board boardAfterMove = board.makeMove(column);
+                moves.add(Pair.of(column, boardAfterMove));
             } catch (InvalidMoveException ignored) {
             }
         }

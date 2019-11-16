@@ -13,5 +13,5 @@ public interface SearchFunction {
      * @param evaluationFunction
      * @return
      */
-    int search(Board board, int depth, EvaluationFunction evaluationFunction);
+    BestMove search(Board board, int depth, EvaluationFunction evaluationFunction);
 }

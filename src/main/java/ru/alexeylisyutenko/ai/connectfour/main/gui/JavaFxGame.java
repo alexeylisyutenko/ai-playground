@@ -15,6 +15,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.*;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.boardcontrol.BoardControl;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.gamelistener.GuiGameEventListener;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.player.GuiPlayer;
+import ru.alexeylisyutenko.ai.connectfour.player.MinimaxPlayer;
 import ru.alexeylisyutenko.ai.connectfour.player.RandomPlayer;
 
 // TODO: Refactor
@@ -32,13 +33,18 @@ public class JavaFxGame extends Application {
         primaryStage.setTitle("Connect Four Game");
         primaryStage.setScene(new Scene(createContent(), GameConstants.SCENE_WIDTH, GameConstants.SCENE_HEIGHT));
 
-        Player player1 = new GuiPlayer(boardControl);
-        Player player2 = new RandomPlayer();
-        gameRunner = new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
+        gameRunner = createGameRunner();
 
         startGameButton.setOnMouseClicked(event -> gameRunner.startGame());
         stopGameButton.setOnMouseClicked(event -> gameRunner.stopGame());
         primaryStage.show();
+    }
+
+    private GameRunner createGameRunner() {
+        Player player1 = new GuiPlayer(boardControl);
+//        Player player1 = new RandomPlayer();
+        Player player2 = new MinimaxPlayer();
+        return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
     }
 
     @Override
