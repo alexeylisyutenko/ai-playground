@@ -40,8 +40,8 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-//        Player player1 = new GuiPlayer(boardControl);
-        Player player1 = new RandomPlayer();
+        Player player1 = new GuiPlayer(boardControl);
+//        Player player1 = new RandomPlayer();
 //        Player player1 = new MultithreadedPlainMinimaxPlayer();
         Player player2 = new MultithreadedPlainMinimaxPlayer();
 //        Player player2 = new GuiPlayer(boardControl);
