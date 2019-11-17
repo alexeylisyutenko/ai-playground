@@ -1,9 +1,12 @@
 package ru.alexeylisyutenko.ai.connectfour.minimax;
 
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
@@ -20,7 +23,7 @@ public class MultithreadedMinimaxSearchFunction implements SearchFunction {
     }
 
     @Override
-    public BestMove search(Board board, int depth, EvaluationFunction evaluationFunction) {
+    public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {
         if (MinimaxHelper.isTerminal(depth, board)) {
             throw new IllegalStateException("Search function was called on a terminal node");
         }
@@ -28,17 +31,31 @@ public class MultithreadedMinimaxSearchFunction implements SearchFunction {
         List<Pair<Integer, Board>> nextMoves = MinimaxHelper.getAllNextMoves(board);
         List<BoardValueSearchRecursiveTask> recursiveTasks = createRecursiveTasks(nextMoves, depth, evaluationFunction);
 
-        int bestColumn = Integer.MIN_VALUE;
-        int bestScore = Integer.MIN_VALUE;
-        for (int i = 0; i < recursiveTasks.size(); i++) {
-            int score = -1 * forkJoinPool.invoke(recursiveTasks.get(i));
-            if (score > bestScore) {
-                bestScore = score;
-                bestColumn = nextMoves.get(i).getLeft();
-            }
+        List<Integer> scores = recursiveTasks.stream()
+                .map(recursiveTask -> -forkJoinPool.invoke(recursiveTask))
+                .collect(Collectors.toList());
+
+        List<Move> moves = constructMoves(nextMoves, scores);
+        moves.sort(Comparator.comparing(Move::getScore).reversed());
+
+        // Find equal score boundary.
+        int equalScoreHigh = 1;
+        while (equalScoreHigh < moves.size() &&
+                moves.get(equalScoreHigh-1).getScore() == moves.get(equalScoreHigh).getScore()) {
+            equalScoreHigh++;
         }
 
-        return new BestMove(bestColumn, bestScore);
+        return moves.get(RandomUtils.nextInt(0, equalScoreHigh));
+    }
+
+    private List<Move> constructMoves(List<Pair<Integer, Board>> nextMoves, List<Integer> scores) {
+        List<Move> moves = new ArrayList<>();
+        for (int i = 0; i < nextMoves.size(); i++) {
+            Integer column = nextMoves.get(i).getLeft();
+            Integer score = scores.get(i);
+            moves.add(new Move(column, score));
+        }
+        return moves;
     }
 
     @AllArgsConstructor

@@ -14,5 +14,5 @@ public interface SearchFunction {
      * @param evaluationFunction the evaluation function to use to give a value to a leaf of the tree
      * @return the column number of the column that the search determines you should add a token to, and the score for that move
      */
-    BestMove search(Board board, int depth, EvaluationFunction evaluationFunction);
+    Move search(Board board, int depth, EvaluationFunction evaluationFunction);
 }

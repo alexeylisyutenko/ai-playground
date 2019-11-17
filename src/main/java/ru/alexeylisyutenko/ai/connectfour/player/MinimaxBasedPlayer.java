@@ -1,8 +1,7 @@
 package ru.alexeylisyutenko.ai.connectfour.player;
 
 import ru.alexeylisyutenko.ai.connectfour.game.GameContext;
-import ru.alexeylisyutenko.ai.connectfour.minimax.BestMove;
-import ru.alexeylisyutenko.ai.connectfour.minimax.CachingEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 
@@ -22,8 +21,8 @@ public class MinimaxBasedPlayer extends AbstractPlayer {
 
     @Override
     public void requestMove(GameContext gameContext) {
-        BestMove bestMove = searchFunction.search(gameContext.getBoard(), depth, evaluationFunction);
-        System.out.println(String.format("MINIMAX: Decided on column %d with rating %d", bestMove.getColumn(), bestMove.getScore()));
-        gameContext.makeMove(bestMove.getColumn());
+        Move move = searchFunction.search(gameContext.getBoard(), depth, evaluationFunction);
+        System.out.println(String.format("MINIMAX: Decided on column %d with rating %d", move.getColumn(), move.getScore()));
+        gameContext.makeMove(move.getColumn());
     }
 }

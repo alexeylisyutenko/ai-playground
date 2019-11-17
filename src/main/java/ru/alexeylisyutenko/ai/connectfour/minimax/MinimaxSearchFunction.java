@@ -9,7 +9,7 @@ import java.util.List;
 
 public class MinimaxSearchFunction implements SearchFunction {
     @Override
-    public BestMove search(Board board, int depth, EvaluationFunction evaluationFunction) {
+    public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {
         if (MinimaxHelper.isTerminal(depth, board)) {
             throw new IllegalStateException("Search function was called on a terminal node");
         }
@@ -25,7 +25,7 @@ public class MinimaxSearchFunction implements SearchFunction {
             }
         }
 
-        return new BestMove(bestColumn, bestScore);
+        return new Move(bestColumn, bestScore);
     }
 
     /**

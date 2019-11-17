@@ -15,6 +15,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.*;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.boardcontrol.BoardControl;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.gamelistener.GuiGameEventListener;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.player.GuiPlayer;
+import ru.alexeylisyutenko.ai.connectfour.player.MultithreadedPlainMinimaxPlayer;
 import ru.alexeylisyutenko.ai.connectfour.player.PlainMinimaxPlayer;
 
 public class JavaFxGame extends Application {
@@ -38,9 +39,11 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-        Player player1 = new GuiPlayer(boardControl);
-//        Player player1 = new RandomPlayer();
-        Player player2 = new PlainMinimaxPlayer();
+//        Player player1 = new GuiPlayer(boardControl);
+        Player player1 = new MultithreadedPlainMinimaxPlayer();
+//        Player player2 = new MultithreadedPlainMinimaxPlayer();
+        Player player2 = new GuiPlayer(boardControl);
+//        Player player2 = new PlainMinimaxPlayer();
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
     }
 
