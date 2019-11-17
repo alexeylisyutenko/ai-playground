@@ -13,7 +13,7 @@ import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 
 public class MultithreadedMinimaxSearchFunction implements SearchFunction {
-    private final ForkJoinPool forkJoinPool = new ForkJoinPool();
+    private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
 
     private static List<BoardValueSearchRecursiveTask> createRecursiveTasks(List<Pair<Integer, Board>> nextMoves, int depth, EvaluationFunction evaluationFunction) {
         return nextMoves.stream()

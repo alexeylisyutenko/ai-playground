@@ -21,4 +21,8 @@ public class CachingEvaluationFunction implements EvaluationFunction {
     public int evaluate(Board board) {
         return cache.computeIfAbsent(board, dummy -> evaluationFunction.evaluate(board));
     }
+
+    public void clearCache() {
+        cache.clear();
+    }
 }

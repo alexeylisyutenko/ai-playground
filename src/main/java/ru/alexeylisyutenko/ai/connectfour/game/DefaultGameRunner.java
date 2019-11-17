@@ -123,6 +123,11 @@ public class DefaultGameRunner implements GameRunner {
         eventExecutorService.shutdown();
     }
 
+    @Override
+    public void awaitGameStop() throws InterruptedException {
+        mutableState.awaitGameStop();
+    }
+
     private void processGameStateTransition() {
         int winnerId = mutableState.getBoard().getWinnerId();
         if (winnerId != 0) {
@@ -224,6 +229,7 @@ public class DefaultGameRunner implements GameRunner {
 
         public synchronized void setGameState(GameState gameState) {
             this.gameState = gameState;
+            notifyAll();
         }
 
         public synchronized Board getBoard() {
@@ -232,6 +238,12 @@ public class DefaultGameRunner implements GameRunner {
 
         public synchronized void setBoard(Board board) {
             this.board = board;
+        }
+
+        public synchronized void awaitGameStop() throws InterruptedException {
+            while (gameState != GameState.STOPPED) {
+                wait();
+            }
         }
     }
 

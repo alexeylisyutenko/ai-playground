@@ -56,4 +56,9 @@ public interface GameRunner {
      * Close this {@link GameRunner} releasing all resources used by this {@link GameRunner}.
      */
     void shutdown();
+
+    /**
+     * Blocks until the current game stops.
+     */
+    void awaitGameStop() throws InterruptedException;
 }

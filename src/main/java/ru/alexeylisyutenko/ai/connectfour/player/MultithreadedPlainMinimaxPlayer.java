@@ -12,4 +12,10 @@ public class MultithreadedPlainMinimaxPlayer extends MinimaxBasedPlayer {
     public MultithreadedPlainMinimaxPlayer() {
         this(9);
     }
+
+    @Override
+    public void gameStarted(int playerId) {
+        super.gameStarted(playerId);
+        ((CachingEvaluationFunction) evaluationFunction).clearCache();
+    }
 }

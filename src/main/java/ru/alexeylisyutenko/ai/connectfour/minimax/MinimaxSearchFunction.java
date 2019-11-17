@@ -5,8 +5,6 @@ import ru.alexeylisyutenko.ai.connectfour.game.Board;
 
 import java.util.List;
 
-// TODO: Test this function.
-
 public class MinimaxSearchFunction implements SearchFunction {
     @Override
     public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {

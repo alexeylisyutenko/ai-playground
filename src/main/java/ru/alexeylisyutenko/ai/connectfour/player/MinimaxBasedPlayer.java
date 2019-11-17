@@ -9,9 +9,9 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
  * Player based on minimax algorithm and it's modifications like alpha-beta and so on.
  */
 public class MinimaxBasedPlayer extends AbstractPlayer {
-    private final SearchFunction searchFunction;
-    private final EvaluationFunction evaluationFunction;
-    private final int depth;
+    protected final SearchFunction searchFunction;
+    protected final EvaluationFunction evaluationFunction;
+    protected final int depth;
 
     public MinimaxBasedPlayer(SearchFunction searchFunction, EvaluationFunction evaluationFunction, int depth) {
         this.searchFunction = searchFunction;
