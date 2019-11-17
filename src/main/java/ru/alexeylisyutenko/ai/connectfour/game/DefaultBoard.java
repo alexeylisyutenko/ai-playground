@@ -14,7 +14,7 @@ import java.util.Set;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
-@EqualsAndHashCode(exclude = "currentPlayerId")
+@EqualsAndHashCode
 public class DefaultBoard implements Board {
     private final static int EMPTY_CELL_PLAYER_ID = 0;
 
