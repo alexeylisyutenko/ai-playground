@@ -5,12 +5,12 @@ import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
 // TODO: Test this class.
-// TODO: Do we need a version of getAllNextMoves() method that returns Iterator<Board>?
 
 /**
  * Helper methods used in minimax algorithms.
@@ -38,6 +38,16 @@ public final class MinimaxHelper {
     }
 
     /**
+     * Returns an iterator which iterates over all possible moves that the current player could take from this position.
+     *
+     * @param board current position board
+     * @return all possible move iterator
+     */
+    public static Iterator<Pair<Integer, Board>> getAllNextMovesIterator(Board board) {
+        return new AllNextMovesIterator(board);
+    }
+
+    /**
      * Generic terminal state check.
      *
      * @param depth current depth in the search tree
@@ -46,5 +56,33 @@ public final class MinimaxHelper {
      */
     public static boolean isTerminal(int depth, Board board) {
         return depth <= 0 || board.isGameOver();
+    }
+
+    /**
+     * Iterator which iterates over all possible moves that the current player could take from this position
+     */
+    private static class AllNextMovesIterator implements Iterator<Pair<Integer, Board>> {
+        private final Board board;
+        private int column;
+
+        public AllNextMovesIterator(Board board) {
+            this.board = board;
+            this.column = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            while (column < BOARD_WIDTH && board.getHeightOfColumn(column) == -1) {
+                column++;
+            }
+            return column != BOARD_WIDTH;
+        }
+
+        @Override
+        public Pair<Integer, Board> next() {
+            Pair<Integer, Board> nextMove = Pair.of(column, board.makeMove(column));
+            column++;
+            return nextMove;
+        }
     }
 }

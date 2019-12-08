@@ -8,8 +8,8 @@ import ru.alexeylisyutenko.ai.connectfour.game.GameResult;
 import ru.alexeylisyutenko.ai.connectfour.game.GameRunner;
 import ru.alexeylisyutenko.ai.connectfour.game.Player;
 import ru.alexeylisyutenko.ai.connectfour.main.console.gamelistener.ConsoleGameEventListener;
+import ru.alexeylisyutenko.ai.connectfour.player.MultithreadedFocusedMinimaxPlayer;
 import ru.alexeylisyutenko.ai.connectfour.player.MultithreadedPlainMinimaxPlayer;
-import ru.alexeylisyutenko.ai.connectfour.player.RandomPlayer;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,8 +18,8 @@ public class MinimaxGameDemo {
     @Test
     @Disabled
     void competitionDemo() throws InterruptedException {
-        Player player1 = new RandomPlayer();
-        Player player2 = new MultithreadedPlainMinimaxPlayer(4);
+        Player player1 = new MultithreadedPlainMinimaxPlayer(4);
+        Player player2 = new MultithreadedFocusedMinimaxPlayer(4);
         CompetitionResult competitionResult = runCompetition(player1, player2, 100);
         System.out.println(competitionResult);
     }

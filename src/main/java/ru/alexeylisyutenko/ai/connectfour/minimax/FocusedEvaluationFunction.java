@@ -12,7 +12,7 @@ public class FocusedEvaluationFunction implements EvaluationFunction {
         if (board.isGameOver()) {
             // If game is over then the winning move was made by our opponent, so we can't win and return
             // the lowest possible score for this board.
-            score = -1000 + board.getNumberOfTokensOnBoard();
+            score = -2000 + board.getNumberOfTokensOnBoard();
         } else {
             score = board.getLongestChain(board.getCurrentPlayerId()) * 10;
 

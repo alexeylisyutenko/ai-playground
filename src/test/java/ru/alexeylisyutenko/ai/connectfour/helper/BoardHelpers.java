@@ -1,6 +1,16 @@
 package ru.alexeylisyutenko.ai.connectfour.helper;
 
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;
+import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
+import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
@@ -40,6 +50,39 @@ public final class BoardHelpers {
                 assertEquals(boardDoubleArray[row][column], board.getCellPlayerId(row, column), message);
             }
         }
+    }
+
+    public static Board constructRandomNonFinishedBoard() {
+        int moves = RandomUtils.nextInt(0, 20);
+
+        Board board = new DefaultBoard();
+
+        boolean success;
+        do {
+            try {
+                for (int i = 0; i < moves; i++) {
+                    board = findRandomNonFinishingMove(board);
+                }
+                success = true;
+            } catch (RuntimeException ignore) {
+                success = false;
+            }
+        } while (!success);
+
+        return board;
+    }
+
+    private static Board findRandomNonFinishingMove(Board board) {
+        List<Pair<Integer, Board>> allNextMoves = MinimaxHelper.getAllNextMoves(board);
+        Collections.shuffle(allNextMoves);
+
+        for (Pair<Integer, Board> nextMove : allNextMoves) {
+            Board nextMoveBoard = nextMove.getRight();
+            if (!nextMoveBoard.isGameOver()) {
+                return nextMoveBoard;
+            }
+        }
+        throw new RuntimeException("There is no non finishing move for this board");
     }
 
 }

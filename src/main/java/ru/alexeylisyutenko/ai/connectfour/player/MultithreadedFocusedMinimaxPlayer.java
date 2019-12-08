@@ -10,7 +10,7 @@ public class MultithreadedFocusedMinimaxPlayer extends MinimaxBasedPlayer {
     }
 
     public MultithreadedFocusedMinimaxPlayer() {
-        this(9);
+        this(4);
     }
 
     @Override
