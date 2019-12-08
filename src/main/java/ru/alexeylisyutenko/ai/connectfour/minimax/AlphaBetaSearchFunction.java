@@ -38,14 +38,12 @@ public class AlphaBetaSearchFunction implements SearchFunction {
         while (nextMovesIterator.hasNext()) {
             Pair<Integer, Board> nextMove = nextMovesIterator.next();
 
-            boolean shouldPrune = currentNodeScore <= alpha;
-            if (shouldPrune) {
-                return currentNodeScore;
-            }
-
             int score = findMaxValue(nextMove.getRight(), depth - 1, alpha, beta, evaluationFunction);
             if (score < currentNodeScore) {
                 currentNodeScore = score;
+            }
+            if (score <= alpha) {
+                return currentNodeScore;
             }
             if (score < beta) {
                 beta = score;
@@ -66,14 +64,12 @@ public class AlphaBetaSearchFunction implements SearchFunction {
         while (nextMovesIterator.hasNext()) {
             Pair<Integer, Board> nextMove = nextMovesIterator.next();
 
-            boolean shouldPrune = currentNodeScore >= beta;
-            if (shouldPrune) {
-                return currentNodeScore;
-            }
-
             int score = findMinValue(nextMove.getRight(), depth - 1, alpha, beta, evaluationFunction);
             if (score > currentNodeScore) {
                 currentNodeScore = score;
+            }
+            if (score >= beta) {
+                return currentNodeScore;
             }
             if (score > alpha) {
                 alpha = score;
@@ -83,28 +79,8 @@ public class AlphaBetaSearchFunction implements SearchFunction {
         return currentNodeScore;
     }
 
-
 //    private int findAlphaBetaBoardValue(Board board, int depth, int alpha, int beta, EvaluationFunction evaluationFunction) {
 //        int currentNodeValue = Integer.MIN_VALUE;
 //        return 0;
 //    }
-
-    /*
-    private int findMinimaxBoardValue(Board board, int depth, EvaluationFunction evaluationFunction) {
-        if (MinimaxHelper.isTerminal(depth, board)) {
-            return evaluationFunction.evaluate(board);
-        }
-
-        List<Pair<Integer, Board>> nextMoves = MinimaxHelper.getAllNextMoves(board);
-        int bestScore = Integer.MIN_VALUE;
-        for (Pair<Integer, Board> nextMove : nextMoves) {
-            int score = -1 * findMinimaxBoardValue(nextMove.getRight(), depth - 1, evaluationFunction);
-            if (score > bestScore) {
-                bestScore = score;
-            }
-        }
-
-        return bestScore;
-    }
-     */
 }

@@ -1,5 +1,6 @@
 package ru.alexeylisyutenko.ai.connectfour.minimax;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -10,11 +11,11 @@ import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVi
 import static org.junit.jupiter.api.Assertions.*;
 
 class AlphaBetaSearchFunctionTest {
-    private final int depth = 5;
-
     @Test
     @RepeatedTest(1000)
     void alphaBetaSearchFunctionMustProduceSameMovesAsMinimaxSearchFunction() {
+        int depth = RandomUtils.nextInt(4, 6);
+
         MinimaxSearchFunction minimaxSearchFunction = new MinimaxSearchFunction();
         AlphaBetaSearchFunction alphaBetaSearchFunction = new AlphaBetaSearchFunction();
 
@@ -24,6 +25,8 @@ class AlphaBetaSearchFunctionTest {
         Board board = BoardHelpers.constructRandomNonFinishedBoard();
         ConsoleBoardVisualizer consoleBoardVisualizer = new ConsoleBoardVisualizer();
         consoleBoardVisualizer.visualize(board);
+
+        System.out.println("Depth: " + depth);
 
         Move minimaxMove = minimaxSearchFunction.search(board, depth, minimaxEvaluationFunction);
         System.out.println("Minimax move: " + minimaxMove);

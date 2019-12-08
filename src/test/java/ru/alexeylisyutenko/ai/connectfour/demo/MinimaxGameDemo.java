@@ -8,6 +8,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.GameResult;
 import ru.alexeylisyutenko.ai.connectfour.game.GameRunner;
 import ru.alexeylisyutenko.ai.connectfour.game.Player;
 import ru.alexeylisyutenko.ai.connectfour.main.console.gamelistener.ConsoleGameEventListener;
+import ru.alexeylisyutenko.ai.connectfour.player.FocusedAlphaBetaPlayer;
 import ru.alexeylisyutenko.ai.connectfour.player.MultithreadedFocusedMinimaxPlayer;
 import ru.alexeylisyutenko.ai.connectfour.player.MultithreadedPlainMinimaxPlayer;
 
@@ -18,7 +19,7 @@ public class MinimaxGameDemo {
     @Test
     @Disabled
     void competitionDemo() throws InterruptedException {
-        Player player1 = new MultithreadedPlainMinimaxPlayer(4);
+        Player player1 = new FocusedAlphaBetaPlayer(8);
         Player player2 = new MultithreadedFocusedMinimaxPlayer(4);
         CompetitionResult competitionResult = runCompetition(player1, player2, 100);
         System.out.println(competitionResult);
@@ -30,7 +31,7 @@ public class MinimaxGameDemo {
 
         for (int i = 0; i < gamesNumber; i++) {
             gameRunner.startGame();
-            Thread.sleep(1000);
+            gameRunner.awaitGameStart();
             gameRunner.awaitGameStop();
         }
 

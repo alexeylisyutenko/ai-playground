@@ -124,6 +124,11 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     @Override
+    public void awaitGameStart() throws InterruptedException {
+        mutableState.awaitGameStart();
+    }
+
+    @Override
     public void awaitGameStop() throws InterruptedException {
         mutableState.awaitGameStop();
     }
@@ -238,6 +243,12 @@ public class DefaultGameRunner implements GameRunner {
 
         public synchronized void setBoard(Board board) {
             this.board = board;
+        }
+
+        public synchronized void awaitGameStart() throws InterruptedException {
+            while (gameState == GameState.STOPPED) {
+                wait();
+            }
         }
 
         public synchronized void awaitGameStop() throws InterruptedException {

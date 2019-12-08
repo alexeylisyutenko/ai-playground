@@ -58,6 +58,11 @@ public interface GameRunner {
     void shutdown();
 
     /**
+     * Blocks until the current game starts.
+     */
+    void awaitGameStart() throws InterruptedException;
+
+    /**
      * Blocks until the current game stops.
      */
     void awaitGameStop() throws InterruptedException;
