@@ -1,12 +1,15 @@
 package ru.alexeylisyutenko.ai.connectfour.minimax;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers;
 import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CountingEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MinimaxSearchFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,6 +18,7 @@ class AlphaBetaSearchFunctionTest {
     @RepeatedTest(1000)
     void alphaBetaSearchFunctionMustProduceSameMovesAsMinimaxSearchFunction() {
         int depth = RandomUtils.nextInt(4, 6);
+//        int depth = 2;
 
         MinimaxSearchFunction minimaxSearchFunction = new MinimaxSearchFunction();
         AlphaBetaSearchFunction alphaBetaSearchFunction = new AlphaBetaSearchFunction();

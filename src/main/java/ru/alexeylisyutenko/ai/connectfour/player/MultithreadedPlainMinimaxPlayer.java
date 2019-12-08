@@ -1,8 +1,8 @@
 package ru.alexeylisyutenko.ai.connectfour.player;
 
-import ru.alexeylisyutenko.ai.connectfour.minimax.BasicEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.CachingEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.MultithreadedMinimaxSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BasicEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
 
 public class MultithreadedPlainMinimaxPlayer extends MinimaxBasedPlayer {
     public MultithreadedPlainMinimaxPlayer(int depth) {

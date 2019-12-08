@@ -1,8 +1,8 @@
 package ru.alexeylisyutenko.ai.connectfour.player;
 
-import ru.alexeylisyutenko.ai.connectfour.minimax.CachingEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.FocusedEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.MultithreadedMinimaxSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
 
 public class MultithreadedFocusedMinimaxPlayer extends MinimaxBasedPlayer {
     public MultithreadedFocusedMinimaxPlayer(int depth) {

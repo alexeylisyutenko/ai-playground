@@ -1,6 +1,7 @@
-package ru.alexeylisyutenko.ai.connectfour.minimax;
+package ru.alexeylisyutenko.ai.connectfour.minimax.evaluation;
 
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

@@ -1,9 +1,13 @@
-package ru.alexeylisyutenko.ai.connectfour.minimax;
+package ru.alexeylisyutenko.ai.connectfour.minimax.search.plain;
 
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
+import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
+import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 
 import java.util.ArrayList;
 import java.util.Comparator;

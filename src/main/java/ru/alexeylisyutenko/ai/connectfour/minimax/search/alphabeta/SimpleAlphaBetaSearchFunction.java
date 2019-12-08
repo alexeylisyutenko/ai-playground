@@ -1,12 +1,16 @@
-package ru.alexeylisyutenko.ai.connectfour.minimax;
+package ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta;
 
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
+import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
+import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class AlphaBetaSearchFunction implements SearchFunction {
+public class SimpleAlphaBetaSearchFunction implements SearchFunction {
     @Override
     public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {
         if (MinimaxHelper.isTerminal(depth, board)) {
@@ -15,7 +19,8 @@ public class AlphaBetaSearchFunction implements SearchFunction {
 
         List<Pair<Integer, Board>> nextMoves = MinimaxHelper.getAllNextMoves(board);
         int bestColumn = Integer.MIN_VALUE;
-        int bestScore = Integer.MIN_VALUE;
+        int bestScore = Integer.MIN_VALUE + 1;
+
         for (Pair<Integer, Board> nextMove : nextMoves) {
             int score = findMinValue(nextMove.getRight(), depth - 1, bestScore, Integer.MAX_VALUE, evaluationFunction);
             if (score > bestScore) {
@@ -78,9 +83,4 @@ public class AlphaBetaSearchFunction implements SearchFunction {
 
         return currentNodeScore;
     }
-
-//    private int findAlphaBetaBoardValue(Board board, int depth, int alpha, int beta, EvaluationFunction evaluationFunction) {
-//        int currentNodeValue = Integer.MIN_VALUE;
-//        return 0;
-//    }
 }

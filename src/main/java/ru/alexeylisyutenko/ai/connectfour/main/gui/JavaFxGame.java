@@ -38,10 +38,10 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-//        Player player1 = new GuiPlayer(boardControl);
+        Player player1 = new GuiPlayer(boardControl);
 //        Player player1 = new RandomPlayer();
-        Player player1 = new FocusedAlphaBetaPlayer(8);
-        Player player2 = new FocusedAlphaBetaPlayer(4);
+//        Player player1 = new FocusedAlphaBetaPlayer(8);
+        Player player2 = new FocusedAlphaBetaPlayer(9);
 //        Player player2 = new GuiPlayer(boardControl);
 //        Player player2 = new PlainMinimaxPlayer();
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
