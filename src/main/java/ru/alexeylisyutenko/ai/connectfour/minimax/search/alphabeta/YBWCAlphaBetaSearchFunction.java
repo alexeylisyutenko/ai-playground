@@ -1,23 +1,26 @@
 package ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta;
 
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
 
-import java.util.List;
 import java.util.concurrent.RecursiveTask;
 
-public class MultithreadedAlphaBetaSearchFunction implements SearchFunction {
+/**
+ * Parallel version of the AlphaBeta Pruning algorithm which uses "Young Brothers Wait Concept" to parallelize the
+ * algorithm.
+ */
+public class YBWCAlphaBetaSearchFunction implements SearchFunction {
     @Override
     public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {
         if (MinimaxHelper.isTerminal(depth, board)) {
             throw new IllegalStateException("Search function was called on a terminal node");
         }
+
+        // How to parallelize? Young Brothers wait concept?
 
         return null;
     }
