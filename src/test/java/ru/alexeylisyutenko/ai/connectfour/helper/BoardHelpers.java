@@ -53,7 +53,7 @@ public final class BoardHelpers {
     }
 
     public static Board constructRandomNonFinishedBoard() {
-        int moves = RandomUtils.nextInt(0, 20);
+        int moves = RandomUtils.nextInt(0, 30);
 
         Board board = new DefaultBoard();
 
