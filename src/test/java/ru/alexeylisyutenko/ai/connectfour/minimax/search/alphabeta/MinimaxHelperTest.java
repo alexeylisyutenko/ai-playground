@@ -1,9 +1,10 @@
-package ru.alexeylisyutenko.ai.connectfour.minimax;
+package ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;
+import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 
 import java.util.Iterator;
 

@@ -24,7 +24,7 @@ import static ru.alexeylisyutenko.ai.connectfour.util.Constants.POSITIVE_INFINIT
  * Parallel version of the AlphaBeta Pruning algorithm which uses "Young Brothers Wait Concept" to parallelize the
  * algorithm.
  */
-public class YBWCAlphaBetaSearchFunction implements SearchFunction {
+public class YBWCAlphaBetaSearchFunction2 implements SearchFunction {
 
     private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
 
@@ -35,30 +35,15 @@ public class YBWCAlphaBetaSearchFunction implements SearchFunction {
         }
 
         List<Pair<Integer, Board>> nextMoves = MinimaxHelper.getAllNextMoves(board);
-
-        // We need to invoke only the first move.
-        Pair<Integer, Board> youngBrotherMove = nextMoves.get(0);
-        BoardValueSearchRecursiveTask recursiveTask =
-                new BoardValueSearchRecursiveTask(youngBrotherMove.getRight(), depth -1, -POSITIVE_INFINITY, -NEGATIVE_INFINITY, evaluationFunction);
-
-        int bestScore = -1 * forkJoinPool.invoke(recursiveTask);
-        int bestColumn = youngBrotherMove.getLeft();
-
-        // Fire all the other tasks for older brothers.
-        ArrayList<BoardValueSearchRecursiveTask> recursiveTasks = new ArrayList<>(BOARD_WIDTH);
-        for (int i = 1; i < nextMoves.size(); i++) {
-            Pair<Integer, Board> nextMove = nextMoves.get(i);
-
-            recursiveTask = new BoardValueSearchRecursiveTask(nextMove.getRight(), depth -1, -POSITIVE_INFINITY, -bestScore, evaluationFunction);
-            forkJoinPool.submit(recursiveTask);
-            recursiveTasks.add(recursiveTask);
-        }
-
-        for (int i = 0; i < recursiveTasks.size(); i++) {
-            int score = -1 * recursiveTasks.get(i).join();
+        int bestColumn = NEGATIVE_INFINITY;
+        int bestScore = NEGATIVE_INFINITY;
+        for (Pair<Integer, Board> nextMove : nextMoves) {
+            BoardValueSearchRecursiveTask recursiveTask = new BoardValueSearchRecursiveTask(
+                    nextMove.getRight(), depth -1, -POSITIVE_INFINITY, -bestScore, evaluationFunction);
+            int score = -1 * forkJoinPool.invoke(recursiveTask);
             if (score > bestScore) {
                 bestScore = score;
-                bestColumn = nextMoves.get(i + 1).getLeft();
+                bestColumn = nextMove.getLeft();
             }
         }
 
@@ -115,7 +100,6 @@ public class YBWCAlphaBetaSearchFunction implements SearchFunction {
                     currentNodeScore = score;
                 }
                 if (score >= beta) {
-                    // TODO: All the other tasks can be dropped.
                     return currentNodeScore;
                 }
                 if (score > currentAlpha) {

@@ -41,7 +41,7 @@ public class JavaFxGame extends Application {
         Player player1 = new GuiPlayer(boardControl);
 //        Player player1 = new RandomPlayer();
 //        Player player1 = new FocusedAlphaBetaPlayer(8);
-        Player player2 = new FocusedAlphaBetaPlayer(11);
+        Player player2 = new YBWCFocusedAlphaBetaPlayer(10);
 //        Player player2 = new GuiPlayer(boardControl);
 //        Player player2 = new PlainMinimaxPlayer();
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
