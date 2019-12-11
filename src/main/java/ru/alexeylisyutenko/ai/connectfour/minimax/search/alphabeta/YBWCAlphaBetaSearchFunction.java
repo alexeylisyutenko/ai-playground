@@ -13,12 +13,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
+import java.util.stream.Collectors;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.NEGATIVE_INFINITY;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.POSITIVE_INFINITY;
 
-// TODO: Test and Refactor!
+// TODO: Introduce a hash table for already estimated board storage.
+// TODO: Prefer moves closer to the middle as young brothers.
 
 /**
  * Parallel version of the AlphaBeta Pruning algorithm which uses "Young Brothers Wait Concept" to parallelize the
@@ -34,31 +36,40 @@ public class YBWCAlphaBetaSearchFunction implements SearchFunction {
             throw new IllegalStateException("Search function was called on a terminal node");
         }
 
+        // Generate all possible next moves.
         List<Pair<Integer, Board>> nextMoves = MinimaxHelper.getAllNextMoves(board);
 
         // We need to invoke only the first move.
         Pair<Integer, Board> youngBrotherMove = nextMoves.get(0);
-        BoardValueSearchRecursiveTask recursiveTask =
-                new BoardValueSearchRecursiveTask(youngBrotherMove.getRight(), depth -1, -POSITIVE_INFINITY, -NEGATIVE_INFINITY, evaluationFunction);
+        BoardValueSearchRecursiveTask youngBrotherRecursiveTask = new BoardValueSearchRecursiveTask(
+                youngBrotherMove.getRight(), depth -1, -POSITIVE_INFINITY, -NEGATIVE_INFINITY, evaluationFunction);
 
-        int bestScore = -1 * forkJoinPool.invoke(recursiveTask);
+        // Receive a score for the youngest brother and since it's the first score we get save it as the best score.
+        int bestScore = -1 * forkJoinPool.invoke(youngBrotherRecursiveTask);
         int bestColumn = youngBrotherMove.getLeft();
 
-        // Fire all the other tasks for older brothers.
+        // Fire all the other tasks concurrently for older brothers.
         ArrayList<BoardValueSearchRecursiveTask> recursiveTasks = new ArrayList<>(BOARD_WIDTH);
         for (int i = 1; i < nextMoves.size(); i++) {
             Pair<Integer, Board> nextMove = nextMoves.get(i);
-
-            recursiveTask = new BoardValueSearchRecursiveTask(nextMove.getRight(), depth -1, -POSITIVE_INFINITY, -bestScore, evaluationFunction);
+            BoardValueSearchRecursiveTask recursiveTask = new BoardValueSearchRecursiveTask(
+                    nextMove.getRight(), depth -1, -POSITIVE_INFINITY, -bestScore, evaluationFunction);
             forkJoinPool.submit(recursiveTask);
             recursiveTasks.add(recursiveTask);
         }
 
+        // Prepare list of columns for each move apart from the first one.
+        List<Integer> moveColumns = nextMoves.stream()
+                .skip(1)
+                .map(Pair::getLeft)
+                .collect(Collectors.toList());
+
+        // Receive scores for older brothers and find the best move.
         for (int i = 0; i < recursiveTasks.size(); i++) {
             int score = -1 * recursiveTasks.get(i).join();
             if (score > bestScore) {
                 bestScore = score;
-                bestColumn = nextMoves.get(i + 1).getLeft();
+                bestColumn = moveColumns.get(i);
             }
         }
 
@@ -83,16 +94,17 @@ public class YBWCAlphaBetaSearchFunction implements SearchFunction {
             int currentAlpha = alpha;
             int currentNodeScore;
 
+            // Create an iterator for generating all possible next moves.
             Iterator<Pair<Integer, Board>> nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
 
-            // Get a score for a younger brother.
+            // Get a score for a younger brother synchronously.
             if (!nextMovesIterator.hasNext()) {
                 throw new IllegalStateException("There are no moves for this board");
             }
             Pair<Integer, Board> youngBrotherMove = nextMovesIterator.next();
-            BoardValueSearchRecursiveTask recursiveTask =
-                    new BoardValueSearchRecursiveTask(youngBrotherMove.getRight(), depth -1, -beta, -currentAlpha, evaluationFunction);
-            currentNodeScore = -1 * recursiveTask.compute();
+            BoardValueSearchRecursiveTask youngBrotherRecursiveTask = new BoardValueSearchRecursiveTask(
+                    youngBrotherMove.getRight(), depth -1, -beta, -currentAlpha, evaluationFunction);
+            currentNodeScore = -1 * youngBrotherRecursiveTask.compute();
             if (currentNodeScore >= beta) {
                 return currentNodeScore;
             }
@@ -104,22 +116,28 @@ public class YBWCAlphaBetaSearchFunction implements SearchFunction {
             ArrayList<BoardValueSearchRecursiveTask> recursiveTasks = new ArrayList<>(BOARD_WIDTH);
             while (nextMovesIterator.hasNext()) {
                 Pair<Integer, Board> nextMove = nextMovesIterator.next();
-                recursiveTask = new BoardValueSearchRecursiveTask(nextMove.getRight(), depth -1, -beta, -currentAlpha, evaluationFunction);
+                BoardValueSearchRecursiveTask recursiveTask = new BoardValueSearchRecursiveTask(
+                        nextMove.getRight(), depth -1, -beta, -currentAlpha, evaluationFunction);
                 recursiveTask.fork();
                 recursiveTasks.add(recursiveTask);
             }
 
+            // Process the results of the older brothers and try to cancel forked tasks if we're in pruning situation.
+            boolean pruning = false;
             for (BoardValueSearchRecursiveTask task : recursiveTasks) {
-                int score = -1 * task.join();
-                if (score > currentNodeScore) {
-                    currentNodeScore = score;
-                }
-                if (score >= beta) {
-                    // TODO: All the other tasks can be dropped.
-                    return currentNodeScore;
-                }
-                if (score > currentAlpha) {
-                    currentAlpha = score;
+                if (!pruning) {
+                    int score = -1 * task.join();
+                    if (score > currentNodeScore) {
+                        currentNodeScore = score;
+                    }
+                    if (score >= beta) {
+                        pruning = true;
+                    }
+                    if (score > currentAlpha) {
+                        currentAlpha = score;
+                    }
+                } else {
+                    task.cancel(true);
                 }
             }
 
@@ -127,31 +145,4 @@ public class YBWCAlphaBetaSearchFunction implements SearchFunction {
         }
     }
 
-    /*
-        private int findAlphaBetaBoardValue(Board board, int depth, int alpha, int beta, EvaluationFunction evaluationFunction) {
-        if (MinimaxHelper.isTerminal(depth, board)) {
-            return evaluationFunction.evaluate(board);
-        }
-
-        int currentNodeScore = NEGATIVE_INFINITY;
-
-        Iterator<Pair<Integer, Board>> nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
-        while (nextMovesIterator.hasNext()) {
-            Pair<Integer, Board> nextMove = nextMovesIterator.next();
-
-            int score = -1 * findAlphaBetaBoardValue(nextMove.getRight(), depth - 1, -beta, -alpha, evaluationFunction);
-            if (score > currentNodeScore) {
-                currentNodeScore = score;
-            }
-            if (score >= beta) {
-                return currentNodeScore;
-            }
-            if (score > alpha) {
-                alpha = score;
-            }
-        }
-
-        return currentNodeScore;
-    }
-     */
 }

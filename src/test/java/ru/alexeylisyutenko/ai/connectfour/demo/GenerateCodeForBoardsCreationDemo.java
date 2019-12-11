@@ -18,10 +18,10 @@ public class GenerateCodeForBoardsCreationDemo {
     @Disabled
     @Test
     void generateCode() {
-        int boardsCount = 20;
+        int boardsCount = 100;
 
         List<Board> boards = Stream.generate(BoardHelpers::constructRandomNonFinishedBoard)
-                .limit(boardsCount).collect(Collectors.toList());
+                .distinct().limit(boardsCount).collect(Collectors.toList());
 
         ConsoleBoardVisualizer consoleBoardVisualizer = new ConsoleBoardVisualizer();
         for (Board board : boards) {
