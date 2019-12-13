@@ -1,5 +1,6 @@
 package ru.alexeylisyutenko.ai.connectfour.player;
 
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BetterEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;

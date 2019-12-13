@@ -15,6 +15,10 @@ import ru.alexeylisyutenko.ai.connectfour.game.*;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.boardcontrol.BoardControl;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.gamelistener.GuiGameEventListener;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.player.GuiPlayer;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BetterEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.YBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.player.*;
 
 public class JavaFxGame extends Application {
@@ -40,8 +44,10 @@ public class JavaFxGame extends Application {
     private GameRunner createGameRunner() {
         Player player1 = new GuiPlayer(boardControl);
 //        Player player1 = new MultithreadedPlainMinimaxPlayer(9);
+//        Player player1 = new MinimaxBasedPlayer(new YBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new FocusedEvaluationFunction()), 9);
+        Player player2 = new MinimaxBasedPlayer(new YBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BetterEvaluationFunction()), 10);
 //        Player player1 = new FocusedAlphaBetaPlayer(8);
-        Player player2 = new YBWCFocusedAlphaBetaPlayer(10);
+//        Player player2 = new YBWCFocusedAlphaBetaPlayer(9);
 //        Player player2 = new GuiPlayer(boardControl);
 //        Player player2 = new PlainMinimaxPlayer();
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
