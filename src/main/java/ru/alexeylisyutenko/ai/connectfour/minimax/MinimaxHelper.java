@@ -19,6 +19,8 @@ public final class MinimaxHelper {
     private MinimaxHelper() {
     }
 
+    private static final int[] ORDER = {3, 4, 2, 5, 1, 6, 0};
+
     /**
      * Returns all possible moves that the current player could take from this position.
      *
@@ -27,10 +29,10 @@ public final class MinimaxHelper {
      */
     public static List<Pair<Integer, Board>> getAllNextMoves(Board board) {
         ArrayList<Pair<Integer, Board>> moves = new ArrayList<>();
-        for (int column = 0; column < BOARD_WIDTH; column++) {
+        for (int position = 0; position < BOARD_WIDTH; position++) {
             try {
-                Board boardAfterMove = board.makeMove(column);
-                moves.add(Pair.of(column, boardAfterMove));
+                Board boardAfterMove = board.makeMove(ORDER[position]);
+                moves.add(Pair.of(ORDER[position], boardAfterMove));
             } catch (InvalidMoveException ignored) {
             }
         }
@@ -62,8 +64,6 @@ public final class MinimaxHelper {
      * Iterator which iterates over all possible moves that the current player could take from this position
      */
     private static class ShuffledAllNextMovesIterator implements Iterator<Pair<Integer, Board>> {
-        private static final int[] order = {3, 4, 2, 5, 1, 6, 0};
-
         private final Board board;
         private int position;
 
@@ -74,7 +74,7 @@ public final class MinimaxHelper {
 
         @Override
         public boolean hasNext() {
-            while (position < BOARD_WIDTH && board.getHeightOfColumn(order[position]) == -1) {
+            while (position < BOARD_WIDTH && board.getHeightOfColumn(ORDER[position]) == -1) {
                 position++;
             }
             return position != BOARD_WIDTH;
@@ -82,7 +82,7 @@ public final class MinimaxHelper {
 
         @Override
         public Pair<Integer, Board> next() {
-            Pair<Integer, Board> nextMove = Pair.of(order[position], board.makeMove(order[position]));
+            Pair<Integer, Board> nextMove = Pair.of(ORDER[position], board.makeMove(ORDER[position]));
             position++;
             return nextMove;
         }

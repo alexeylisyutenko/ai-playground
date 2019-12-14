@@ -3,6 +3,7 @@ package ru.alexeylisyutenko.ai.connectfour.minimax;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BetterEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.YBWCAlphaBetaSearchFunction;
@@ -20,7 +21,7 @@ public class SearchFunctionsBenchmark {
     @Param({"50"})
     int boardCount;
 
-    @Param({"7"})
+    @Param({"6"})
     int depth;
 
     List<Board> boards;
@@ -33,7 +34,7 @@ public class SearchFunctionsBenchmark {
     @Setup
     public void setup() {
         boards = getBoardsForBenchmarking(boardCount);
-        evaluationFunction = new FocusedEvaluationFunction();
+        evaluationFunction = new BetterEvaluationFunction();
         minimaxSearchFunction = new MinimaxSearchFunction();
         alphaBetaSearchFunction = new AlphaBetaSearchFunction();
         multithreadedMinimaxSearchFunction = new MultithreadedMinimaxSearchFunction();
