@@ -44,7 +44,7 @@ public final class MinimaxHelper {
      * @return all possible move iterator
      */
     public static Iterator<Pair<Integer, Board>> getAllNextMovesIterator(Board board) {
-        return new AllNextMovesIterator(board);
+        return new ShuffledAllNextMovesIterator(board);
     }
 
     /**
@@ -61,27 +61,29 @@ public final class MinimaxHelper {
     /**
      * Iterator which iterates over all possible moves that the current player could take from this position
      */
-    private static class AllNextMovesIterator implements Iterator<Pair<Integer, Board>> {
-        private final Board board;
-        private int column;
+    private static class ShuffledAllNextMovesIterator implements Iterator<Pair<Integer, Board>> {
+        private static final int[] order = {3, 4, 2, 5, 1, 6, 0};
 
-        public AllNextMovesIterator(Board board) {
+        private final Board board;
+        private int position;
+
+        public ShuffledAllNextMovesIterator(Board board) {
             this.board = board;
-            this.column = 0;
+            this.position = 0;
         }
 
         @Override
         public boolean hasNext() {
-            while (column < BOARD_WIDTH && board.getHeightOfColumn(column) == -1) {
-                column++;
+            while (position < BOARD_WIDTH && board.getHeightOfColumn(order[position]) == -1) {
+                position++;
             }
-            return column != BOARD_WIDTH;
+            return position != BOARD_WIDTH;
         }
 
         @Override
         public Pair<Integer, Board> next() {
-            Pair<Integer, Board> nextMove = Pair.of(column, board.makeMove(column));
-            column++;
+            Pair<Integer, Board> nextMove = Pair.of(order[position], board.makeMove(order[position]));
+            position++;
             return nextMove;
         }
     }

@@ -8,7 +8,9 @@ import ru.alexeylisyutenko.ai.connectfour.game.GameResult;
 import ru.alexeylisyutenko.ai.connectfour.game.GameRunner;
 import ru.alexeylisyutenko.ai.connectfour.game.Player;
 import ru.alexeylisyutenko.ai.connectfour.main.console.gamelistener.ConsoleGameEventListener;
-import ru.alexeylisyutenko.ai.connectfour.player.MultithreadedFocusedMinimaxPlayer;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.player.MinimaxBasedPlayer;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,22 +19,35 @@ public class MinimaxGameDemo {
     @Test
     @Disabled
     void competitionDemo() throws InterruptedException {
-        Player player1 = new MultithreadedFocusedMinimaxPlayer(4);
-        Player player2 = new MultithreadedFocusedMinimaxPlayer(4);
-        CompetitionResult competitionResult = runCompetition(player1, player2, 100);
+        int games = 200;
+        int depth = 6;
+
+        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new EvenBetterEvaluationFunction()), depth);
+        Player player2 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new FocusedEvaluationFunction()), depth);
+
+        CompetitionResult competitionResult = runCompetition(player1, player2, games);
         System.out.println(competitionResult);
     }
 
-    private CompetitionResult runCompetition(Player player1, Player player2, int gamesNumber) throws InterruptedException {
+    private CompetitionResult runCompetition(Player player1, Player player2, int games) throws InterruptedException {
+        CompetitionResult firstResults = compete(player1, player2, games);
+        CompetitionResult secondResults = compete(player2, player1, games);
+        return new CompetitionResult(
+                firstResults.getPlayer1Wins() + secondResults.getPlayer2Wins(),
+                firstResults.getPlayer2Wins() + secondResults.getPlayer1Wins(),
+                firstResults.getTies() + secondResults.getTies(),
+                firstResults.getGames() + secondResults.getGames()
+        );
+    }
+
+    private CompetitionResult compete(Player player1, Player player2, int games) throws InterruptedException {
         CompetitionGameEventListener competitionGameEventListener = new CompetitionGameEventListener();
         GameRunner gameRunner = new DefaultGameRunner(player1, player2, competitionGameEventListener);
-
-        for (int i = 0; i < gamesNumber; i++) {
+        for (int i = 0; i < games; i++) {
             gameRunner.startGame();
             gameRunner.awaitGameStart();
             gameRunner.awaitGameStop();
         }
-
         return new CompetitionResult(competitionGameEventListener.getPlayer1Wins(), competitionGameEventListener.getPlayer2Wins(),
                 competitionGameEventListener.getTies(), competitionGameEventListener.getGames());
     }

@@ -28,16 +28,16 @@ class MinimaxHelperTest {
         Iterator<Pair<Integer, Board>> iterator = MinimaxHelper.getAllNextMovesIterator(board);
 
         assertTrue(iterator.hasNext());
-        assertEquals(Integer.valueOf(1), iterator.next().getLeft());
+        assertEquals(Integer.valueOf(4), iterator.next().getLeft());
 
         assertTrue(iterator.hasNext());
         assertEquals(Integer.valueOf(2), iterator.next().getLeft());
 
         assertTrue(iterator.hasNext());
-        assertEquals(Integer.valueOf(4), iterator.next().getLeft());
+        assertEquals(Integer.valueOf(5), iterator.next().getLeft());
 
         assertTrue(iterator.hasNext());
-        assertEquals(Integer.valueOf(5), iterator.next().getLeft());
+        assertEquals(Integer.valueOf(1), iterator.next().getLeft());
 
         assertTrue(iterator.hasNext());
         assertEquals(Integer.valueOf(6), iterator.next().getLeft());
@@ -52,25 +52,25 @@ class MinimaxHelperTest {
         Iterator<Pair<Integer, Board>> iterator = MinimaxHelper.getAllNextMovesIterator(board);
 
         assertTrue(iterator.hasNext());
-        assertEquals(Integer.valueOf(0), iterator.next().getLeft());
-
-        assertTrue(iterator.hasNext());
-        assertEquals(Integer.valueOf(1), iterator.next().getLeft());
-
-        assertTrue(iterator.hasNext());
-        assertEquals(Integer.valueOf(2), iterator.next().getLeft());
-
-        assertTrue(iterator.hasNext());
         assertEquals(Integer.valueOf(3), iterator.next().getLeft());
 
         assertTrue(iterator.hasNext());
         assertEquals(Integer.valueOf(4), iterator.next().getLeft());
 
         assertTrue(iterator.hasNext());
+        assertEquals(Integer.valueOf(2), iterator.next().getLeft());
+
+        assertTrue(iterator.hasNext());
         assertEquals(Integer.valueOf(5), iterator.next().getLeft());
 
         assertTrue(iterator.hasNext());
+        assertEquals(Integer.valueOf(1), iterator.next().getLeft());
+
+        assertTrue(iterator.hasNext());
         assertEquals(Integer.valueOf(6), iterator.next().getLeft());
+
+        assertTrue(iterator.hasNext());
+        assertEquals(Integer.valueOf(0), iterator.next().getLeft());
 
         assertFalse(iterator.hasNext());
     }

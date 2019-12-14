@@ -35,8 +35,10 @@ public class MultithreadedMinimaxSearchFunction implements SearchFunction {
         List<Pair<Integer, Board>> nextMoves = MinimaxHelper.getAllNextMoves(board);
         List<BoardValueSearchRecursiveTask> recursiveTasks = createRecursiveTasks(nextMoves, depth, evaluationFunction);
 
+        recursiveTasks.forEach(forkJoinPool::submit);
+
         List<Integer> scores = recursiveTasks.stream()
-                .map(recursiveTask -> -forkJoinPool.invoke(recursiveTask))
+                .map(recursiveTask -> -recursiveTask.join())
                 .collect(Collectors.toList());
 
         List<Move> moves = constructMoves(nextMoves, scores);

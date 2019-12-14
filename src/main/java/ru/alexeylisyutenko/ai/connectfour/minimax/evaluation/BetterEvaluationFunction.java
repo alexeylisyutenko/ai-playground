@@ -25,7 +25,6 @@ public class BetterEvaluationFunction implements EvaluationFunction {
         } else {
             score = 0;
 
-            // This simple approach works poorly? We need to improve it.
             Set<List<Cell>> currentPlayerChains = board.getChainCells(board.getCurrentPlayerId()).stream()
                     .filter(cells -> cells.size() > 1).collect(Collectors.toSet());
             for (List<Cell> chain : currentPlayerChains) {
