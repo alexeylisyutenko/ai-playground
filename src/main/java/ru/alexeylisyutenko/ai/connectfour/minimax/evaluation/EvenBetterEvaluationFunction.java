@@ -41,7 +41,6 @@ public class EvenBetterEvaluationFunction implements EvaluationFunction {
             direction = new ChainDirection(1, 1);
             for (int row = 0; row < BOARD_HEIGHT - 3; row++) {
                 for (int column = 0; column < BOARD_WIDTH - 3; column++) {
-                    Cell cell = new Cell(row, column);
                     score += evaluateFourCellCombinationScore(new Cell(row, column), direction, board);
                 }
             }
@@ -50,7 +49,6 @@ public class EvenBetterEvaluationFunction implements EvaluationFunction {
             direction = new ChainDirection(-1, 1);
             for (int row = BOARD_HEIGHT - 3; row < BOARD_HEIGHT; row++) {
                 for (int column = 0; column < BOARD_WIDTH - 3; column++) {
-                    Cell cell = new Cell(row, column);
                     score += evaluateFourCellCombinationScore(new Cell(row, column), direction, board);
                 }
             }
