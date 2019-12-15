@@ -8,6 +8,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;
 import ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers;
 import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BetterEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.EvenBetterEvaluationFunction;
 
@@ -22,8 +23,7 @@ public class EvaluationFunctionDemo {
 
     @BeforeEach
     void setup() {
-        evaluationFunction = new BetterEvaluationFunction();
-        evaluationFunction = new EvenBetterEvaluationFunction();
+        evaluationFunction = new BestEvaluationFunction();
     }
 
     @Disabled

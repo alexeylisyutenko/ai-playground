@@ -6,14 +6,28 @@ import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers;
 import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
+import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.generateGenuineGameBoardSequence;
 
 public class GenerateCodeForBoardsCreationDemo {
+
+    @Test
+    void generateGenuineGameBoardsCode() throws InterruptedException {
+        int games = 5;
+
+        List<Board> boards = new ArrayList<>();
+        for (int i = 0; i < games; i++) {
+            boards.addAll(generateGenuineGameBoardSequence());
+        }
+        String code = generateListOfCreationCode(boards);
+        System.out.println(code);
+    }
 
     @Disabled
     @Test
@@ -29,18 +43,21 @@ public class GenerateCodeForBoardsCreationDemo {
         }
         System.out.println();
 
+        String code = generateListOfCreationCode(boards);
+        System.out.println(code);
+    }
+
+    private String generateListOfCreationCode(List<Board> boards) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("List.of(\r\n");
         for (Board board : boards) {
             String boardCreationCode = constructBoardCreationJavaCode(board);
             stringBuilder.append(boardCreationCode).append(",\r\n");
         }
-        stringBuilder.delete(stringBuilder.length()-3, stringBuilder.length());
+        stringBuilder.delete(stringBuilder.length() - 3, stringBuilder.length());
         stringBuilder.append("\r\n");
         stringBuilder.append(");");
-        String code = stringBuilder.toString();
-
-        System.out.println(code);
+        return stringBuilder.toString();
     }
 
     private String constructBoardCreationJavaCode(Board board) {

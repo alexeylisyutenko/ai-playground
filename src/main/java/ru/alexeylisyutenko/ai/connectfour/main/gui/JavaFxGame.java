@@ -41,10 +41,10 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-        Player player2 = new GuiPlayer(boardControl);
+        Player player1 = new GuiPlayer(boardControl);
 //        Player player1 = new MultithreadedPlainMinimaxPlayer(8);
 //        Player player1 = new MinimaxBasedPlayer(new YBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BasicEvaluationFunction()), 12);
-        Player player1 = new MinimaxBasedPlayer(new YBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new EvenBetterEvaluationFunction()), 12);
+        Player player2 = new MinimaxBasedPlayer(new YBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), 12);
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
     }
 

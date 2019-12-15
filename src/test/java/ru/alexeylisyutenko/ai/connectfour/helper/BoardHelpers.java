@@ -2,15 +2,17 @@ package ru.alexeylisyutenko.ai.connectfour.helper;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import ru.alexeylisyutenko.ai.connectfour.game.Board;
-import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;
-import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
+import ru.alexeylisyutenko.ai.connectfour.game.*;
 import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BasicEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.EvenBetterEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.player.MinimaxBasedPlayer;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
@@ -87,6 +89,23 @@ public final class BoardHelpers {
             }
         }
         throw new RuntimeException("There is no non finishing move for this board");
+    }
+
+    public static List<Board> generateGenuineGameBoardSequence() {
+        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new EvenBetterEvaluationFunction()), 4);
+        Player player2 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new BasicEvaluationFunction()), 4);
+
+        GameRunner gameRunner = new DefaultGameRunner(player1, player2, null);
+        gameRunner.startGame();
+        try {
+            gameRunner.awaitGameStart();
+            gameRunner.awaitGameStop();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        List<Board> boards = new ArrayList<>(gameRunner.getBoardHistory());
+        boards.remove(boards.size() - 1);
+        return boards;
     }
 
 }
