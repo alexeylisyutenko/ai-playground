@@ -13,6 +13,7 @@ import ru.alexeylisyutenko.ai.connectfour.player.MinimaxBasedPlayer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
@@ -61,34 +62,36 @@ public final class BoardHelpers {
     public static Board constructRandomNonFinishedBoard(int lowerBound, int upperBound) {
         int moves = RandomUtils.nextInt(lowerBound, upperBound);
 
-        Board board = new DefaultBoard();
-
+        Board board;
         boolean success;
         do {
-            try {
-                for (int i = 0; i < moves; i++) {
-                    board = findRandomNonFinishingMove(board);
+            board = new DefaultBoard();
+            success = true;
+            for (int i = 0; i < moves; i++) {
+                Optional<Board> boardOptional = findRandomNonFinishingMove(board);
+                if (boardOptional.isPresent()) {
+                    board = boardOptional.get();
+                } else {
+                    success = false;
+                    break;
                 }
-                success = true;
-            } catch (RuntimeException ignore) {
-                success = false;
             }
         } while (!success);
 
         return board;
     }
 
-    private static Board findRandomNonFinishingMove(Board board) {
+    private static Optional<Board> findRandomNonFinishingMove(Board board) {
         List<Pair<Integer, Board>> allNextMoves = MinimaxHelper.getAllNextMoves(board);
         Collections.shuffle(allNextMoves);
 
         for (Pair<Integer, Board> nextMove : allNextMoves) {
             Board nextMoveBoard = nextMove.getRight();
             if (!nextMoveBoard.isGameOver()) {
-                return nextMoveBoard;
+                return Optional.of(nextMoveBoard);
             }
         }
-        throw new RuntimeException("There is no non finishing move for this board");
+        return Optional.empty();
     }
 
     public static List<Board> generateGenuineGameBoardSequence() {

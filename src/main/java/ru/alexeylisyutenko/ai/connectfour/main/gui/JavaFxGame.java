@@ -18,6 +18,7 @@ import ru.alexeylisyutenko.ai.connectfour.main.gui.player.GuiPlayer;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.*;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.YBWCAlphaBetaSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.ExperimentalYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.player.*;
 
 public class JavaFxGame extends Application {
@@ -41,10 +42,10 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-        Player player1 = new GuiPlayer(boardControl);
-//        Player player1 = new MultithreadedPlainMinimaxPlayer(8);
+//        Player player1 = new GuiPlayer(boardControl);
+        Player player1 = new MultithreadedPlainMinimaxPlayer(8);
 //        Player player1 = new MinimaxBasedPlayer(new YBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BasicEvaluationFunction()), 12);
-        Player player2 = new MinimaxBasedPlayer(new YBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), 12);
+        Player player2 = new MinimaxBasedPlayer(new ExperimentalYBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), 14);
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
     }
 

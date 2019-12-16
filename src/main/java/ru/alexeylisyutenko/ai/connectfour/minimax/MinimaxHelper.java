@@ -30,10 +30,9 @@ public final class MinimaxHelper {
     public static List<Pair<Integer, Board>> getAllNextMoves(Board board) {
         ArrayList<Pair<Integer, Board>> moves = new ArrayList<>();
         for (int position = 0; position < BOARD_WIDTH; position++) {
-            try {
+            if (board.getHeightOfColumn(ORDER[position]) != -1) {
                 Board boardAfterMove = board.makeMove(ORDER[position]);
                 moves.add(Pair.of(ORDER[position], boardAfterMove));
-            } catch (InvalidMoveException ignored) {
             }
         }
         return moves;
