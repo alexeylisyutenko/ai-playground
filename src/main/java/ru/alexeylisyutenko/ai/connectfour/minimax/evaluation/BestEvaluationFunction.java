@@ -4,6 +4,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -145,7 +146,7 @@ public class BestEvaluationFunction implements EvaluationFunction {
             preCompute(lineScores, new int[0], 6);
             preCompute(lineScores, new int[0], 5);
             preCompute(lineScores, new int[0], 4);
-            return lineScores;
+            return Collections.unmodifiableMap(lineScores);
         }
 
         private static void preCompute(Map<Integer, Integer> lineScores, int[] line, int lineLength) {
