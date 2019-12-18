@@ -11,10 +11,5 @@
         <module name="ai-playground.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="ai-playground.jmh" target="11" />
-      <module name="ai-playground.main" target="11" />
-      <module name="ai-playground.test" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>
