@@ -3,10 +3,13 @@ package ru.alexeylisyutenko.ai.connectfour.minimax;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BetterEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.YBWCAlphaBetaSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MinimaxSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
 
@@ -30,51 +33,67 @@ public class SearchFunctionsBenchmark {
     SearchFunction alphaBetaSearchFunction;
     SearchFunction multithreadedMinimaxSearchFunction;
     SearchFunction ybwcAlphaBetaSearchFunction;
+    SearchFunction transpositionTableAlphaBetaSearchFunction;
 
     @Setup
     public void setup() {
         boards = getBoardsForBenchmarking(boardCount);
-        evaluationFunction = new BetterEvaluationFunction();
+        evaluationFunction = new CachingEvaluationFunction(new BestEvaluationFunction());
         minimaxSearchFunction = new MinimaxSearchFunction();
         alphaBetaSearchFunction = new AlphaBetaSearchFunction();
         multithreadedMinimaxSearchFunction = new MultithreadedMinimaxSearchFunction();
         ybwcAlphaBetaSearchFunction = new YBWCAlphaBetaSearchFunction();
+        transpositionTableAlphaBetaSearchFunction = new TranspositionTableAlphaBetaSearchFunction();
     }
+
+//    @Benchmark
+//    @BenchmarkMode(Mode.AverageTime)
+//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+//    public void minimaxSearchFunction(Blackhole bh) {
+//        for (Board board : boards) {
+//            bh.consume(minimaxSearchFunction.search(board, depth, evaluationFunction));
+//        }
+//    }
+
+//    @Benchmark
+//    @BenchmarkMode(Mode.AverageTime)
+//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+//    @Warmup(iterations = 3, time = 5)
+//    @Measurement(iterations = 3, time = 5)
+//    public void alphaBetaSearchFunction(Blackhole bh) {
+//        for (Board board : boards) {
+//            bh.consume(alphaBetaSearchFunction.search(board, depth, evaluationFunction));
+//        }
+//    }
+
+//    @Benchmark
+//    @BenchmarkMode(Mode.AverageTime)
+//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+//    public void multithreadedMinimaxSearchFunction(Blackhole bh) {
+//        for (Board board : boards) {
+//            bh.consume(multithreadedMinimaxSearchFunction.search(board, depth, evaluationFunction));
+//        }
+//    }
+//
+//    @Benchmark
+//    @BenchmarkMode(Mode.AverageTime)
+//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+//    public void ybwcAlphaBetaSearchFunction(Blackhole bh) {
+//        for (Board board : boards) {
+//            bh.consume(ybwcAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
+//        }
+//    }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void minimaxSearchFunction(Blackhole bh) {
+    @Warmup(iterations = 3, time = 5)
+    @Measurement(iterations = 3, time = 5)
+    public void transpositionTableAlphaBetaSearchFunction(Blackhole bh) {
         for (Board board : boards) {
-            bh.consume(minimaxSearchFunction.search(board, depth, evaluationFunction));
+            bh.consume(transpositionTableAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
         }
     }
 
-    @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void alphaBetaSearchFunction(Blackhole bh) {
-        for (Board board : boards) {
-            bh.consume(alphaBetaSearchFunction.search(board, depth, evaluationFunction));
-        }
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void multithreadedMinimaxSearchFunction(Blackhole bh) {
-        for (Board board : boards) {
-            bh.consume(multithreadedMinimaxSearchFunction.search(board, depth, evaluationFunction));
-        }
-    }
-
-    @Benchmark
-    @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void ybwcAlphaBetaSearchFunction(Blackhole bh) {
-        for (Board board : boards) {
-            bh.consume(ybwcAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
-        }
-    }
 
 }

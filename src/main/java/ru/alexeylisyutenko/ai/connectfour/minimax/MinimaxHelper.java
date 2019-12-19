@@ -1,12 +1,9 @@
 package ru.alexeylisyutenko.ai.connectfour.minimax;
 
 import org.apache.commons.lang3.tuple.Pair;
-import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
@@ -19,7 +16,7 @@ public final class MinimaxHelper {
     private MinimaxHelper() {
     }
 
-    private static final int[] ORDER = {3, 4, 2, 5, 1, 6, 0};
+    private static final int[] DEFAULT_ORDER = {3, 4, 2, 5, 1, 6, 0};
 
     /**
      * Returns all possible moves that the current player could take from this position.
@@ -30,9 +27,9 @@ public final class MinimaxHelper {
     public static List<Pair<Integer, Board>> getAllNextMoves(Board board) {
         ArrayList<Pair<Integer, Board>> moves = new ArrayList<>();
         for (int position = 0; position < BOARD_WIDTH; position++) {
-            if (board.getHeightOfColumn(ORDER[position]) != -1) {
-                Board boardAfterMove = board.makeMove(ORDER[position]);
-                moves.add(Pair.of(ORDER[position], boardAfterMove));
+            if (board.getHeightOfColumn(DEFAULT_ORDER[position]) != -1) {
+                Board boardAfterMove = board.makeMove(DEFAULT_ORDER[position]);
+                moves.add(Pair.of(DEFAULT_ORDER[position], boardAfterMove));
             }
         }
         return moves;
@@ -45,7 +42,39 @@ public final class MinimaxHelper {
      * @return all possible move iterator
      */
     public static Iterator<Pair<Integer, Board>> getAllNextMovesIterator(Board board) {
-        return new ShuffledAllNextMovesIterator(board);
+        return new ShuffledAllNextMovesIterator(board, DEFAULT_ORDER);
+    }
+
+
+    /**
+     * Returns an iterator which iterates over all possible moves that the current player could take from this position.
+     * <p>
+     *     Column indicated by the bestMove argument is used as the first move returned by the iterator (if such move is possibsle).
+     * </p>
+     *
+     * @param board current position board
+     * @param bestMove best move
+     * @return all possible move iterator
+     */
+    public static Iterator<Pair<Integer, Board>> getAllNextMovesIterator(Board board, int bestMove) {
+        Objects.requireNonNull(board, "board cannot be null");
+        if (bestMove < 0 || bestMove > BOARD_WIDTH) {
+            throw new IllegalArgumentException("Illegal bestMove argument");
+        }
+        return new ShuffledAllNextMovesIterator(board, constructOrder(bestMove));
+    }
+
+    public static int[] constructOrder(int bestMove) {
+        int[] order = new int[BOARD_WIDTH];
+        order[0] = bestMove;
+        int index = 1;
+        for (int i = 0; i < BOARD_WIDTH; i++) {
+            if (DEFAULT_ORDER[i] != bestMove) {
+                order[index] = DEFAULT_ORDER[i];
+                index++;
+            }
+        }
+        return order;
     }
 
     /**
@@ -64,16 +93,18 @@ public final class MinimaxHelper {
      */
     private static class ShuffledAllNextMovesIterator implements Iterator<Pair<Integer, Board>> {
         private final Board board;
+        private final int[] order;
         private int position;
 
-        public ShuffledAllNextMovesIterator(Board board) {
+        public ShuffledAllNextMovesIterator(Board board, int[] order) {
             this.board = board;
+            this.order = order;
             this.position = 0;
         }
 
         @Override
         public boolean hasNext() {
-            while (position < BOARD_WIDTH && board.getHeightOfColumn(ORDER[position]) == -1) {
+            while (position < BOARD_WIDTH && board.getHeightOfColumn(order[position]) == -1) {
                 position++;
             }
             return position != BOARD_WIDTH;
@@ -81,7 +112,7 @@ public final class MinimaxHelper {
 
         @Override
         public Pair<Integer, Board> next() {
-            Pair<Integer, Board> nextMove = Pair.of(ORDER[position], board.makeMove(ORDER[position]));
+            Pair<Integer, Board> nextMove = Pair.of(order[position], board.makeMove(order[position]));
             position++;
             return nextMove;
         }

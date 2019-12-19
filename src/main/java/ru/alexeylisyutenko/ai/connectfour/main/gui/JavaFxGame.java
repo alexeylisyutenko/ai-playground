@@ -46,7 +46,7 @@ public class JavaFxGame extends Application {
     private GameRunner createGameRunner() {
 //        Player player1 = new GuiPlayer(boardControl);
         Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new FocusedEvaluationFunction()), 7);
-        Player player2 = new MinimaxBasedPlayer(new TranspositionTableAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), 15);
+        Player player2 = new MinimaxBasedPlayer(new TranspositionTableAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), 14);
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
     }
 

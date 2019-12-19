@@ -1,5 +1,6 @@
 package ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
@@ -7,17 +8,15 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.NEGATIVE_INFINITY;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.POSITIVE_INFINITY;
 
 public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction {
 
-    private final Map<Board, Pair<Integer, Integer>> transpositionTable = new HashMap<>();
+    private final Map<Board, TranspositionTableEntry> transpositionTable = new HashMap<>();
 
     @Override
     public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {
@@ -45,55 +44,110 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
             return evaluationFunction.evaluate(board);
         }
 
-
         int originalAlpha = alpha;
 
-        Pair<Integer, Integer> transpositionTableRecord = transpositionTable.get(board);
-        if (transpositionTableRecord != null) {
-            int value = transpositionTableRecord.getLeft();
-            int tableDepth = transpositionTableRecord.getRight();
-
-            // We know value of this node already. What to do with it?
-//            System.out.println(String.format("We already know a score for a node! Score: '%d' at depth '%d'. Current node's depth: '%d'", value, tableDepth, depth));
-
-            if (tableDepth >= depth) {
-                return value;
+        TranspositionTableEntry transpositionTableEntry = transpositionTable.get(board);
+        if (transpositionTableEntry != null && transpositionTableEntry.getDepth() >= depth) {
+            switch (transpositionTableEntry.getType()) {
+                case EXACT_VALUE:
+                    return transpositionTableEntry.getValue();
+                case UPPER_BOUND:
+                    beta = Math.min(beta, transpositionTableEntry.getValue());
+                    break;
+                case LOWER_BOUND:
+                    alpha = Math.max(alpha, transpositionTableEntry.getValue());
+                    break;
             }
         }
 
+        Iterator<Pair<Integer, Board>> nextMovesIterator;
+//        if (transpositionTableEntry != null && transpositionTableEntry.getBestMove().isPresent()) {
+//            nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board, transpositionTableEntry.getBestMove().get());
+//        } else {
+//            nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
+//        }
 
-        int currentNodeScore = NEGATIVE_INFINITY;
+        nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
 
-        Iterator<Pair<Integer, Board>> nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
+        int bestMove = 0;
+        int value = NEGATIVE_INFINITY;
         while (nextMovesIterator.hasNext()) {
             Pair<Integer, Board> nextMove = nextMovesIterator.next();
 
             int score = -1 * findAlphaBetaBoardValue(nextMove.getRight(), depth - 1, -beta, -alpha, evaluationFunction);
-//            if (score >= beta) {
-//                return score;  // prune the exploration if we find a possible move better than what we were looking for.
-//            }
-//            if (score > alpha) {
-//                alpha = score;
-//            }
-            if (score > currentNodeScore) {
-                currentNodeScore = score;
+            if (score > value) {
+                value = score;
+                bestMove = nextMove.getLeft();
             }
-            if (score >= beta) {
-                return currentNodeScore;
-            }
-            if (score > alpha) {
-                alpha = score;
+
+            alpha = Math.max(alpha, value);
+            if (alpha >= beta) {
+                break;
             }
         }
 
-        if (currentNodeScore >= originalAlpha) {
-            // currentNodeScore is exact value of the node here. Think why!
-            transpositionTable.put(board, Pair.of(alpha, depth));
+        // Save entry in the transposition table.
+        TranspositionTableEntry entry;
+        if (value <= originalAlpha) {
+            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.UPPER_BOUND, value, null);
+        } else if (value >= beta) {
+            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.LOWER_BOUND, value, null);
+        } else {
+            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.EXACT_VALUE, value, bestMove);
         }
+        transpositionTable.put(board, entry);
+
+        // Add records wisely.
+//        transpositionTable.merge(board, entry, (entry1, entry2) -> entry1.getDepth() > entry2.getDepth() ? entry1 : entry2);
+
+        /*
+    ttEntry.value := value
+    if value ≤ alphaOrig then
+        ttEntry.flag := UPPERBOUND
+    else if value ≥ β then
+        ttEntry.flag := LOWERBOUND
+    else
+        ttEntry.flag := EXACT
+
+     // Think about why it's the case!
+         */
 
         return alpha;
     }
 
+    private enum TranspositionTableEntryType {
+        EXACT_VALUE, UPPER_BOUND, LOWER_BOUND;
+    }
+
+    private static class TranspositionTableEntry {
+        private final int depth;
+        private final TranspositionTableEntryType type;
+        private final int value;
+        private final Integer bestMove;
+
+        public TranspositionTableEntry(int depth, TranspositionTableEntryType type, int value, Integer bestMove) {
+            this.depth = depth;
+            this.type = type;
+            this.value = value;
+            this.bestMove = bestMove;
+        }
+
+        public int getDepth() {
+            return depth;
+        }
+
+        public TranspositionTableEntryType getType() {
+            return type;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public Optional<Integer> getBestMove() {
+            return Optional.ofNullable(bestMove);
+        }
+    }
 }
 
 //    /**
