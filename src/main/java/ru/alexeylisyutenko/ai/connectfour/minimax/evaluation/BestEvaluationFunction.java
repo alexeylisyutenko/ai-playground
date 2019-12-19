@@ -19,7 +19,11 @@ public class BestEvaluationFunction implements EvaluationFunction {
     public int evaluate(Board board) {
         int score;
         if (board.isGameOver()) {
-            score = -1000000 + board.getNumberOfTokensOnBoard();
+            if (board.isTie()) {
+                score = 0;
+            } else {
+                score = -1000000 + board.getNumberOfTokensOnBoard();
+            }
         } else {
             score = 0;
             score += getHorizontalLinesScore(board);

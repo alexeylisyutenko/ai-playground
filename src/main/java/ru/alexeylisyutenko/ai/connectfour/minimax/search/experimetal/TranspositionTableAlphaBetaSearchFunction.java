@@ -45,16 +45,8 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
             return evaluationFunction.evaluate(board);
         }
 
-        // Upper bound of our score.
-//        int max = transpositionTable.getOrDefault(board, POSITIVE_INFINITY);
-//
-//
-//        if (beta > max) {
-//            beta = max;                     // there is no need to keep beta above our max possible score.
-//            if (alpha >= beta) {
-//                return beta;  // prune the exploration if the [alpha;beta] window is empty.
-//            }
-//        }
+
+        int originalAlpha = alpha;
 
         Pair<Integer, Integer> transpositionTableRecord = transpositionTable.get(board);
         if (transpositionTableRecord != null) {
@@ -62,39 +54,42 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
             int tableDepth = transpositionTableRecord.getRight();
 
             // We know value of this node already. What to do with it?
-            System.out.println(String.format("We already know a score for a node! Score: '%d' at depth '%d'. Current node's depth: '%d'", value, tableDepth, depth));
+//            System.out.println(String.format("We already know a score for a node! Score: '%d' at depth '%d'. Current node's depth: '%d'", value, tableDepth, depth));
 
-            // Can we just return it? I don't think so! Because this saved value depends on beta's value when it was calculated.
-//            if (depth == tableDepth) {
-//                 But we return not an actual score here, but a value which can be bigger than current alpha.
-//                return value;
-//            }
-
-            // How can we use it?
-
-            // Can we prune?
-            if (beta > value) {
-                // ???
+            if (tableDepth >= depth) {
+                return value;
             }
         }
+
+
+        int currentNodeScore = NEGATIVE_INFINITY;
 
         Iterator<Pair<Integer, Board>> nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
         while (nextMovesIterator.hasNext()) {
             Pair<Integer, Board> nextMove = nextMovesIterator.next();
 
             int score = -1 * findAlphaBetaBoardValue(nextMove.getRight(), depth - 1, -beta, -alpha, evaluationFunction);
+//            if (score >= beta) {
+//                return score;  // prune the exploration if we find a possible move better than what we were looking for.
+//            }
+//            if (score > alpha) {
+//                alpha = score;
+//            }
+            if (score > currentNodeScore) {
+                currentNodeScore = score;
+            }
             if (score >= beta) {
-                return score;  // prune the exploration if we find a possible move better than what we were looking for.
+                return currentNodeScore;
             }
             if (score > alpha) {
                 alpha = score;
             }
         }
 
-        // We safe this value only if we found an exact value within some depth.
-        // Alpha is not just a score of this node, the actual score <= alpha
-        // How can we use this information? Do we need to store depth here?
-        transpositionTable.put(board, Pair.of(alpha, depth));
+        if (currentNodeScore >= originalAlpha) {
+            // currentNodeScore is exact value of the node here. Think why!
+            transpositionTable.put(board, Pair.of(alpha, depth));
+        }
 
         return alpha;
     }
