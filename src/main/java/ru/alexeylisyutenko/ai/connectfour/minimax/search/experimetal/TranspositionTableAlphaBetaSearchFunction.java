@@ -1,5 +1,6 @@
 package ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal;
 
+import lombok.Value;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
@@ -60,16 +61,8 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
             }
         }
 
-        Iterator<Pair<Integer, Board>> nextMovesIterator;
-//        if (transpositionTableEntry != null && transpositionTableEntry.getBestMove().isPresent()) {
-//            nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board, transpositionTableEntry.getBestMove().get());
-//        } else {
-//            nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
-//        }
+        Iterator<Pair<Integer, Board>> nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
 
-        nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
-
-        int bestMove = 0;
         int value = NEGATIVE_INFINITY;
         while (nextMovesIterator.hasNext()) {
             Pair<Integer, Board> nextMove = nextMovesIterator.next();
@@ -77,7 +70,6 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
             int score = -1 * findAlphaBetaBoardValue(nextMove.getRight(), depth - 1, -beta, -alpha, evaluationFunction);
             if (score > value) {
                 value = score;
-                bestMove = nextMove.getLeft();
             }
 
             alpha = Math.max(alpha, value);
@@ -89,11 +81,11 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
         // Save entry in the transposition table.
         TranspositionTableEntry entry;
         if (value <= originalAlpha) {
-            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.UPPER_BOUND, value, null);
+            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.UPPER_BOUND, value);
         } else if (value >= beta) {
-            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.LOWER_BOUND, value, null);
+            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.LOWER_BOUND, value);
         } else {
-            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.EXACT_VALUE, value, bestMove);
+            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.EXACT_VALUE, value);
         }
         transpositionTable.put(board, entry);
 
@@ -119,34 +111,11 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
         EXACT_VALUE, UPPER_BOUND, LOWER_BOUND;
     }
 
+    @Value
     private static class TranspositionTableEntry {
         private final int depth;
         private final TranspositionTableEntryType type;
         private final int value;
-        private final Integer bestMove;
-
-        public TranspositionTableEntry(int depth, TranspositionTableEntryType type, int value, Integer bestMove) {
-            this.depth = depth;
-            this.type = type;
-            this.value = value;
-            this.bestMove = bestMove;
-        }
-
-        public int getDepth() {
-            return depth;
-        }
-
-        public TranspositionTableEntryType getType() {
-            return type;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public Optional<Integer> getBestMove() {
-            return Optional.ofNullable(bestMove);
-        }
     }
 }
 
