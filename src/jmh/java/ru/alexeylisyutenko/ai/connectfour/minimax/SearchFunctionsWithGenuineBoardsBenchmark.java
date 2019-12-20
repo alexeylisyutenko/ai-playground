@@ -19,7 +19,7 @@ import static ru.alexeylisyutenko.ai.connectfour.minimax.helper.Boards.getGenuin
 
 @State(Scope.Thread)
 public class SearchFunctionsWithGenuineBoardsBenchmark {
-    @Param({"6"})
+    @Param({"9"})
     int depth;
 
     List<Board> boards;
@@ -41,25 +41,14 @@ public class SearchFunctionsWithGenuineBoardsBenchmark {
         transpositionTableYBWCAlphaBetaSearchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction();
     }
 
-//    @Benchmark
-//    @BenchmarkMode(Mode.AverageTime)
-//    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-//    @Warmup(iterations = 3, time = 5)
-//    @Measurement(iterations = 3, time = 5)
-//    public void ybwcAlphaBetaSearchFunctionGame(Blackhole bh) {
-//        for (Board board : boards) {
-//            bh.consume(ybwcAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
-//        }
-//    }
-//
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Warmup(iterations = 3, time = 5)
     @Measurement(iterations = 3, time = 5)
-    public void experimentalYbwcAlphaBetaSearchFunctionGame(Blackhole bh) {
+    public void ybwcAlphaBetaSearchFunctionGame(Blackhole bh) {
         for (Board board : boards) {
-            bh.consume(experimentalYbwcAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
+            bh.consume(ybwcAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
         }
     }
 
@@ -68,9 +57,20 @@ public class SearchFunctionsWithGenuineBoardsBenchmark {
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Warmup(iterations = 3, time = 5)
     @Measurement(iterations = 3, time = 5)
-    public void transpositionTableAlphaBetaSearchFunctionGame(Blackhole bh) {
+    public void transpositionTableYBWCAlphaBetaSearchFunctionGame(Blackhole bh) {
         for (Board board : boards) {
-            bh.consume(transpositionTableAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
+            bh.consume(transpositionTableYBWCAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
+        }
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Warmup(iterations = 3, time = 5)
+    @Measurement(iterations = 3, time = 5)
+    public void experimentalYbwcAlphaBetaSearchFunctionGame(Blackhole bh) {
+        for (Board board : boards) {
+            bh.consume(experimentalYbwcAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
         }
     }
 
@@ -90,9 +90,9 @@ public class SearchFunctionsWithGenuineBoardsBenchmark {
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Warmup(iterations = 3, time = 5)
     @Measurement(iterations = 3, time = 5)
-    public void transpositionTableYBWCAlphaBetaSearchFunctionGame(Blackhole bh) {
+    public void transpositionTableAlphaBetaSearchFunctionGame(Blackhole bh) {
         for (Board board : boards) {
-            bh.consume(transpositionTableYBWCAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
+            bh.consume(transpositionTableAlphaBetaSearchFunction.search(board, depth, evaluationFunction));
         }
     }
 

@@ -14,23 +14,19 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.NEGATIVE_INFINITY;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.POSITIVE_INFINITY;
 
-// TODO: Refactor the code.
-
 public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunction {
 
     private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
 
     private final ConcurrentMap<Board, TranspositionTableEntry> transpositionTable = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Board, BestMoveTableEntry> bestMovesTable = new ConcurrentHashMap<>();
 
     @Override
     public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {
@@ -39,12 +35,13 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
         }
 
         // Generate all possible next moves.
-        List<Pair<Integer, Board>> nextMoves = MinimaxHelper.getAllNextMoves(board);
+        List<Pair<Integer, Board>> nextMoves = new ArrayList<>(BOARD_WIDTH);
+        getNextMovesOrdered(board, evaluationFunction).forEachRemaining(nextMoves::add);
 
         // We need to invoke only the first move.
         Pair<Integer, Board> youngBrotherMove = nextMoves.get(0);
-        BoardValueSearchRecursiveTask youngBrotherRecursiveTask = new BoardValueSearchRecursiveTask(
-                youngBrotherMove.getRight(), depth -1, -POSITIVE_INFINITY, -NEGATIVE_INFINITY, evaluationFunction, transpositionTable);
+        BoardValueSearchRecursiveTask youngBrotherRecursiveTask =
+                createTask(youngBrotherMove.getRight(), depth - 1, -POSITIVE_INFINITY, -NEGATIVE_INFINITY, evaluationFunction);
 
         // Receive a score for the youngest brother and since it's the first score we get save it as the best score.
         int bestScore = -1 * forkJoinPool.invoke(youngBrotherRecursiveTask);
@@ -54,10 +51,9 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
         ArrayList<BoardValueSearchRecursiveTask> recursiveTasks = new ArrayList<>(BOARD_WIDTH);
         for (int i = 1; i < nextMoves.size(); i++) {
             Pair<Integer, Board> nextMove = nextMoves.get(i);
-            BoardValueSearchRecursiveTask recursiveTask = new BoardValueSearchRecursiveTask(
-                    nextMove.getRight(), depth -1, -POSITIVE_INFINITY, -bestScore, evaluationFunction, transpositionTable);
-            forkJoinPool.submit(recursiveTask);
-            recursiveTasks.add(recursiveTask);
+            BoardValueSearchRecursiveTask task = createTask(nextMove.getRight(), depth - 1, -POSITIVE_INFINITY, -bestScore, evaluationFunction);
+            forkJoinPool.submit(task);
+            recursiveTasks.add(task);
         }
 
         // Prepare list of columns for each move apart from the first one.
@@ -75,18 +71,80 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
             }
         }
 
+        saveBestMovesTableEntry(board, depth, bestColumn);
         return new Move(bestColumn, bestScore);
     }
 
+    private void saveBestMovesTableEntry(Board board, int depth, int column) {
+        bestMovesTable.merge(board, new BestMoveTableEntry(depth, column),
+                (entry1, entry2) -> entry1.getDepth() > entry2.getDepth() ? entry1 : entry2);
+    }
+
+    private BoardValueSearchRecursiveTask createTask(Board board, int depth, int alpha, int beta, EvaluationFunction evaluationFunction) {
+        return new BoardValueSearchRecursiveTask(board, depth, alpha, beta, evaluationFunction);
+    }
+
+    private void saveTranspositionTableEntry(Board board, int depth, int value, int originalAlpha, int beta) {
+        TranspositionTableEntryType type;
+        if (value <= originalAlpha) {
+            type = TranspositionTableEntryType.UPPER_BOUND;
+        } else if (value >= beta) {
+            type = TranspositionTableEntryType.LOWER_BOUND;
+        } else {
+            type = TranspositionTableEntryType.EXACT_VALUE;
+        }
+        transpositionTable.merge(board, new TranspositionTableEntry(depth, type, value), (entry1, entry2) -> entry1.getDepth() > entry2.getDepth() ? entry1 : entry2);
+    }
+
+    private Iterator<Pair<Integer, Board>> getNextMovesOrdered(Board board, EvaluationFunction evaluationFunction) {
+        BestMoveTableEntry bestMoveTableEntry = bestMovesTable.get(board);
+        if (bestMoveTableEntry != null) {
+            return MinimaxHelper.getAllNextMovesIterator(board, bestMoveTableEntry.getColumn());
+        } else {
+            List<Pair<Integer, Board>> nextMoves = getNextMovesOrderedByEvaluationFunction(board, evaluationFunction);
+            saveBestMovesTableEntry(board, 1, nextMoves.get(0).getLeft());
+            return nextMoves.iterator();
+        }
+    }
+
+    private List<Pair<Integer, Board>> getNextMovesOrderedByEvaluationFunction(Board board, EvaluationFunction evaluationFunction) {
+        return MinimaxHelper.getAllNextMoves(board).stream()
+                .map(move -> new ImmutableTriple<>(move.getLeft(), move.getRight(), evaluationFunction.evaluate(move.getRight())))
+                .sorted(Comparator.comparing(ImmutableTriple::getRight))
+                .map(triple -> Pair.of(triple.getLeft(), triple.getMiddle()))
+                .collect(Collectors.toList());
+    }
+
+    private enum TranspositionTableEntryType {
+        EXACT_VALUE, UPPER_BOUND, LOWER_BOUND;
+    }
+
+    @Value
+    private static class TranspositionTableEntry {
+        private final int depth;
+        private final TranspositionTableEntryType type;
+        private final int value;
+    }
+
+    @Value
+    private static class BestMoveTableEntry {
+        private final int depth;
+        private final int column;
+    }
+
+    @Value
+    private static class TaskWithMove {
+        private final BoardValueSearchRecursiveTask task;
+        private final int move;
+    }
 
     @AllArgsConstructor
-    private static class BoardValueSearchRecursiveTask extends RecursiveTask<Integer> {
+    private class BoardValueSearchRecursiveTask extends RecursiveTask<Integer> {
         private final Board board;
         private final int depth;
-        private final int alpha;
-        private final int beta;
+        private final int originalAlpha;
+        private final int originalBeta;
         private final EvaluationFunction evaluationFunction;
-        private final ConcurrentMap<Board, TranspositionTableEntry> transpositionTable;
 
         @Override
         protected Integer compute() {
@@ -94,8 +152,8 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 return evaluationFunction.evaluate(board);
             }
 
-            int currentAlpha = alpha;
-            int currentBeta = beta;
+            int currentAlpha = originalAlpha;
+            int currentBeta = originalBeta;
 
             TranspositionTableEntry transpositionTableEntry = transpositionTable.get(board);
             if (transpositionTableEntry != null && transpositionTableEntry.getDepth() >= depth) {
@@ -109,90 +167,84 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                         currentAlpha = Math.max(currentAlpha, transpositionTableEntry.getValue());
                         break;
                 }
-
                 if (currentAlpha >= currentBeta) {
                     return transpositionTableEntry.getValue();
                 }
             }
 
             // Create an iterator for generating all possible next moves.
-            Iterator<Pair<Integer, Board>> nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
+            Iterator<Pair<Integer, Board>> nextMovesIterator = getNextMovesOrdered(board, evaluationFunction);
 
             // Get a score for a younger brother synchronously.
             int value = NEGATIVE_INFINITY;
+            int column = NEGATIVE_INFINITY;
             if (!nextMovesIterator.hasNext()) {
                 throw new IllegalStateException("There are no moves for this board");
             }
             Pair<Integer, Board> youngBrotherMove = nextMovesIterator.next();
-            BoardValueSearchRecursiveTask youngBrotherRecursiveTask = new BoardValueSearchRecursiveTask(
-                    youngBrotherMove.getRight(), depth -1, -currentBeta, -currentAlpha, evaluationFunction, transpositionTable);
-            int score = -1 * youngBrotherRecursiveTask.compute();
+            BoardValueSearchRecursiveTask youngBrotherTask = createTask(youngBrotherMove.getRight(), depth - 1, -currentBeta, -currentAlpha, evaluationFunction);
+            int score = -1 * youngBrotherTask.compute();
             if (score > value) {
                 value = score;
+                column = youngBrotherMove.getLeft();
             }
             currentAlpha = Math.max(currentAlpha, value);
             if (currentAlpha >= currentBeta) {
-                saveTranspositionTableEntry(board, depth, value, alpha, currentBeta);
+                saveTranspositionTableEntry(board, depth, value, originalAlpha, currentBeta);
                 return value;
             }
 
             // We can't prune, so we need to create recursive tasks for older brothers.
-            ArrayList<BoardValueSearchRecursiveTask> recursiveTasks = new ArrayList<>(BOARD_WIDTH);
+            ArrayList<TaskWithMove> tasksWithMoves = new ArrayList<>(BOARD_WIDTH);
             while (nextMovesIterator.hasNext()) {
                 Pair<Integer, Board> nextMove = nextMovesIterator.next();
-                BoardValueSearchRecursiveTask recursiveTask = new BoardValueSearchRecursiveTask(
-                        nextMove.getRight(), depth -1, -currentBeta, -currentAlpha, evaluationFunction, transpositionTable);
-                recursiveTask.fork();
-                recursiveTasks.add(recursiveTask);
+                BoardValueSearchRecursiveTask task = createTask(nextMove.getRight(), depth - 1, -currentBeta, -currentAlpha, evaluationFunction);
+                tasksWithMoves.add(new TaskWithMove(task, nextMove.getLeft()));
+                task.fork();
             }
 
             // Process the results of the older brothers and try to cancel forked tasks if we're in pruning situation.
-            boolean pruning = false;
-            for (BoardValueSearchRecursiveTask task : recursiveTasks) {
-                if (!pruning) {
+            boolean canceled = false;
+            int index = 0;
+            while (index < tasksWithMoves.size()) {
+                TaskWithMove taskWithMove = tasksWithMoves.get(index);
+                index++;
 
-                    // TODO: if here is an exception, all recursiveTasks must be canceled.
-                    score = -1 * task.join();
+                try {
+                    score = -1 * taskWithMove.getTask().join();
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                    canceled = true;
+                    break;
+                }
 
-                    if (score > value) {
-                        value = score;
-                    }
-                    currentAlpha = Math.max(currentAlpha, value);
-                    if (currentAlpha >= currentBeta) {
-                        pruning = true;
-                    }
-                } else {
-                    task.cancel(true);
+                if (score > value) {
+                    value = score;
+                    column = taskWithMove.getMove();
+                }
+                currentAlpha = Math.max(currentAlpha, value);
+                if (currentAlpha >= currentBeta) {
+                    break;
                 }
             }
 
-            saveTranspositionTableEntry(board, depth, value, alpha, currentBeta);
+            // Cancel tasks that are left after pruning or canceling.
+            while (index < tasksWithMoves.size()) {
+                TaskWithMove taskWithMove = tasksWithMoves.get(index);
+                taskWithMove.getTask().cancel(true);
+                index++;
+            }
+            if (canceled) {
+                System.out.println("!!!!canceled");
+                throw new CancellationException();
+            }
+
+            if (value > originalAlpha && value < currentBeta) {
+                saveBestMovesTableEntry(board, depth, column);
+            }
+            saveTranspositionTableEntry(board, depth, value, originalAlpha, currentBeta);
             return value;
         }
-
-        private void saveTranspositionTableEntry(Board board, int depth, int value, int originalAlpha, int beta) {
-            TranspositionTableEntry entry;
-            if (value <= originalAlpha) {
-                entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.UPPER_BOUND, value);
-            } else if (value >= beta) {
-                entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.LOWER_BOUND, value);
-            } else {
-                entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.EXACT_VALUE, value);
-            }
-            transpositionTable.put(board, entry);
-        }
-
-    }
-
-    private enum TranspositionTableEntryType {
-        EXACT_VALUE, UPPER_BOUND, LOWER_BOUND;
-    }
-
-    @Value
-    private static class TranspositionTableEntry {
-        private final int depth;
-        private final TranspositionTableEntryType type;
-        private final int value;
     }
 
 }

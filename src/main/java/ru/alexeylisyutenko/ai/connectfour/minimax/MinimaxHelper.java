@@ -3,7 +3,10 @@ package ru.alexeylisyutenko.ai.connectfour.minimax;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
@@ -13,10 +16,10 @@ import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
  * Helper methods used in minimax algorithms.
  */
 public final class MinimaxHelper {
+    private static final int[] DEFAULT_ORDER = {3, 4, 2, 5, 1, 6, 0};
+
     private MinimaxHelper() {
     }
-
-    private static final int[] DEFAULT_ORDER = {3, 4, 2, 5, 1, 6, 0};
 
     /**
      * Returns all possible moves that the current player could take from this position.
@@ -25,11 +28,29 @@ public final class MinimaxHelper {
      * @return list of all possible moves from this position
      */
     public static List<Pair<Integer, Board>> getAllNextMoves(Board board) {
+        return getAllNextMovesWithOrder(board, DEFAULT_ORDER);
+    }
+
+    /**
+     * Returns all possible moves that the current player could take from this position.
+     * <p>
+     * Column indicated by the bestMove argument is used as the first move returned by the method (if such move is possible).
+     * </p>
+     *
+     * @param board current position board
+     * @param bestMove best move
+     * @return list of all possible moves from this position
+     */
+    public static List<Pair<Integer, Board>> getAllNextMoves(Board board, int bestMove) {
+        return getAllNextMovesWithOrder(board, constructOrder(bestMove));
+    }
+
+    private static List<Pair<Integer, Board>> getAllNextMovesWithOrder(Board board, int[] order) {
         ArrayList<Pair<Integer, Board>> moves = new ArrayList<>();
         for (int position = 0; position < BOARD_WIDTH; position++) {
-            if (board.getHeightOfColumn(DEFAULT_ORDER[position]) != -1) {
-                Board boardAfterMove = board.makeMove(DEFAULT_ORDER[position]);
-                moves.add(Pair.of(DEFAULT_ORDER[position], boardAfterMove));
+            if (board.getHeightOfColumn(order[position]) != -1) {
+                Board boardAfterMove = board.makeMove(order[position]);
+                moves.add(Pair.of(order[position], boardAfterMove));
             }
         }
         return moves;
@@ -49,10 +70,10 @@ public final class MinimaxHelper {
     /**
      * Returns an iterator which iterates over all possible moves that the current player could take from this position.
      * <p>
-     *     Column indicated by the bestMove argument is used as the first move returned by the iterator (if such move is possibsle).
+     * Column indicated by the bestMove argument is used as the first move returned by the iterator (if such move is possible).
      * </p>
      *
-     * @param board current position board
+     * @param board    current position board
      * @param bestMove best move
      * @return all possible move iterator
      */

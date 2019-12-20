@@ -19,7 +19,7 @@ public class GenerateCodeForBoardsCreationDemo {
 
     @Test
     void generateGenuineGameBoardsCode() throws InterruptedException {
-        int games = 5;
+        int games = 1;
 
         List<Board> boards = new ArrayList<>();
         for (int i = 0; i < games; i++) {

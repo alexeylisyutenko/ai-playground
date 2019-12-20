@@ -2,6 +2,7 @@ package ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
@@ -57,8 +58,9 @@ class TranspositionTableYBWCAlphaBetaSearchFunctionTest {
         assertEquals(minimaxMove, alphaBetaMove);
     }
 
+    @Disabled
     @Test
-    @RepeatedTest(10)
+    @RepeatedTest(50)
     void genuine() {
         List<Board> boards = generateGenuineGameBoardSequence();
         for (Board board : boards) {

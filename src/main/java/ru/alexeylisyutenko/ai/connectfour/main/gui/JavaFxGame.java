@@ -11,18 +11,25 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.RandomUtils;
 import ru.alexeylisyutenko.ai.connectfour.game.*;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.boardcontrol.BoardControl;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.gamelistener.GuiGameEventListener;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.player.GuiPlayer;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.YBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.ExperimentalYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.player.*;
+
+import java.util.Random;
+
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
 public class JavaFxGame extends Application {
     private GameRunner gameRunner;
@@ -45,9 +52,12 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-//        Player player1 = new GuiPlayer(boardControl);
-        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new FocusedEvaluationFunction()), 7);
-        Player player2 = new MinimaxBasedPlayer(new TranspositionTableYBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), 15);
+        Player player1 = new GuiPlayer(boardControl);
+//        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new FocusedEvaluationFunction()), 5);
+
+        Player player2 = new MinimaxBasedPlayer(new TranspositionTableYBWCAlphaBetaSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), 13);
+
+
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
     }
 
