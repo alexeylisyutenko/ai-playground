@@ -59,6 +59,10 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
                     alpha = Math.max(alpha, transpositionTableEntry.getValue());
                     break;
             }
+
+            if (alpha >= beta) {
+                return transpositionTableEntry.getValue();
+            }
         }
 
         Iterator<Pair<Integer, Board>> nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
@@ -79,6 +83,24 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
         }
 
         // Save entry in the transposition table.
+        saveTranspositionTableEntry(board, depth, value, originalAlpha, beta);
+
+        /*
+            ttEntry.value := value
+            if value ≤ alphaOrig then
+                ttEntry.flag := UPPERBOUND
+            else if value ≥ β then
+                ttEntry.flag := LOWERBOUND
+            else
+                ttEntry.flag := EXACT
+
+             // Think about why it's the case!
+         */
+
+        return value;
+    }
+
+    private void saveTranspositionTableEntry(Board board, int depth, int value, int originalAlpha, int beta) {
         TranspositionTableEntry entry;
         if (value <= originalAlpha) {
             entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.UPPER_BOUND, value);
@@ -88,23 +110,6 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
             entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.EXACT_VALUE, value);
         }
         transpositionTable.put(board, entry);
-
-        // Add records wisely.
-//        transpositionTable.merge(board, entry, (entry1, entry2) -> entry1.getDepth() > entry2.getDepth() ? entry1 : entry2);
-
-        /*
-    ttEntry.value := value
-    if value ≤ alphaOrig then
-        ttEntry.flag := UPPERBOUND
-    else if value ≥ β then
-        ttEntry.flag := LOWERBOUND
-    else
-        ttEntry.flag := EXACT
-
-     // Think about why it's the case!
-         */
-
-        return alpha;
     }
 
     private enum TranspositionTableEntryType {
