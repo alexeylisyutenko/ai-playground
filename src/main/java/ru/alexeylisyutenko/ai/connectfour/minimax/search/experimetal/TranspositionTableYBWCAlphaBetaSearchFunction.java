@@ -23,10 +23,24 @@ import static ru.alexeylisyutenko.ai.connectfour.util.Constants.POSITIVE_INFINIT
 
 public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunction {
 
-    private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
+    private final List<RecursiveTask<?>> topLevelTasks = new CopyOnWriteArrayList<>();
 
-    private final ConcurrentMap<Board, TranspositionTableEntry> transpositionTable = new ConcurrentHashMap<>();
-    private final ConcurrentMap<Board, BestMoveTableEntry> bestMovesTable = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Board, TranspositionTableEntry> transpositionTable;
+    private final ConcurrentMap<Board, BestMoveTableEntry> bestMovesTable;
+    private final ForkJoinPool forkJoinPool;
+
+
+    public TranspositionTableYBWCAlphaBetaSearchFunction() {
+        this.transpositionTable = new ConcurrentHashMap<>();
+        this.bestMovesTable = new ConcurrentHashMap<>();
+        this.forkJoinPool = new ForkJoinPool();
+    }
+
+    public TranspositionTableYBWCAlphaBetaSearchFunction(ConcurrentMap<Board, TranspositionTableEntry> transpositionTable, ConcurrentMap<Board, BestMoveTableEntry> bestMovesTable, ForkJoinPool forkJoinPool) {
+        this.transpositionTable = transpositionTable;
+        this.bestMovesTable = bestMovesTable;
+        this.forkJoinPool = forkJoinPool;
+    }
 
     @Override
     public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {
@@ -56,6 +70,9 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
             recursiveTasks.add(task);
         }
 
+        // Save top level tasks.
+        topLevelTasks.addAll(recursiveTasks);
+
         // Prepare list of columns for each move apart from the first one.
         List<Integer> moveColumns = nextMoves.stream()
                 .skip(1)
@@ -63,12 +80,16 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 .collect(Collectors.toList());
 
         // Receive scores for older brothers and find the best move.
-        for (int i = 0; i < recursiveTasks.size(); i++) {
-            int score = -1 * recursiveTasks.get(i).join();
-            if (score > bestScore) {
-                bestScore = score;
-                bestColumn = moveColumns.get(i);
+        try {
+            for (int i = 0; i < recursiveTasks.size(); i++) {
+                int score = -1 * recursiveTasks.get(i).join();
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestColumn = moveColumns.get(i);
+                }
             }
+        } finally {
+            topLevelTasks.removeAll(recursiveTasks);
         }
 
         saveBestMovesTableEntry(board, depth, bestColumn);
@@ -115,19 +136,27 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 .collect(Collectors.toList());
     }
 
+    public ForkJoinPool getForkJoinPool() {
+        return forkJoinPool;
+    }
+
+    public List<RecursiveTask<?>> getTopLevelTasks() {
+        return topLevelTasks;
+    }
+
     private enum TranspositionTableEntryType {
         EXACT_VALUE, UPPER_BOUND, LOWER_BOUND;
     }
 
     @Value
-    private static class TranspositionTableEntry {
+    public static class TranspositionTableEntry {
         private final int depth;
         private final TranspositionTableEntryType type;
         private final int value;
     }
 
     @Value
-    private static class BestMoveTableEntry {
+    public static class BestMoveTableEntry {
         private final int depth;
         private final int column;
     }
@@ -213,7 +242,6 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 try {
                     score = -1 * taskWithMove.getTask().join();
                 } catch (RuntimeException e) {
-                    e.printStackTrace();
                     canceled = true;
                     break;
                 }
@@ -235,7 +263,6 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 index++;
             }
             if (canceled) {
-                System.out.println("!!!!canceled");
                 throw new CancellationException();
             }
 

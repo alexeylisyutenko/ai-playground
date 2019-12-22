@@ -5,15 +5,12 @@ import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;
-import ru.alexeylisyutenko.ai.connectfour.game.DefaultGameRunner;
-import ru.alexeylisyutenko.ai.connectfour.game.GameRunner;
-import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
-import ru.alexeylisyutenko.ai.connectfour.player.MinimaxBasedPlayer;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MinimaxSearchFunction;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,11 +23,10 @@ public class SearchFunctionsGameRunnerBasedBenchmark {
     int games;
 
     EvaluationFunction evaluationFunction;
-    private EvaluationFunction randomizedEvaluationFunction;
-    private AlphaBetaSearchFunction alphaBetaSearchFunction;
-
     SearchFunction transpositionTableAlphaBetaSearchFunction;
     SearchFunction transpositionTableYBWCAlphaBetaSearchFunction;
+    private EvaluationFunction randomizedEvaluationFunction;
+    private MinimaxSearchFunction minimaxSearchFunction;
 
     @Setup
     public void setup() {
@@ -44,7 +40,7 @@ public class SearchFunctionsGameRunnerBasedBenchmark {
             }
             return score;
         };
-        alphaBetaSearchFunction = new AlphaBetaSearchFunction();
+        minimaxSearchFunction = new MinimaxSearchFunction();
 
         transpositionTableAlphaBetaSearchFunction = new TranspositionTableAlphaBetaSearchFunction();
         transpositionTableYBWCAlphaBetaSearchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction();
@@ -78,7 +74,7 @@ public class SearchFunctionsGameRunnerBasedBenchmark {
         while (!board.isGameOver()) {
             Move move;
             if (board.getCurrentPlayerId() == 1) {
-                move = alphaBetaSearchFunction.search(board, 3, randomizedEvaluationFunction);
+                move = minimaxSearchFunction.search(board, 3, randomizedEvaluationFunction);
             } else {
                 move = searchFunction.search(board, depth, evaluationFunction);
             }
