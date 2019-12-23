@@ -5,7 +5,6 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
 
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,6 +17,9 @@ public class DefaultStoppableSearch implements StoppableSearch {
 
     @Override
     public Optional<Move> search(Board board, int depth, EvaluationFunction evaluationFunction, int timeout) {
+        ForkJoinPool forkJoinPool = new ForkJoinPool();
+        TranspositionTableYBWCAlphaBetaSearchFunction searchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction(transpositionTable, bestMovesTable, forkJoinPool);
+
         AtomicReference<Move> foundMove = new AtomicReference<>();
 
         Thread searchThread = new Thread(() -> {
@@ -35,9 +37,21 @@ public class DefaultStoppableSearch implements StoppableSearch {
             Thread.currentThread().interrupt();
         }
 
-        for (RecursiveTask<?> task : searchFunction.getTopLevelTasks()) {
-            task.cancel(true);
+        forkJoinPool.shutdownNow();
+        try {
+            forkJoinPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+
+//        for (RecursiveTask<?> task : searchFunction.getTopLevelTasks()) {
+//            task.cancel(true);
+//        }
+//        try {
+//            searchThread.join();
+//        } catch (InterruptedException e) {
+//            Thread.currentThread().interrupt();
+//        }
 
         return Optional.ofNullable(foundMove.get());
     }

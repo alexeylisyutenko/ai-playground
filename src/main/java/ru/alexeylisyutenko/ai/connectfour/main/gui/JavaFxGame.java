@@ -53,7 +53,7 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-//        Player player1 = new GuiPlayer(boardControl);
+        Player player1 = new GuiPlayer(boardControl);
         EvaluationFunction randomizedEvaluationFunction = board -> {
             int score;
             if (board.isGameOver()) {
@@ -65,7 +65,7 @@ public class JavaFxGame extends Application {
         };
 
 //        Player player1 = new MinimaxBasedPlayer(new AlphaBetaSearchFunction(), randomizedEvaluationFunction, 9);
-        Player player1 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(1000), new CachingEvaluationFunction(new BestEvaluationFunction()), 13);
+//        Player player1 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(5000), new CachingEvaluationFunction(new BestEvaluationFunction()), 13);
         Player player2 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(1000), new CachingEvaluationFunction(new BestEvaluationFunction()), 13);
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
     }

@@ -37,7 +37,7 @@ public class IterativeDeepeningSearchFunction implements SearchFunction {
         while (System.currentTimeMillis() < endMillis && currentDepth <= depthLimit) {
             Optional<Move> moveOptional = stoppableSearch.search(board, currentDepth, evaluationFunction, (int) (endMillis - System.currentTimeMillis()));
             moveOptional.ifPresent(move -> bestMove = move);
-            System.out.println(String.format("ITERATIVE DEEPENING: Depth: %d, opt: %s", currentDepth, moveOptional));
+            System.out.println(String.format("ITERATIVE DEEPENING: Depth: %d, result: %s", currentDepth, moveOptional));
             currentDepth++;
         }
 

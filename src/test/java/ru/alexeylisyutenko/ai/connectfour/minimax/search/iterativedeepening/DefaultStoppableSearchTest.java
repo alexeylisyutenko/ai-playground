@@ -28,7 +28,7 @@ class DefaultStoppableSearchTest {
         LocalDateTime searchStarted = LocalDateTime.now();
         System.out.println("Search search started: " + searchStarted);
 
-        Optional<Move> moveOptional = defaultStoppableSearch.search(board, 15, new BestEvaluationFunction(), 5000);
+        Optional<Move> moveOptional = defaultStoppableSearch.search(board, 20, new BestEvaluationFunction(), 1000);
 
         LocalDateTime searchStopped = LocalDateTime.now();
         System.out.println("Search search stopped: " + searchStopped);

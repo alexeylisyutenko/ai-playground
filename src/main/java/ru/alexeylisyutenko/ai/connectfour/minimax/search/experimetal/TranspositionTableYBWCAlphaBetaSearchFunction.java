@@ -177,6 +177,10 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
 
         @Override
         protected Integer compute() {
+            if (getForkJoinPool().isTerminating()) {
+                throw new CancellationException();
+            }
+
             if (MinimaxHelper.isTerminal(depth, board)) {
                 return evaluationFunction.evaluate(board);
             }
@@ -229,8 +233,10 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 Pair<Integer, Board> nextMove = nextMovesIterator.next();
                 BoardValueSearchRecursiveTask task = createTask(nextMove.getRight(), depth - 1, -currentBeta, -currentAlpha, evaluationFunction);
                 tasksWithMoves.add(new TaskWithMove(task, nextMove.getLeft()));
-                task.fork();
             }
+
+            // Fork this new recursive tasks.
+            tasksWithMoves.stream().map(TaskWithMove::getTask).forEach(BoardValueSearchRecursiveTask::fork);
 
             // Process the results of the older brothers and try to cancel forked tasks if we're in pruning situation.
             boolean canceled = false;
