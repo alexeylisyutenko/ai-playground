@@ -6,12 +6,9 @@ import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVi
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CountingEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.stoppablesearch.DefaultStoppableSearch;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.constructRandomNonFinishedBoard;
 

@@ -5,10 +5,7 @@ import lombok.Value;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
-import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
-import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
-import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,66 +18,71 @@ import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.NEGATIVE_INFINITY;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.POSITIVE_INFINITY;
 
-public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunction {
+public class TranspositionTableYBWCAlphaBetaSearchFunction implements StoppableSearchFunction {
 
-    private final List<RecursiveTask<?>> topLevelTasks = new CopyOnWriteArrayList<>();
-
+    private final List<RecursiveTask<?>> topLevelTasks;
     private final ConcurrentMap<Board, TranspositionTableEntry> transpositionTable;
     private final ConcurrentMap<Board, BestMoveTableEntry> bestMovesTable;
     private final ForkJoinPool forkJoinPool;
 
+    // TODO: Fix?! Probably we need several such flags for each search???
+    private volatile boolean stopped;
 
     public TranspositionTableYBWCAlphaBetaSearchFunction() {
-        this.transpositionTable = new ConcurrentHashMap<>();
-        this.bestMovesTable = new ConcurrentHashMap<>();
-        this.forkJoinPool = new ForkJoinPool();
+        this(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), ForkJoinPool.commonPool());
     }
 
     public TranspositionTableYBWCAlphaBetaSearchFunction(ConcurrentMap<Board, TranspositionTableEntry> transpositionTable, ConcurrentMap<Board, BestMoveTableEntry> bestMovesTable, ForkJoinPool forkJoinPool) {
+        this.topLevelTasks = new CopyOnWriteArrayList<>();
         this.transpositionTable = transpositionTable;
         this.bestMovesTable = bestMovesTable;
         this.forkJoinPool = forkJoinPool;
+        this.stopped = true;
     }
 
     @Override
     public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {
-        if (MinimaxHelper.isTerminal(depth, board)) {
-            throw new IllegalStateException("Search function was called on a terminal node");
+        if (!stopped) {
+            throw new IllegalStateException("Search is already started");
         }
-
-        // Generate all possible next moves.
-        List<Pair<Integer, Board>> nextMoves = new ArrayList<>(BOARD_WIDTH);
-        getNextMovesOrdered(board, evaluationFunction).forEachRemaining(nextMoves::add);
-
-        // We need to invoke only the first move.
-        Pair<Integer, Board> youngBrotherMove = nextMoves.get(0);
-        BoardValueSearchRecursiveTask youngBrotherRecursiveTask =
-                createTask(youngBrotherMove.getRight(), depth - 1, -POSITIVE_INFINITY, -NEGATIVE_INFINITY, evaluationFunction);
-
-        // Receive a score for the youngest brother and since it's the first score we get save it as the best score.
-        int bestScore = -1 * forkJoinPool.invoke(youngBrotherRecursiveTask);
-        int bestColumn = youngBrotherMove.getLeft();
-
-        // Fire all the other tasks concurrently for older brothers.
-        ArrayList<BoardValueSearchRecursiveTask> recursiveTasks = new ArrayList<>(BOARD_WIDTH);
-        for (int i = 1; i < nextMoves.size(); i++) {
-            Pair<Integer, Board> nextMove = nextMoves.get(i);
-            BoardValueSearchRecursiveTask task = createTask(nextMove.getRight(), depth - 1, -POSITIVE_INFINITY, -bestScore, evaluationFunction);
-            forkJoinPool.submit(task);
-            recursiveTasks.add(task);
-        }
-
-        // Save top level tasks.
-        topLevelTasks.addAll(recursiveTasks);
-
-        // Prepare list of columns for each move apart from the first one.
-        List<Integer> moveColumns = nextMoves.stream()
-                .skip(1)
-                .map(Pair::getLeft)
-                .collect(Collectors.toList());
-
-        // Receive scores for older brothers and find the best move.
+        stopped = false;
         try {
+            if (MinimaxHelper.isTerminal(depth, board)) {
+                throw new IllegalStateException("Search function was called on a terminal node");
+            }
+
+            // Generate all possible next moves.
+            List<Pair<Integer, Board>> nextMoves = new ArrayList<>(BOARD_WIDTH);
+            getNextMovesOrdered(board, evaluationFunction).forEachRemaining(nextMoves::add);
+
+            // We need to invoke only the first move.
+            Pair<Integer, Board> youngBrotherMove = nextMoves.get(0);
+            BoardValueSearchRecursiveTask youngBrotherRecursiveTask =
+                    createTopLevelTask(youngBrotherMove.getRight(), depth - 1, -POSITIVE_INFINITY, -NEGATIVE_INFINITY, evaluationFunction);
+
+            // Receive a score for the youngest brother and since it's the first score we get save it as the best score.
+            int bestScore = -1 * forkJoinPool.invoke(youngBrotherRecursiveTask);
+            int bestColumn = youngBrotherMove.getLeft();
+
+            // Fire all the other tasks concurrently for older brothers.
+            ArrayList<BoardValueSearchRecursiveTask> recursiveTasks = new ArrayList<>(BOARD_WIDTH);
+            for (int i = 1; i < nextMoves.size(); i++) {
+                Pair<Integer, Board> nextMove = nextMoves.get(i);
+                BoardValueSearchRecursiveTask task = createTopLevelTask(nextMove.getRight(), depth - 1, -POSITIVE_INFINITY, -bestScore, evaluationFunction);
+                recursiveTasks.add(task);
+                forkJoinPool.submit(task);
+            }
+
+            // Save created top level tasks in the list.
+            topLevelTasks.addAll(recursiveTasks);
+
+            // Prepare list of columns for each move apart from the first one.
+            List<Integer> moveColumns = nextMoves.stream()
+                    .skip(1)
+                    .map(Pair::getLeft)
+                    .collect(Collectors.toList());
+
+            // Receive scores for older brothers and find the best move.
             for (int i = 0; i < recursiveTasks.size(); i++) {
                 int score = -1 * recursiveTasks.get(i).join();
                 if (score > bestScore) {
@@ -88,12 +90,14 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                     bestColumn = moveColumns.get(i);
                 }
             }
-        } finally {
-            topLevelTasks.removeAll(recursiveTasks);
-        }
 
-        saveBestMovesTableEntry(board, depth, bestColumn);
-        return new Move(bestColumn, bestScore);
+            saveBestMovesTableEntry(board, depth, bestColumn);
+            return new Move(bestColumn, bestScore);
+
+        } finally {
+            stopped = true;
+            topLevelTasks.removeAll(topLevelTasks);
+        }
     }
 
     private void saveBestMovesTableEntry(Board board, int depth, int column) {
@@ -101,7 +105,10 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 (entry1, entry2) -> entry1.getDepth() > entry2.getDepth() ? entry1 : entry2);
     }
 
-    private BoardValueSearchRecursiveTask createTask(Board board, int depth, int alpha, int beta, EvaluationFunction evaluationFunction) {
+    private BoardValueSearchRecursiveTask createTopLevelTask(Board board, int depth, int alpha, int beta, EvaluationFunction evaluationFunction) {
+        if (stopped) {
+            throw new IllegalStateException("Failed to create a top level task. Search stop requested.");
+        }
         return new BoardValueSearchRecursiveTask(board, depth, alpha, beta, evaluationFunction);
     }
 
@@ -136,12 +143,12 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 .collect(Collectors.toList());
     }
 
-    public ForkJoinPool getForkJoinPool() {
-        return forkJoinPool;
-    }
-
-    public List<RecursiveTask<?>> getTopLevelTasks() {
-        return topLevelTasks;
+    @Override
+    public void stop() {
+        stopped = true;
+        for (RecursiveTask<?> task : topLevelTasks) {
+            task.cancel(true);
+        }
     }
 
     private enum TranspositionTableEntryType {
@@ -169,16 +176,36 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
 
     @AllArgsConstructor
     private class BoardValueSearchRecursiveTask extends RecursiveTask<Integer> {
+        private final List<BoardValueSearchRecursiveTask> subtasks = new CopyOnWriteArrayList<>();
+
         private final Board board;
         private final int depth;
         private final int originalAlpha;
         private final int originalBeta;
         private final EvaluationFunction evaluationFunction;
 
+        private BoardValueSearchRecursiveTask createSubtask(Board board, int depth, int alpha, int beta, EvaluationFunction evaluationFunction) {
+            if (isCancelled() || isDone()) {
+                throw new IllegalStateException("Failed to create a subtask. Current task is cancelled or done.");
+            }
+            BoardValueSearchRecursiveTask subtask = new BoardValueSearchRecursiveTask(board, depth, alpha, beta, evaluationFunction);
+            subtasks.add(subtask);
+            return subtask;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            boolean cancel = super.cancel(mayInterruptIfRunning);
+            for (BoardValueSearchRecursiveTask subtask : subtasks) {
+                subtask.cancel(mayInterruptIfRunning);
+            }
+            return cancel;
+        }
+
         @Override
         protected Integer compute() {
-            if (getForkJoinPool().isTerminating()) {
-                throw new CancellationException();
+            if (stopped) {
+                throw new CancellationException("Stop requested");
             }
 
             if (MinimaxHelper.isTerminal(depth, board)) {
@@ -215,7 +242,7 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 throw new IllegalStateException("There are no moves for this board");
             }
             Pair<Integer, Board> youngBrotherMove = nextMovesIterator.next();
-            BoardValueSearchRecursiveTask youngBrotherTask = createTask(youngBrotherMove.getRight(), depth - 1, -currentBeta, -currentAlpha, evaluationFunction);
+            BoardValueSearchRecursiveTask youngBrotherTask = createSubtask(youngBrotherMove.getRight(), depth - 1, -currentBeta, -currentAlpha, evaluationFunction);
             int score = -1 * youngBrotherTask.compute();
             if (score > value) {
                 value = score;
@@ -231,7 +258,7 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
             ArrayList<TaskWithMove> tasksWithMoves = new ArrayList<>(BOARD_WIDTH);
             while (nextMovesIterator.hasNext()) {
                 Pair<Integer, Board> nextMove = nextMovesIterator.next();
-                BoardValueSearchRecursiveTask task = createTask(nextMove.getRight(), depth - 1, -currentBeta, -currentAlpha, evaluationFunction);
+                BoardValueSearchRecursiveTask task = createSubtask(nextMove.getRight(), depth - 1, -currentBeta, -currentAlpha, evaluationFunction);
                 tasksWithMoves.add(new TaskWithMove(task, nextMove.getLeft()));
             }
 
@@ -239,19 +266,12 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
             tasksWithMoves.stream().map(TaskWithMove::getTask).forEach(BoardValueSearchRecursiveTask::fork);
 
             // Process the results of the older brothers and try to cancel forked tasks if we're in pruning situation.
-            boolean canceled = false;
             int index = 0;
             while (index < tasksWithMoves.size()) {
                 TaskWithMove taskWithMove = tasksWithMoves.get(index);
                 index++;
 
-                try {
-                    score = -1 * taskWithMove.getTask().join();
-                } catch (RuntimeException e) {
-                    canceled = true;
-                    break;
-                }
-
+                score = -1 * taskWithMove.getTask().join();
                 if (score > value) {
                     value = score;
                     column = taskWithMove.getMove();
@@ -267,9 +287,6 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements SearchFunc
                 TaskWithMove taskWithMove = tasksWithMoves.get(index);
                 taskWithMove.getTask().cancel(true);
                 index++;
-            }
-            if (canceled) {
-                throw new CancellationException();
             }
 
             if (value > originalAlpha && value < currentBeta) {

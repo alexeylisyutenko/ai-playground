@@ -2,7 +2,10 @@ package ru.alexeylisyutenko.ai.connectfour.demo;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
@@ -36,12 +39,35 @@ public class ForkJoinPoolDemo {
     }
 
     private static class DemoRecursiveTask extends RecursiveTask<Void> {
+        private final List<DemoRecursiveTask> subtasks = new CopyOnWriteArrayList<>();
+
         private final int count;
         private final long sleepMillis;
 
         public DemoRecursiveTask(int count, long sleepMillis) {
             this.count = count;
             this.sleepMillis = sleepMillis;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            boolean cancel = super.cancel(mayInterruptIfRunning);
+            for (DemoRecursiveTask subtask : subtasks) {
+                subtask.cancel(mayInterruptIfRunning);
+            }
+
+            // Can someone add more tasks here?
+
+            return cancel;
+        }
+
+        private DemoRecursiveTask createSubtask(int count, long sleepMillis) {
+            if (isCancelled() || isDone()) {
+                throw new IllegalStateException("Failed to create a subtask. Current task is cancelled or done.");
+            }
+            DemoRecursiveTask subtask = new DemoRecursiveTask(count, sleepMillis);
+            subtasks.add(subtask);
+            return subtask;
         }
 
         @Override
@@ -62,7 +88,7 @@ public class ForkJoinPoolDemo {
                 return null;
             }
 
-            DemoRecursiveTask demoRecursiveTask = new DemoRecursiveTask(count - 1, sleepMillis);
+            DemoRecursiveTask demoRecursiveTask = createSubtask(count - 1, sleepMillis);
             System.out.println(String.format("DemoRecursiveTask %d: Forking new task...", count));
             demoRecursiveTask.fork();
 

@@ -5,7 +5,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.stoppablesearch.DefaultStoppableSearch;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.DefaultTimeoutBasedSearchFunction;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.constructRandomNonFinishedBoard;
 
-class DefaultStoppableSearchTest {
+class DefaultTimeoutBasedSearchFunctionTest {
     private final ConsoleBoardVisualizer consoleBoardVisualizer = new ConsoleBoardVisualizer();
 
     @Test
@@ -23,12 +23,12 @@ class DefaultStoppableSearchTest {
         System.out.println("Current player: " +board.getCurrentPlayerId());
         System.out.println();
 
-        DefaultStoppableSearch defaultStoppableSearch = new DefaultStoppableSearch();
+        DefaultTimeoutBasedSearchFunction defaultStoppableSearch = new DefaultTimeoutBasedSearchFunction();
 
         LocalDateTime searchStarted = LocalDateTime.now();
         System.out.println("Search search started: " + searchStarted);
 
-        Optional<Move> moveOptional = defaultStoppableSearch.search(board, 20, new BestEvaluationFunction(), 1000);
+        Optional<Move> moveOptional = defaultStoppableSearch.search(board, 15, new BestEvaluationFunction(), 3000);
 
         LocalDateTime searchStopped = LocalDateTime.now();
         System.out.println("Search search stopped: " + searchStopped);
