@@ -2,26 +2,33 @@ package ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening;
 
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
-import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
-import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
-import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.DefaultTimeoutBasedSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.TimeoutBasedSearchFunction;
 
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ForkJoinPool;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
 public class IterativeDeepeningSearchFunction implements SearchFunction {
+    private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
+
     private final int timeout;
     private final TimeoutBasedSearchFunction timeoutBasedSearchFunction;
     private Move bestMove;
 
     public IterativeDeepeningSearchFunction(int timeout) {
         this.timeout = timeout;
-        this.timeoutBasedSearchFunction = new DefaultTimeoutBasedSearchFunction();
+
+        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.TranspositionTableEntry> transpositionTable = new ConcurrentHashMap<>();
+        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.BestMoveTableEntry> bestMovesTable = new ConcurrentHashMap<>();
+        StoppableSearchFunction stoppableSearchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction(transpositionTable, bestMovesTable, forkJoinPool);
+        this.timeoutBasedSearchFunction = new DefaultTimeoutBasedSearchFunction(stoppableSearchFunction);
     }
 
     @Override

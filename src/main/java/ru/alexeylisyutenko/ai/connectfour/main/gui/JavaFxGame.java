@@ -53,25 +53,14 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-//        Player player1 = new GuiPlayer(boardControl);
-        EvaluationFunction randomizedEvaluationFunction = board -> {
-            int score;
-            if (board.isGameOver()) {
-                score = -1000 + board.getNumberOfTokensOnBoard();
-            } else {
-                score = RandomUtils.nextInt(0, 10) - 5;
-            }
-            return score;
-        };
-
-//        Player player1 = new MinimaxBasedPlayer(new AlphaBetaSearchFunction(), randomizedEvaluationFunction, 11);
-        Player player1 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(10000), new CachingEvaluationFunction(new BestEvaluationFunction()), 10);
-        Player player2 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(10000), new CachingEvaluationFunction(new BestEvaluationFunction()), 13);
+        Player player1 = new GuiPlayer(boardControl);
+//        Player player1 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(1000), new CachingEvaluationFunction(new BestEvaluationFunction()), 10);
+        Player player2 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(1000), new CachingEvaluationFunction(new BestEvaluationFunction()), 13);
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel));
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         gameRunner.shutdown();
     }
 

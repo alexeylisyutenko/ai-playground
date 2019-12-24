@@ -3,19 +3,17 @@ package ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.tim
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.StoppableSearchFunction;
 
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DefaultTimeoutBasedSearchFunction implements TimeoutBasedSearchFunction {
-    private final ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
-    private final ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.TranspositionTableEntry> transpositionTable = new ConcurrentHashMap<>();
-    private final ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.BestMoveTableEntry> bestMovesTable = new ConcurrentHashMap<>();
-    private final TranspositionTableYBWCAlphaBetaSearchFunction searchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction(transpositionTable, bestMovesTable, forkJoinPool);
+    private final StoppableSearchFunction stoppableSearchFunction;
+
+    public DefaultTimeoutBasedSearchFunction(StoppableSearchFunction stoppableSearchFunction) {
+        this.stoppableSearchFunction = stoppableSearchFunction;
+    }
 
     @Override
     public Optional<Move> search(Board board, int depth, EvaluationFunction evaluationFunction, int timeout) {
@@ -23,7 +21,7 @@ public class DefaultTimeoutBasedSearchFunction implements TimeoutBasedSearchFunc
 
         Thread searchThread = launchSearchThread(board, depth, evaluationFunction, foundMove);
         joinThread(timeout, searchThread);
-        searchFunction.stop();
+        stoppableSearchFunction.stop();
         joinThread(searchThread);
 
         return Optional.ofNullable(foundMove.get());
@@ -48,7 +46,7 @@ public class DefaultTimeoutBasedSearchFunction implements TimeoutBasedSearchFunc
     private Thread launchSearchThread(Board board, int depth, EvaluationFunction evaluationFunction, AtomicReference<Move> foundMove) {
         Thread searchThread = new Thread(() -> {
             try {
-                Move move = searchFunction.search(board, depth, evaluationFunction);
+                Move move = stoppableSearchFunction.search(board, depth, evaluationFunction);
                 foundMove.set(move);
             } catch (RuntimeException ignore) {
             }
