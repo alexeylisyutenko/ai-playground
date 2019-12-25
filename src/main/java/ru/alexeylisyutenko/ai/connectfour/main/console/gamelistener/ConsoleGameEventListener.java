@@ -40,7 +40,7 @@ public class ConsoleGameEventListener implements GameEventListener {
     }
 
     @Override
-    public void gameFinished(GameRunner gameRunner, GameResult gameResult) {
+    public void gameFinished(GameRunner gameRunner, GameResult gameResult, Board board) {
         System.out.println();
         if (gameResult.getType() == GameResult.Type.NORMAL_VICTORY || gameResult.getType() == GameResult.Type.TIMEOUT_VICTORY) {
             System.out.println(String.format("Win for player %d (%c)!", gameResult.getWinnerId(), BOARD_SYMBOL_MAPPING[gameResult.getWinnerId()]));

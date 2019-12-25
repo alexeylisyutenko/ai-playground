@@ -46,6 +46,7 @@ public interface GameEventListener {
      *
      * @param gameRunner a main runner which controls current main
      * @param gameResult a main result
+     * @param board a board at the end of a game
      */
-    void gameFinished(GameRunner gameRunner, GameResult gameResult);
+    void gameFinished(GameRunner gameRunner, GameResult gameResult, Board board);
 }

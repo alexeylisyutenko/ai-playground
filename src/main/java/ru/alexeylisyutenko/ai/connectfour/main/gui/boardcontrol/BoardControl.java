@@ -2,7 +2,6 @@ package ru.alexeylisyutenko.ai.connectfour.main.gui.boardcontrol;
 
 import javafx.animation.TranslateTransition;
 import javafx.event.Event;
-import javafx.event.EventTarget;
 import javafx.event.EventType;
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
@@ -11,6 +10,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.util.Duration;
@@ -33,11 +33,13 @@ public class BoardControl extends Region {
     private final Token[][] tokens;
     private final Pane tokenPane;
     private final List<Rectangle> columnRectangles;
+    private final Shape[][] crosses;
 
     public BoardControl() {
         tokens = new Token[BOARD_HEIGHT][BOARD_WIDTH];
         tokenPane = createTokenPane();
         columnRectangles = createColumnRectangles();
+        crosses = new Shape[BOARD_HEIGHT][BOARD_WIDTH];
 
         getChildren().add(tokenPane);
         getChildren().add(createGrid());
@@ -95,6 +97,46 @@ public class BoardControl extends Region {
     }
 
     /**
+     * Displays a cross mark in a particular position defined by row and column.
+     *
+     * @param row    row of a cross
+     * @param column column of a cross
+     */
+    public void displayCross(int row, int column) {
+        validateRowNumber(row);
+        validateColumnNumber(column);
+
+        if (crosses[row][column] != null) {
+            return;
+        }
+
+        double centerX = calculateTokenCenter(column);
+        double centerY = calculateTokenCenter(row);
+
+        Shape cross = createCrossShape(centerX, centerY);
+        tokenPane.getChildren().addAll(cross);
+        crosses[row][column] = cross;
+    }
+
+    private Shape createCrossShape(double centerX, double centerY) {
+        Line line1 = new Line();
+        line1.setStartX(centerX - 7.07);
+        line1.setStartY(centerY - 7.07);
+        line1.setEndX(centerX + 7.07);
+        line1.setEndY(centerY + 7.07);
+        line1.setStrokeWidth(2.0);
+
+        Line line2 = new Line();
+        line2.setStartX(centerX + 7.07);
+        line2.setStartY(centerY - 7.07);
+        line2.setEndX(centerX - 7.07);
+        line2.setEndY(centerY + 7.07);
+        line2.setStrokeWidth(2.0);
+
+        return Shape.union(line1, line2);
+    }
+
+    /**
      * Hide a token in a particular position.
      *
      * @param row    token row
@@ -111,12 +153,13 @@ public class BoardControl extends Region {
     }
 
     /**
-     * Hide all tokens on the board.
+     * Hide all tokens and all crosses on the board.
      */
     public void hideAll() {
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             for (int column = 0; column < BOARD_WIDTH; column++) {
                 tokens[row][column] = null;
+                crosses[row][column] = null;
             }
         }
         tokenPane.getChildren().clear();

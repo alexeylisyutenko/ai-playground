@@ -199,7 +199,7 @@ public class DefaultGameRunner implements GameRunner {
 
     private void invokeGameFinishedEvent(GameResult gameResult) {
         if (gameEventListener != null) {
-            gameEventListener.gameFinished(this, gameResult);
+            gameEventListener.gameFinished(this, gameResult, mutableState.getBoard());
         }
     }
 
