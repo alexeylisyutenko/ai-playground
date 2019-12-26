@@ -189,7 +189,15 @@ class DefaultGameRunnerTest {
         inOrder.verify(player2).gameFinished(eq(GameResult.normalVictory(1, 2)));
         inOrder.verify(gameEventListener).gameFinished(
                 same(gameRunner),
-                eq(GameResult.normalVictory(1, 2))
+                eq(GameResult.normalVictory(1, 2)),
+                eq(new DefaultBoard(constructBoardArray(new int[][]{
+                        {0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0},
+                        {1, 0, 0, 0, 0, 0, 0},
+                        {1, 0, 0, 0, 0, 0, 0},
+                        {1, 0, 0, 0, 0, 0, 0},
+                        {1, 2, 2, 2, 2, 0, 0}
+                }), 1))
         );
         assertEquals(STOPPED, gameRunner.getGameState());
         assertEquals(4, gameRunner.getBoardHistory().size());
@@ -305,7 +313,15 @@ class DefaultGameRunnerTest {
         inOrder.verify(player2).gameFinished(eq(GameResult.tie()));
         inOrder.verify(gameEventListener).gameFinished(
                 same(gameRunner),
-                eq(GameResult.tie())
+                eq(GameResult.tie()),
+                eq(new DefaultBoard(constructBoardArray(new int[][]{
+                        {1, 1, 2, 2, 2, 1, 2},
+                        {2, 2, 1, 1, 2, 1, 1},
+                        {1, 1, 1, 2, 1, 2, 1},
+                        {1, 1, 2, 2, 1, 1, 1},
+                        {2, 1, 2, 1, 2, 1, 2},
+                        {1, 2, 1, 2, 1, 2, 1}
+                }), 2))
         );
         assertEquals(STOPPED, gameRunner.getGameState());
 
@@ -375,7 +391,15 @@ class DefaultGameRunnerTest {
         inOrder.verify(player2).gameFinished(eq(GameResult.stoppedGame()));
         inOrder.verify(gameEventListener).gameFinished(
                 same(gameRunner),
-                eq(GameResult.stoppedGame())
+                eq(GameResult.stoppedGame()),
+                eq(new DefaultBoard(constructBoardArray(new int[][]{
+                        {0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0},
+                        {1, 0, 0, 0, 0, 0, 0},
+                        {1, 0, 2, 2, 0, 0, 0}
+                }), 1))
         );
         assertEquals(STOPPED, gameRunner.getGameState());
 

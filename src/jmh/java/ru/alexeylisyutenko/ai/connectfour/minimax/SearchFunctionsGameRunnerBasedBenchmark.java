@@ -16,10 +16,10 @@ import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
 public class SearchFunctionsGameRunnerBasedBenchmark {
-    @Param({"11"})
+    @Param({"9"})
     int depth;
 
-    @Param({"1"})
+    @Param({"4"})
     int games;
 
     EvaluationFunction evaluationFunction;

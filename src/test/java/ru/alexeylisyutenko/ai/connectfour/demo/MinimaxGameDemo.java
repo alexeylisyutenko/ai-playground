@@ -3,10 +3,7 @@ package ru.alexeylisyutenko.ai.connectfour.demo;
 import lombok.Value;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import ru.alexeylisyutenko.ai.connectfour.game.DefaultGameRunner;
-import ru.alexeylisyutenko.ai.connectfour.game.GameResult;
-import ru.alexeylisyutenko.ai.connectfour.game.GameRunner;
-import ru.alexeylisyutenko.ai.connectfour.game.Player;
+import ru.alexeylisyutenko.ai.connectfour.game.*;
 import ru.alexeylisyutenko.ai.connectfour.main.console.gamelistener.ConsoleGameEventListener;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.*;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
@@ -59,8 +56,8 @@ public class MinimaxGameDemo {
         private AtomicInteger games = new AtomicInteger();
 
         @Override
-        public void gameFinished(GameRunner gameRunner, GameResult gameResult) {
-            super.gameFinished(gameRunner, gameResult);
+        public void gameFinished(GameRunner gameRunner, GameResult gameResult, Board board) {
+            super.gameFinished(gameRunner, gameResult, board);
 
             games.incrementAndGet();
             if (gameResult.getType() == GameResult.Type.NORMAL_VICTORY) {
