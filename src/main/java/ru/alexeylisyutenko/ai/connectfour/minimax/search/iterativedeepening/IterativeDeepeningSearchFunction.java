@@ -6,6 +6,7 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.*;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.DefaultTimeoutBasedSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.TimeoutBasedSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.util.BlackholeConcurrentMap;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,11 +25,16 @@ public class IterativeDeepeningSearchFunction implements SearchFunction {
 
     public IterativeDeepeningSearchFunction(int timeout) {
         this.timeout = timeout;
+        this.timeoutBasedSearchFunction = createTimeBaseSearchFunction();
+    }
 
+    private TimeoutBasedSearchFunction createTimeBaseSearchFunction() {
+//        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.TranspositionTableEntry> transpositionTable = new BlackholeConcurrentMap<>();
+//        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.BestMoveTableEntry> bestMovesTable = new BlackholeConcurrentMap<>();
         ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.TranspositionTableEntry> transpositionTable = new ConcurrentHashMap<>();
         ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.BestMoveTableEntry> bestMovesTable = new ConcurrentHashMap<>();
         StoppableSearchFunction stoppableSearchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction(transpositionTable, bestMovesTable, forkJoinPool);
-        this.timeoutBasedSearchFunction = new DefaultTimeoutBasedSearchFunction(stoppableSearchFunction);
+        return new DefaultTimeoutBasedSearchFunction(stoppableSearchFunction);
     }
 
     @Override
