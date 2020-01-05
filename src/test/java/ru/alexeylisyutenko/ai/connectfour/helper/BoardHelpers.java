@@ -55,6 +55,32 @@ public final class BoardHelpers {
         }
     }
 
+    public static Board constructRandomFinishedBoard() {
+        Board board;
+        boolean success;
+        do {
+            board = new DefaultBoard();
+            while (!board.isGameOver()) {
+                board = findRandomMove(board);
+            }
+            success = !board.isTie();
+        } while (!success);
+        return board;
+    }
+
+    public static Board constructRandomTieBoard() {
+        Board board;
+        boolean success;
+        do {
+            board = new DefaultBoard();
+            while (!board.isGameOver()) {
+                board = findRandomMove(board);
+            }
+            success = board.isTie();
+        } while (!success);
+        return board;
+    }
+
     public static Board constructRandomNonFinishedBoard() {
         return constructRandomNonFinishedBoard(0, 30);
     }
@@ -79,6 +105,15 @@ public final class BoardHelpers {
         } while (!success);
 
         return board;
+    }
+
+    private static Board findRandomMove(Board board) {
+        List<Pair<Integer, Board>> allNextMoves = MinimaxHelper.getAllNextMoves(board);
+        if (allNextMoves.isEmpty()) {
+            throw new IllegalArgumentException("It's impossible to generate a move since there are no available moves for the board");
+        }
+        Collections.shuffle(allNextMoves);
+        return board.makeMove(allNextMoves.get(0).getLeft());
     }
 
     private static Optional<Board> findRandomNonFinishingMove(Board board) {

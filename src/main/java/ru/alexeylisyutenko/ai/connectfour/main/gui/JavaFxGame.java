@@ -16,6 +16,7 @@ import ru.alexeylisyutenko.ai.connectfour.main.gui.boardcontrol.BoardControl;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.gamelistener.GuiGameEventListener;
 import ru.alexeylisyutenko.ai.connectfour.main.gui.player.GuiPlayer;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.IterativeDeepeningSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.player.*;
 
@@ -34,10 +35,8 @@ public class JavaFxGame extends Application {
         primaryStage.setTitle("Connect Four Game");
         primaryStage.setScene(new Scene(createContent(), GameConstants.SCENE_WIDTH, GameConstants.SCENE_HEIGHT));
 
-        gameRunner = createGameRunner();
-
         startGameButton.setOnMouseClicked(event -> {
-//            gameRunner = createGameRunner();
+            gameRunner = createGameRunner();
             gameRunner.startGame();
         });
         stopGameButton.setOnMouseClicked(event -> gameRunner.stopGame());
@@ -45,11 +44,10 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-//        Player player1 = new GuiPlayer(boardControl);
-        Player player1 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(5000), new CachingEvaluationFunction(new BestEvaluationFunction()), 10);
-        Player player2 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(5000), new CachingEvaluationFunction(new BestEvaluationFunction()), 13);
-//        Player player1 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(5000), new BestEvaluationFunction(), 10);
-//        Player player2 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(5000), new BestEvaluationFunction(), 13);
+        Player player1 = new GuiPlayer(boardControl);
+//        Player player2 = new GuiPlayer(boardControl);
+//        Player player1 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(1000), new CachingEvaluationFunction(new InternalEvaluationFunction()), 17);
+        Player player2 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(1000), new CachingEvaluationFunction(new InternalEvaluationFunction()), 13);
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel, timeLabel, movesLabel));
     }
 

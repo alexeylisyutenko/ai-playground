@@ -111,4 +111,18 @@ public interface Board {
      * @return true if the main has come to a conclusion, otherwise false
      */
     boolean isGameOver();
+
+    /**
+     * Returns true if current board's implementation supports {@link Board#internalEvaluate()} function
+     *
+     * @return true - {@link Board#internalEvaluate()} is supported, false - otherwise
+     */
+    boolean isInternalEvaluationSupported();
+
+    /**
+     * Internal evaluation function which uses board's implementation details to calculate board scores.
+     *
+     * @return a score of board
+     */
+    int internalEvaluate();
 }

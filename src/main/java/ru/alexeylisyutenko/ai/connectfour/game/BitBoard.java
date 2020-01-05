@@ -1,23 +1,31 @@
 package ru.alexeylisyutenko.ai.connectfour.game;
 
+import lombok.EqualsAndHashCode;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 
-import java.util.List;
-import java.util.Set;
+import java.util.ArrayList;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 import static ru.alexeylisyutenko.ai.connectfour.util.BitBoardHelper.bitmapToString;
 
-public class BitBoard implements Board {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+public class BitBoard extends AbstractBoard {
+    /**
+     * 4-token slots masks used int the internal evaluate function.
+     */
+    private static final long[] SLOT_MASKS = calculateSlotMasks();
+
     /**
      * Bitmap of the current player's stones
      */
+    @EqualsAndHashCode.Include
     private final long position;
 
     /**
      * Bitmap of all the already played cells.
      */
+    @EqualsAndHashCode.Include
     private final long mask;
 
     /**
@@ -82,6 +90,83 @@ public class BitBoard implements Board {
         }
     }
 
+    private static long[] calculateSlotMasks() {
+        ArrayList<Long> slotMasks = new ArrayList<>();
+
+        // Horizontal chains.
+        for (int row = 0; row < BOARD_HEIGHT; row++) {
+            for (int column = 0; column < BOARD_WIDTH - 3; column++) {
+                long m = cellMask(row, column);
+                m |= cellMask(row, column + 1);
+                m |= cellMask(row, column + 2);
+                m |= cellMask(row, column + 3);
+                slotMasks.add(m);
+            }
+        }
+
+        // Vertical chains.
+        for (int column = 0; column < BOARD_WIDTH; column++) {
+            for (int row = 0; row < BOARD_HEIGHT - 3; row++) {
+                long m = cellMask(row, column);
+                m |= cellMask(row + 1, column);
+                m |= cellMask(row + 2, column);
+                m |= cellMask(row + 3, column);
+                slotMasks.add(m);
+            }
+        }
+
+        // Diagonals from top-left corner to bottom-right corner.
+        for (int row = 0; row < BOARD_HEIGHT - 3; row++) {
+            for (int column = 0; column < BOARD_WIDTH - 3; column++) {
+                long m = cellMask(row, column);
+                m |= cellMask(row + 1, column + 1);
+                m |= cellMask(row + 2, column + 2);
+                m |= cellMask(row + 3, column + 3);
+                slotMasks.add(m);
+            }
+        }
+
+        // Diagonals from bottom-left corner to top-right corner.
+        for (int row = BOARD_HEIGHT - 3; row < BOARD_HEIGHT; row++) {
+            for (int column = 0; column < BOARD_WIDTH - 3; column++) {
+                long m = cellMask(row, column);
+                m |= cellMask(row - 1, column + 1);
+                m |= cellMask(row - 2, column + 2);
+                m |= cellMask(row - 3, column + 3);
+                slotMasks.add(m);
+            }
+        }
+
+        return slotMasks.stream().mapToLong(value -> value).toArray();
+    }
+
+    private static long bottomMask(int column) {
+        return 1L << column * (BOARD_HEIGHT + 1);
+    }
+
+    private static long topMask(int column) {
+        return 1L << (BOARD_HEIGHT - 1) << column * (BOARD_HEIGHT + 1);
+    }
+
+    private static long cellMask(int row, int column) {
+        return 1L << (BOARD_HEIGHT - 1 - row) << column * (BOARD_HEIGHT + 1);
+    }
+
+    private static long columnMask(int column) {
+        return ((1L << BOARD_HEIGHT) - 1) << column * (BOARD_HEIGHT + 1);
+    }
+
+    private static long msb64(long n) {
+        n |= n >> 1;
+        n |= n >> 2;
+        n |= n >> 4;
+        n |= n >> 8;
+        n |= n >> 16;
+        n |= n >> 32;
+        n = n + 1;
+        return (n >> 1);
+    }
+
     @Override
     public int getCurrentPlayerId() {
         return currentPlayerId;
@@ -116,7 +201,7 @@ public class BitBoard implements Board {
         if (m == 0) {
             return 0;
         }
-        if ((position & msb(m)) != 0) {
+        if ((position & msb64(m)) != 0) {
             return getCurrentPlayerId();
         } else {
             return getOtherPlayerId();
@@ -125,7 +210,28 @@ public class BitBoard implements Board {
 
     @Override
     public int getHeightOfColumn(int column) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        validateColumnNumber(column);
+
+        long m = (mask & columnMask(column)) >> column * (BOARD_HEIGHT + 1);
+        long msb = (m + 1) >> 1;
+        switch ((int) msb) {
+            case 0:
+                return 6;
+            case 1:
+                return 4;
+            case 2:
+                return 3;
+            case 4:
+                return 2;
+            case 8:
+                return 1;
+            case 16:
+                return 0;
+            case 32:
+                return -1;
+            default:
+                throw new IllegalStateException();
+        }
     }
 
     @Override
@@ -137,16 +243,6 @@ public class BitBoard implements Board {
             throw new InvalidMoveException(column, this);
         }
         return new BitBoard(position ^ mask, mask | (mask + bottomMask(column)), getOtherPlayerId(), moves + 1);
-    }
-
-    @Override
-    public int getLongestChain(int playerId) {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    @Override
-    public Set<List<Cell>> getChainCells(int playerId) {
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
@@ -175,6 +271,33 @@ public class BitBoard implements Board {
         return getWinnerId() != 0 || isTie();
     }
 
+    @Override
+    public boolean isInternalEvaluationSupported() {
+        return true;
+    }
+
+    @Override
+    public int internalEvaluate() {
+        int score;
+        if (winFoundInPosition(position ^ mask)) {
+            score = -1000000 + getNumberOfTokensOnBoard();
+        } else if (isTie()) {
+            score = 0;
+        } else {
+            score = 0;
+            for (long slotMask : SLOT_MASKS) {
+                int currentPlayerTokens = Long.bitCount(position & slotMask);
+                int otherPlayerTokens = Long.bitCount((position ^ mask) & slotMask);
+                if (currentPlayerTokens != 0 && otherPlayerTokens == 0) {
+                    score += currentPlayerTokens * currentPlayerTokens;
+                } else if (currentPlayerTokens == 0 && otherPlayerTokens != 0) {
+                    score -= otherPlayerTokens * otherPlayerTokens;
+                }
+            }
+        }
+        return score;
+    }
+
     private boolean winFoundInPosition(long position) {
         // horizontal
         long m = position & (position >> (BOARD_HEIGHT + 1));
@@ -201,45 +324,6 @@ public class BitBoard implements Board {
         }
 
         return false;
-    }
-
-    private long bottomMask(int column) {
-        return 1L << column * (BOARD_HEIGHT + 1);
-    }
-
-    private long topMask(int column) {
-        return 1L << (BOARD_HEIGHT - 1) << column * (BOARD_HEIGHT + 1);
-    }
-
-    private long cellMask(int row, int column) {
-        return 1L << (BOARD_HEIGHT - 1 - row) << column * (BOARD_HEIGHT + 1);
-    }
-
-    private long columnMask(int column) {
-        return ((1L << BOARD_HEIGHT) - 1) << column * (BOARD_HEIGHT + 1);
-    }
-
-    private long msb(long n) {
-        n |= n >> 1;
-        n |= n >> 2;
-        n |= n >> 4;
-        n |= n >> 8;
-        n |= n >> 16;
-        n |= n >> 32;
-        n = n + 1;
-        return (n >> 1);
-    }
-
-    private void validateColumnNumber(int column) {
-        if (column < 0 || column >= BOARD_WIDTH) {
-            throw new IllegalArgumentException(String.format("Incorrect column number '%d', it must be between '%d' and '%d'", column, 0, BOARD_WIDTH - 1));
-        }
-    }
-
-    private void validateRowNumber(int row) {
-        if (row < 0 || row >= BOARD_HEIGHT) {
-            throw new IllegalArgumentException(String.format("Incorrect row number '%d', it must be between '%d' and '%d'", row, 0, BOARD_HEIGHT - 1));
-        }
     }
 
     public void printInternals() {

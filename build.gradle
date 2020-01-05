@@ -28,8 +28,8 @@ mainClassName = 'ru.alexeylisyutenko.ai.connectfour.main.gui.JavaFxGame'
 
 jmh {
     jvmArgs = ['-Djmh.separateClasspathJAR=true']
-    exclude = ['SearchFunctionsBenchmark', 'EvaluationFunctionsBenchmark', 'SearchFunctionsWithGenuineBoardsBenchmark']
-//    exclude = ['SearchFunctionsWithGenuineBoardsBenchmark', 'EvaluationFunctionsBenchmark']
+    exclude = ['SearchFunctionsBenchmark', 'EvaluationFunctionsBenchmark', 'SearchFunctionsWithGenuineBoardsBenchmark',
+               'SearchFunctionsGameRunnerBasedBenchmark', 'BoardImplementationsBenchmark']
 }
 
 dependencies {

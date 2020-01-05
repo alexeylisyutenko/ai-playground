@@ -19,8 +19,8 @@ public class MinimaxGameDemo {
         int games = 200;
         int depth = 6;
 
-        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new EvenBetterEvaluationFunction()), depth);
-        Player player2 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), depth);
+        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), depth);
+        Player player2 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new InternalEvaluationFunction()), depth);
 
         CompetitionResult competitionResult = runCompetition(player1, player2, games);
         System.out.println(competitionResult);

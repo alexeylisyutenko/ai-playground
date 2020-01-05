@@ -38,7 +38,7 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     public DefaultGameRunner(Player player1, Player player2, GameEventListener gameEventListener) {
-        this(player1, player2, DEFAULT_TIMEOUT, new DefaultBoard(), gameEventListener);
+        this(player1, player2, DEFAULT_TIMEOUT, new BitBoard(), gameEventListener);
     }
 
     @Override
