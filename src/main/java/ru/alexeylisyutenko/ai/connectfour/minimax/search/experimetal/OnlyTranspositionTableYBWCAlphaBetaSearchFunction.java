@@ -2,13 +2,14 @@ package ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal;
 
 import lombok.AllArgsConstructor;
 import lombok.Value;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
-import ru.alexeylisyutenko.ai.connectfour.minimax.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
+import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
+import ru.alexeylisyutenko.ai.connectfour.minimax.StoppableSearchFunction;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
@@ -18,22 +19,20 @@ import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.NEGATIVE_INFINITY;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.POSITIVE_INFINITY;
 
-public class TranspositionTableYBWCAlphaBetaSearchFunction implements StoppableSearchFunction {
+public class OnlyTranspositionTableYBWCAlphaBetaSearchFunction implements StoppableSearchFunction {
     private final List<RecursiveTask<?>> topLevelTasks;
     private final ConcurrentMap<Board, TranspositionTableEntry> transpositionTable;
-    private final ConcurrentMap<Board, BestMoveTableEntry> bestMovesTable;
     private final ForkJoinPool forkJoinPool;
 
     private volatile boolean stopped;
 
-    public TranspositionTableYBWCAlphaBetaSearchFunction() {
-        this(new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), ForkJoinPool.commonPool());
+    public OnlyTranspositionTableYBWCAlphaBetaSearchFunction() {
+        this(new ConcurrentHashMap<>(), ForkJoinPool.commonPool());
     }
 
-    public TranspositionTableYBWCAlphaBetaSearchFunction(ConcurrentMap<Board, TranspositionTableEntry> transpositionTable, ConcurrentMap<Board, BestMoveTableEntry> bestMovesTable, ForkJoinPool forkJoinPool) {
+    public OnlyTranspositionTableYBWCAlphaBetaSearchFunction(ConcurrentMap<Board, TranspositionTableEntry> transpositionTable, ForkJoinPool forkJoinPool) {
         this.topLevelTasks = new CopyOnWriteArrayList<>();
         this.transpositionTable = transpositionTable;
-        this.bestMovesTable = bestMovesTable;
         this.forkJoinPool = forkJoinPool;
         this.stopped = true;
     }
@@ -50,8 +49,7 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements StoppableS
             }
 
             // Generate all possible next moves.
-            List<Pair<Integer, Board>> nextMoves = new ArrayList<>(BOARD_WIDTH);
-            getNextMovesOrdered(board, evaluationFunction).forEachRemaining(nextMoves::add);
+            List<Pair<Integer, Board>> nextMoves = MinimaxHelper.getAllNextMoves(board);
 
             // We need to invoke only the first move.
             Pair<Integer, Board> youngBrotherMove = nextMoves.get(0);
@@ -89,18 +87,12 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements StoppableS
                 }
             }
 
-            saveBestMovesTableEntry(board, depth, bestColumn);
             return new Move(bestColumn, bestScore);
 
         } finally {
             stopped = true;
             topLevelTasks.removeAll(topLevelTasks);
         }
-    }
-
-    private void saveBestMovesTableEntry(Board board, int depth, int column) {
-        bestMovesTable.merge(board, new BestMoveTableEntry(depth, column),
-                (entry1, entry2) -> entry1.getDepth() > entry2.getDepth() ? entry1 : entry2);
     }
 
     private BoardValueSearchRecursiveTask createTopLevelTask(Board board, int depth, int alpha, int beta, EvaluationFunction evaluationFunction) {
@@ -120,25 +112,6 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements StoppableS
             type = TranspositionTableEntryType.EXACT_VALUE;
         }
         transpositionTable.merge(board, new TranspositionTableEntry(depth, type, value), (entry1, entry2) -> entry1.getDepth() > entry2.getDepth() ? entry1 : entry2);
-    }
-
-    private Iterator<Pair<Integer, Board>> getNextMovesOrdered(Board board, EvaluationFunction evaluationFunction) {
-        BestMoveTableEntry bestMoveTableEntry = bestMovesTable.get(board);
-        if (bestMoveTableEntry != null) {
-            return MinimaxHelper.getAllNextMovesIterator(board, bestMoveTableEntry.getColumn());
-        } else {
-            List<Pair<Integer, Board>> nextMoves = getNextMovesOrderedByEvaluationFunction(board, evaluationFunction);
-            saveBestMovesTableEntry(board, 1, nextMoves.get(0).getLeft());
-            return nextMoves.iterator();
-        }
-    }
-
-    private List<Pair<Integer, Board>> getNextMovesOrderedByEvaluationFunction(Board board, EvaluationFunction evaluationFunction) {
-        return MinimaxHelper.getAllNextMoves(board).stream()
-                .map(move -> new ImmutableTriple<>(move.getLeft(), move.getRight(), evaluationFunction.evaluate(move.getRight())))
-                .sorted(Comparator.comparing(ImmutableTriple::getRight))
-                .map(triple -> Pair.of(triple.getLeft(), triple.getMiddle()))
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -231,11 +204,10 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements StoppableS
             }
 
             // Create an iterator for generating all possible next moves.
-            Iterator<Pair<Integer, Board>> nextMovesIterator = getNextMovesOrdered(board, evaluationFunction);
+            Iterator<Pair<Integer, Board>> nextMovesIterator = MinimaxHelper.getAllNextMovesIterator(board);
 
             // Get a score for a younger brother synchronously.
             int value = NEGATIVE_INFINITY;
-            int column = NEGATIVE_INFINITY;
             if (!nextMovesIterator.hasNext()) {
                 throw new IllegalStateException("There are no moves for this board");
             }
@@ -244,7 +216,6 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements StoppableS
             int score = -1 * youngBrotherTask.compute();
             if (score > value) {
                 value = score;
-                column = youngBrotherMove.getLeft();
             }
             currentAlpha = Math.max(currentAlpha, value);
             if (currentAlpha >= currentBeta) {
@@ -272,7 +243,6 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements StoppableS
                 score = -1 * taskWithMove.getTask().join();
                 if (score > value) {
                     value = score;
-                    column = taskWithMove.getMove();
                 }
                 currentAlpha = Math.max(currentAlpha, value);
                 if (currentAlpha >= currentBeta) {
@@ -287,9 +257,6 @@ public class TranspositionTableYBWCAlphaBetaSearchFunction implements StoppableS
                 index++;
             }
 
-            if (value > originalAlpha && value < currentBeta) {
-                saveBestMovesTableEntry(board, depth, column);
-            }
             saveTranspositionTableEntry(board, depth, value, originalAlpha, currentBeta);
             return value;
         }

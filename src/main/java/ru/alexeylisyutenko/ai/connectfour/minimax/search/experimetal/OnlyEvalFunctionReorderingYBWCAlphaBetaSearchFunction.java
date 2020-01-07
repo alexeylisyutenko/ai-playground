@@ -21,7 +21,7 @@ import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.NEGATIVE_INFINITY;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.POSITIVE_INFINITY;
 
-public class ExperimentalYBWCAlphaBetaSearchFunction implements SearchFunction {
+public class OnlyEvalFunctionReorderingYBWCAlphaBetaSearchFunction implements SearchFunction {
 
     private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
 

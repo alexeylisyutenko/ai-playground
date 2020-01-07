@@ -85,18 +85,6 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
         // Save entry in the transposition table.
         saveTranspositionTableEntry(board, depth, value, originalAlpha, beta);
 
-        /*
-            ttEntry.value := value
-            if value ≤ alphaOrig then
-                ttEntry.flag := UPPERBOUND
-            else if value ≥ β then
-                ttEntry.flag := LOWERBOUND
-            else
-                ttEntry.flag := EXACT
-
-             // Think about why it's the case!
-         */
-
         return value;
     }
 

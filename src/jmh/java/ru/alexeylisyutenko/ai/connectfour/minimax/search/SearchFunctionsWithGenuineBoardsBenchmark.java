@@ -1,14 +1,15 @@
-package ru.alexeylisyutenko.ai.connectfour.minimax;
+package ru.alexeylisyutenko.ai.connectfour.minimax.search;
 
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.EvenBetterEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.YBWCAlphaBetaSearchFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.ExperimentalYBWCAlphaBetaSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.OnlyEvalFunctionReorderingYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
 
@@ -35,7 +36,7 @@ public class SearchFunctionsWithGenuineBoardsBenchmark {
         boards = getGenuineBoards();
         evaluationFunction = new CachingEvaluationFunction(new BestEvaluationFunction());
         ybwcAlphaBetaSearchFunction = new YBWCAlphaBetaSearchFunction();
-        experimentalYbwcAlphaBetaSearchFunction = new ExperimentalYBWCAlphaBetaSearchFunction();
+        experimentalYbwcAlphaBetaSearchFunction = new OnlyEvalFunctionReorderingYBWCAlphaBetaSearchFunction();
         transpositionTableAlphaBetaSearchFunction = new TranspositionTableAlphaBetaSearchFunction();
         alphaBetaSearchFunction = new AlphaBetaSearchFunction();
         transpositionTableYBWCAlphaBetaSearchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction();

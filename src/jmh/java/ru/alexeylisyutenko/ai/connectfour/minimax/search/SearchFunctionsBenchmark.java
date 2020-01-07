@@ -1,8 +1,10 @@
-package ru.alexeylisyutenko.ai.connectfour.minimax;
+package ru.alexeylisyutenko.ai.connectfour.minimax.search;
 
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BetterEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;

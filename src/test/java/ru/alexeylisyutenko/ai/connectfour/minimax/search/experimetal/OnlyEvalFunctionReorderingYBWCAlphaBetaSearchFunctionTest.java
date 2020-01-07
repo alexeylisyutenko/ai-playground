@@ -13,14 +13,14 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MinimaxSearchFunc
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ExperimentalYBWCAlphaBetaSearchFunctionTest {
+class OnlyEvalFunctionReorderingYBWCAlphaBetaSearchFunctionTest {
     @Test
     @RepeatedTest(1000)
     void experimentalYbwcAlphaBetaSearchFunctionMustProduceSameMovesAsMinimaxSearchFunction() {
         int depth = RandomUtils.nextInt(4, 6);
 
         MinimaxSearchFunction minimaxSearchFunction = new MinimaxSearchFunction();
-        ExperimentalYBWCAlphaBetaSearchFunction alphaBetaSearchFunction = new ExperimentalYBWCAlphaBetaSearchFunction();
+        OnlyEvalFunctionReorderingYBWCAlphaBetaSearchFunction alphaBetaSearchFunction = new OnlyEvalFunctionReorderingYBWCAlphaBetaSearchFunction();
 
         CountingEvaluationFunction minimaxEvaluationFunction = new CountingEvaluationFunction(new FocusedEvaluationFunction());
         CountingEvaluationFunction alphaBetaEvaluationFunction = new CountingEvaluationFunction(new FocusedEvaluationFunction());

@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour.minimax;
+package ru.alexeylisyutenko.ai.connectfour.minimax.board;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.openjdk.jmh.annotations.*;
@@ -6,6 +6,7 @@ import org.openjdk.jmh.infra.Blackhole;
 import ru.alexeylisyutenko.ai.connectfour.game.BitBoard;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;
+import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 import ru.alexeylisyutenko.ai.connectfour.minimax.helper.BoardArrays;
 
 import java.util.Collections;

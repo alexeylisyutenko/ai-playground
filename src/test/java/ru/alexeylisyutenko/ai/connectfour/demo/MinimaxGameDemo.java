@@ -11,19 +11,28 @@ import ru.alexeylisyutenko.ai.connectfour.player.MinimaxBasedPlayer;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction.DEFAULT_CACHE_SIZE;
+
 public class MinimaxGameDemo {
 
     @Test
     @Disabled
     void competitionDemo() throws InterruptedException {
-        int games = 200;
-        int depth = 6;
+        int games = 100;
+        int depth = 7;
 
-        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new BestEvaluationFunction()), depth);
-        Player player2 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new InternalEvaluationFunction()), depth);
+        CachingEvaluationFunction player1EvaluationFunction = new CachingEvaluationFunction(new BestEvaluationFunction(), DEFAULT_CACHE_SIZE, true);
+        CachingEvaluationFunction player2EvaluationFunction = new CachingEvaluationFunction(new InternalEvaluationFunction(), DEFAULT_CACHE_SIZE, true);
+
+        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), player1EvaluationFunction, depth);
+        Player player2 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), player2EvaluationFunction, depth);
 
         CompetitionResult competitionResult = runCompetition(player1, player2, games);
         System.out.println(competitionResult);
+        System.out.println();
+
+        System.out.println(player1EvaluationFunction.getCacheStats());
+        System.out.println(player2EvaluationFunction.getCacheStats());
     }
 
     private CompetitionResult runCompetition(Player player1, Player player2, int games) throws InterruptedException {
