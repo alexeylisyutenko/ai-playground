@@ -125,4 +125,11 @@ public interface Board {
      * @return a score of board
      */
     int internalEvaluate();
+
+    /**
+     * Returns a unique id for this board.
+     *
+     * @return a unique id for this board
+     */
+    long getId();
 }

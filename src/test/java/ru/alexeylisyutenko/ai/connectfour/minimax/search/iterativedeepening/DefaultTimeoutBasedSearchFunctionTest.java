@@ -8,6 +8,7 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.StoppableSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.DefaultTimeoutBasedSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -28,8 +29,8 @@ class DefaultTimeoutBasedSearchFunctionTest {
         System.out.println("Current player: " +board.getCurrentPlayerId());
         System.out.println();
 
-        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.TranspositionTableEntry> transpositionTable = new ConcurrentHashMap<>();
-        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.BestMoveTableEntry> bestMovesTable = new ConcurrentHashMap<>();
+        TranspositionTable transpositionTable = new ConcurrentHashMapTranspositionTable();
+        BestMoveTable bestMovesTable = new ConcurrentHashMapBestMoveTable();
         StoppableSearchFunction stoppableSearchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction(transpositionTable, bestMovesTable, ForkJoinPool.commonPool());
         DefaultTimeoutBasedSearchFunction defaultStoppableSearch = new DefaultTimeoutBasedSearchFunction(stoppableSearchFunction);
 

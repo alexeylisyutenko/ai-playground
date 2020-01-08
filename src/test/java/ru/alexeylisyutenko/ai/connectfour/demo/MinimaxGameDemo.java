@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import ru.alexeylisyutenko.ai.connectfour.game.*;
 import ru.alexeylisyutenko.ai.connectfour.main.console.gamelistener.ConsoleGameEventListener;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.player.MinimaxBasedPlayer;
 
@@ -18,18 +19,19 @@ public class MinimaxGameDemo {
     @Test
     @Disabled
     void competitionDemo() throws InterruptedException {
-        int games = 100;
-        int depth = 7;
+        int games = 1;
+        int depth = 15;
 
-        CachingEvaluationFunction player1EvaluationFunction = new CachingEvaluationFunction(new BestEvaluationFunction(), DEFAULT_CACHE_SIZE, true);
+        CachingEvaluationFunction player1EvaluationFunction = new CachingEvaluationFunction(new InternalEvaluationFunction(), DEFAULT_CACHE_SIZE, true);
         CachingEvaluationFunction player2EvaluationFunction = new CachingEvaluationFunction(new InternalEvaluationFunction(), DEFAULT_CACHE_SIZE, true);
 
-        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), player1EvaluationFunction, depth);
-        Player player2 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), player2EvaluationFunction, depth);
+        Player player1 = new MinimaxBasedPlayer(new TranspositionTableYBWCAlphaBetaSearchFunction(), player1EvaluationFunction, depth);
+        Player player2 = new MinimaxBasedPlayer(new TranspositionTableYBWCAlphaBetaSearchFunction(), player2EvaluationFunction, depth);
 
         CompetitionResult competitionResult = runCompetition(player1, player2, games);
         System.out.println(competitionResult);
         System.out.println();
+
 
         System.out.println(player1EvaluationFunction.getCacheStats());
         System.out.println(player2EvaluationFunction.getCacheStats());

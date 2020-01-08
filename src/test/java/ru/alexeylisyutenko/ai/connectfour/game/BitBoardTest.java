@@ -10,6 +10,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.assertBoardArrayEquals;
+import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.constructBoardArray;
+import static ru.alexeylisyutenko.ai.connectfour.util.BitBoardHelper.bitmapToString;
 
 class BitBoardTest {
 
@@ -382,6 +384,39 @@ class BitBoardTest {
                 {1, 2, 1, 2, 1, 2, 1}
         }, 1);
         assertTrue(board3.isGameOver());
+    }
+
+    @Test
+    void getIdMustWorkProperly() {
+        Board board1 = new BitBoard(new int[][]{
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 2, 0, 2},
+                {0, 0, 1, 0, 1, 2, 1},
+                {0, 0, 2, 0, 2, 1, 2},
+                {0, 1, 1, 1, 2, 2, 1}
+        }, 1);
+        assertEquals(92707949330817L, board1.getId());
+
+        Board board2 = new BitBoard(new int[][]{
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0}
+        }, 1);
+        assertEquals(4432676798593L, board2.getId());
+
+        Board board3 = new BitBoard(new int[][]{
+                {1, 1, 2, 2, 2, 1, 2},
+                {2, 2, 1, 1, 2, 1, 1},
+                {1, 1, 1, 2, 1, 2, 1},
+                {1, 1, 2, 2, 1, 1, 1},
+                {2, 1, 2, 1, 2, 1, 2},
+                {1, 2, 1, 2, 1, 2, 1}
+        }, 1);
+        assertEquals(413093617629037L, board3.getId());
     }
 
 }

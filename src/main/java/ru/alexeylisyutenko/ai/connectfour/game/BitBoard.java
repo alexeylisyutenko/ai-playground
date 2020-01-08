@@ -17,22 +17,24 @@ public class BitBoard extends AbstractBoard {
     private static final long[] SLOT_MASKS = calculateSlotMasks();
 
     /**
+     * A bottom mask which contains ones in all bottom positions.
+     */
+    private static final long ALL_COLUMNS_BOTTOM_MASK = calculateBottomMask();
+
+    /**
      * Bitmap of the current player's stones
      */
     @EqualsAndHashCode.Include
     private final long position;
-
     /**
      * Bitmap of all the already played cells.
      */
     @EqualsAndHashCode.Include
     private final long mask;
-
     /**
      * Current player's id.
      */
     private final int currentPlayerId;
-
     /**
      * Number of moves played since the beginning of the game.
      */
@@ -77,6 +79,14 @@ public class BitBoard extends AbstractBoard {
         this.mask = mask;
         this.currentPlayerId = currentPlayerId;
         this.moves = moves;
+    }
+
+    private static long calculateBottomMask() {
+        long bottom = 0;
+        for (int column = 0; column < BOARD_WIDTH; column++) {
+            bottom |= bottomMask(column);
+        }
+        return bottom;
     }
 
     private static void validateArraySize(int[][] boardDoubleArray) {
@@ -296,6 +306,11 @@ public class BitBoard extends AbstractBoard {
             }
         }
         return score;
+    }
+
+    @Override
+    public long getId() {
+        return position + mask + ALL_COLUMNS_BOTTOM_MASK;
     }
 
     private boolean winFoundInPosition(long position) {

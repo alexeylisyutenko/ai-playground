@@ -6,34 +6,77 @@ import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
-import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.TimeoutBasedSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.NEGATIVE_INFINITY;
 import static ru.alexeylisyutenko.ai.connectfour.util.Constants.POSITIVE_INFINITY;
 
-public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction {
+// TODO: Benchmark and refactor. Modify according to TranspositionTableAlphaBetaSearchFunction implementation.
+
+public class TranspositionTableAlphaBetaTimeoutBasedSearchFunction implements TimeoutBasedSearchFunction {
     private final TranspositionTable transpositionTable;
     private final BestMoveTable bestMovesTable;
 
-    public TranspositionTableAlphaBetaSearchFunction() {
+    private volatile boolean stopped = true;
+
+    public TranspositionTableAlphaBetaTimeoutBasedSearchFunction() {
         this(new ConcurrentHashMapTranspositionTable(), new ConcurrentHashMapBestMoveTable());
     }
 
-    public TranspositionTableAlphaBetaSearchFunction(TranspositionTable transpositionTable, BestMoveTable bestMovesTable) {
+    public TranspositionTableAlphaBetaTimeoutBasedSearchFunction(TranspositionTable transpositionTable, BestMoveTable bestMovesTable) {
         this.transpositionTable = transpositionTable;
         this.bestMovesTable = bestMovesTable;
     }
 
     @Override
-    public Move search(Board board, int depth, EvaluationFunction evaluationFunction) {
+    public Optional<Move> search(Board board, int depth, EvaluationFunction evaluationFunction, int timeout) {
+        if (!stopped) {
+            throw new IllegalStateException("Search is already started");
+        }
+        stopped = false;
+        AtomicReference<Move> foundMove = new AtomicReference<>();
+        Thread searchThread = launchSearchThread(board, depth, evaluationFunction, foundMove);
+        joinThread(timeout, searchThread);
+        stopped = true;
+        joinThread(searchThread);
+        return Optional.ofNullable(foundMove.get());
+    }
+
+    private Thread launchSearchThread(Board board, int depth, EvaluationFunction evaluationFunction, AtomicReference<Move> foundMove) {
+        Thread searchThread = new Thread(() -> {
+            try {
+                Move move = doSearch(board, depth, evaluationFunction);
+                foundMove.set(move);
+            } catch (RuntimeException ignore) {
+            }
+        });
+        searchThread.start();
+        return searchThread;
+    }
+
+    private void joinThread(Thread thread) {
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void joinThread(int timeout, Thread thread) {
+        try {
+            thread.join(timeout);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public Move doSearch(Board board, int depth, EvaluationFunction evaluationFunction) {
         if (MinimaxHelper.isTerminal(depth, board)) {
             throw new IllegalStateException("Search function was called on a terminal node");
         }
@@ -59,6 +102,9 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
     }
 
     private int findAlphaBetaBoardValue(Board board, int depth, int alpha, int beta, EvaluationFunction evaluationFunction) {
+        if (stopped) {
+            throw new RuntimeException("Stop requested");
+        }
         if (MinimaxHelper.isTerminal(depth, board)) {
             return evaluationFunction.evaluate(board);
         }
@@ -119,18 +165,6 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
         return value;
     }
 
-    private void saveTranspositionTableEntry(Board board, int depth, int value, int originalAlpha, int beta) {
-        TranspositionTableEntry entry;
-        if (value <= originalAlpha) {
-            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.UPPER_BOUND, value);
-        } else if (value >= beta) {
-            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.LOWER_BOUND, value);
-        } else {
-            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.EXACT_VALUE, value);
-        }
-        transpositionTable.save(board, entry);
-    }
-
     private void saveBestMovesTableEntry(Board board, int depth, int column, int score) {
         bestMovesTable.save(board, new BestMoveTableEntry(depth, column, score));
     }
@@ -163,5 +197,17 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
                 .sorted(Comparator.comparing(ImmutableTriple::getRight))
                 .map(triple -> Pair.of(triple.getLeft(), triple.getMiddle()))
                 .collect(Collectors.toList());
+    }
+
+    private void saveTranspositionTableEntry(Board board, int depth, int value, int originalAlpha, int beta) {
+        TranspositionTableEntry entry;
+        if (value <= originalAlpha) {
+            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.UPPER_BOUND, value);
+        } else if (value >= beta) {
+            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.LOWER_BOUND, value);
+        } else {
+            entry = new TranspositionTableEntry(depth, TranspositionTableEntryType.EXACT_VALUE, value);
+        }
+        transpositionTable.save(board, entry);
     }
 }

@@ -55,7 +55,7 @@ class TranspositionTableYBWCAlphaBetaSearchFunctionTest {
         System.out.println("Transposition table YBWC AlphaBeta move: " + alphaBetaMove);
         System.out.println("Transposition table YBWC AlphaBeta evaluations: " + alphaBetaEvaluationFunction.getEvaluationsCounter());
 
-        assertEquals(minimaxMove, alphaBetaMove);
+        assertEquals(minimaxMove.getColumn(), alphaBetaMove.getColumn());
     }
 
     @Disabled

@@ -3,14 +3,13 @@ package ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableAlphaBetaTimeoutBasedSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.DefaultTimeoutBasedSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.TimeoutBasedSearchFunction;
-import ru.alexeylisyutenko.ai.connectfour.util.BlackholeConcurrentMap;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.*;
 
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ForkJoinPool;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
@@ -29,12 +28,11 @@ public class IterativeDeepeningSearchFunction implements SearchFunction {
     }
 
     private TimeoutBasedSearchFunction createTimeBaseSearchFunction() {
-//        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.TranspositionTableEntry> transpositionTable = new BlackholeConcurrentMap<>();
-//        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.BestMoveTableEntry> bestMovesTable = new BlackholeConcurrentMap<>();
-        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.TranspositionTableEntry> transpositionTable = new ConcurrentHashMap<>();
-        ConcurrentMap<Board, TranspositionTableYBWCAlphaBetaSearchFunction.BestMoveTableEntry> bestMovesTable = new ConcurrentHashMap<>();
-        StoppableSearchFunction stoppableSearchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction(transpositionTable, bestMovesTable, forkJoinPool);
-        return new DefaultTimeoutBasedSearchFunction(stoppableSearchFunction);
+        TranspositionTable transpositionTable = new CacheBasedTranspositionTable();
+        BestMoveTable bestMovesTable = new CacheBasedBestMoveTable();
+//        StoppableSearchFunction stoppableSearchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction(transpositionTable, bestMovesTable, forkJoinPool);
+//        return new DefaultTimeoutBasedSearchFunction(stoppableSearchFunction);
+        return new TranspositionTableAlphaBetaTimeoutBasedSearchFunction(transpositionTable, bestMovesTable);
     }
 
     @Override

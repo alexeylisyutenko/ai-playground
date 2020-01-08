@@ -19,7 +19,6 @@ public class DefaultTimeoutBasedSearchFunction implements TimeoutBasedSearchFunc
     public Optional<Move> search(Board board, int depth, EvaluationFunction evaluationFunction, int timeout) {
         AtomicReference<Move> foundMove = new AtomicReference<>();
 
-        // TODO: Use some executor service here.
         Thread searchThread = launchSearchThread(board, depth, evaluationFunction, foundMove);
         joinThread(timeout, searchThread);
         stoppableSearchFunction.stop();

@@ -13,6 +13,7 @@ import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.assertBoardArrayEquals;
 import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.constructBoardArray;
+import static ru.alexeylisyutenko.ai.connectfour.util.BitBoardHelper.bitmapToString;
 
 class DefaultBoardTest {
 
@@ -356,6 +357,42 @@ class DefaultBoardTest {
         });
         Board board2 = new DefaultBoard(boardArray2, 1);
         assertTrue(board2.isTie());
+    }
+
+    @Test
+    void getIdMustWorkProperly() {
+        int[] boardArray1 = constructBoardArray(new int[][]{
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 2, 0, 2},
+                {0, 0, 1, 0, 1, 2, 1},
+                {0, 0, 2, 0, 2, 1, 2},
+                {0, 1, 1, 1, 2, 2, 1}
+        });
+        Board board1 = new DefaultBoard(boardArray1, 1);
+        assertEquals(92707949330817L, board1.getId());
+
+        int[] boardArray2 = constructBoardArray(new int[][]{
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0}
+        });
+        Board board2 = new DefaultBoard(boardArray2, 1);
+        assertEquals(4432676798593L, board2.getId());
+
+        int[] boardArray3 = constructBoardArray(new int[][]{
+                {1, 1, 2, 2, 2, 1, 2},
+                {2, 2, 1, 1, 2, 1, 1},
+                {1, 1, 1, 2, 1, 2, 1},
+                {1, 1, 2, 2, 1, 1, 1},
+                {2, 1, 2, 1, 2, 1, 2},
+                {1, 2, 1, 2, 1, 2, 1}
+        });
+        Board board3 = new DefaultBoard(boardArray3, 1);
+        assertEquals(413093617629037L, board3.getId());
     }
 
 }

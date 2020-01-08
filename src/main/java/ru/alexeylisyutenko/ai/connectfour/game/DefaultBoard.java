@@ -21,6 +21,10 @@ public class DefaultBoard extends AbstractBoard {
         this.currentPlayerId = currentPlayerId;
     }
 
+    private static long cellMask(int row, int column) {
+        return 1L << (BOARD_HEIGHT - 1 - row) << column * (BOARD_HEIGHT + 1);
+    }
+
     @Override
     public int getCurrentPlayerId() {
         return currentPlayerId;
@@ -52,5 +56,27 @@ public class DefaultBoard extends AbstractBoard {
         int row = Math.min(5, columnHeight);
         newBoardArray[BOARD_WIDTH * row + column] = currentPlayerId;
         return new DefaultBoard(newBoardArray, getOtherPlayerId());
+    }
+
+    @Override
+    public long getId() {
+        long id = 0;
+        for (int column = 0; column < BOARD_WIDTH; column++) {
+            int row = BOARD_HEIGHT - 1;
+            while (row >= 0) {
+                int cell = getCellPlayerId(row, column);
+                if (cell == 0) {
+                    break;
+                }
+
+                long cellMask = cellMask(row, column);
+                if (cell == currentPlayerId) {
+                    id |= cellMask;
+                }
+                row--;
+            }
+            id |= cellMask(row, column);
+        }
+        return id;
     }
 }

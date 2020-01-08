@@ -1,0 +1,4 @@
+Benchmark                                                                                        (depth)  (games)  Mode  Cnt     Score     Error  Units
+SearchFunctionsGameRunnerBasedBenchmark.cacheBasedTranspositionTableYBWCAlphaBetaSearchFunction        7      100  avgt   25  3173.666 ± 171.370  ms/op
+SearchFunctionsGameRunnerBasedBenchmark.transpositionTableAlphaBetaSearchFunction                      7      100  avgt   25   580.249 ±  62.305  ms/op
+SearchFunctionsGameRunnerBasedBenchmark.transpositionTableYBWCAlphaBetaSearchFunction                  7      100  avgt   25  2133.389 ± 265.186  ms/op

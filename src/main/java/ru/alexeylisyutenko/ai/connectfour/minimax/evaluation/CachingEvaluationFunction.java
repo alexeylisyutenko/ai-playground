@@ -9,13 +9,13 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Board evaluation function which caches results in a hash map.
+ * Board evaluation function which caches results.
  */
 public class CachingEvaluationFunction implements EvaluationFunction {
     public final static int DEFAULT_CACHE_SIZE = 10_000_000;
 
     private final EvaluationFunction evaluationFunction;
-    private final Cache<Board, Integer> cache;
+    private final Cache<Long, Integer> cache;
 
     public CachingEvaluationFunction(EvaluationFunction evaluationFunction) {
         this(evaluationFunction, DEFAULT_CACHE_SIZE, false);
@@ -26,7 +26,7 @@ public class CachingEvaluationFunction implements EvaluationFunction {
         this.cache = buildCache(cacheMaximumSize, recordStats);
     }
 
-    private Cache<Board, Integer> buildCache(int cacheMaximumSize, boolean recordStats) {
+    private Cache<Long, Integer> buildCache(int cacheMaximumSize, boolean recordStats) {
         CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder();
         cacheBuilder.maximumSize(cacheMaximumSize);
         if (recordStats) {
@@ -38,7 +38,7 @@ public class CachingEvaluationFunction implements EvaluationFunction {
     @Override
     public int evaluate(Board board) {
         try {
-            return cache.get(board, () -> evaluationFunction.evaluate(board));
+            return cache.get(board.getId(), () -> evaluationFunction.evaluate(board));
         } catch (ExecutionException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
