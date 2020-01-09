@@ -28,11 +28,7 @@ public class IterativeDeepeningSearchFunction implements SearchFunction {
     }
 
     private TimeoutBasedSearchFunction createTimeBaseSearchFunction() {
-        TranspositionTable transpositionTable = new CacheBasedTranspositionTable();
-        BestMoveTable bestMovesTable = new CacheBasedBestMoveTable();
-//        StoppableSearchFunction stoppableSearchFunction = new TranspositionTableYBWCAlphaBetaSearchFunction(transpositionTable, bestMovesTable, forkJoinPool);
-//        return new DefaultTimeoutBasedSearchFunction(stoppableSearchFunction);
-        return new TranspositionTableAlphaBetaTimeoutBasedSearchFunction(transpositionTable, bestMovesTable);
+        return new TranspositionTableAlphaBetaTimeoutBasedSearchFunction(new CacheBasedTranspositionTable(), new CacheBasedBestMoveTable());
     }
 
     @Override

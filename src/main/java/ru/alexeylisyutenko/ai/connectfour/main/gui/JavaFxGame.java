@@ -6,7 +6,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -29,6 +31,14 @@ public class JavaFxGame extends Application {
     private Label gameStateLabel;
     private Label timeLabel;
     private Label movesLabel;
+
+    private ComboBox<String> player1ComboBox;
+    private TextField player1DepthTextField;
+    private TextField player1TimeoutTextField;
+
+    private ComboBox<String> player2ComboBox;
+    private TextField player2DepthTextField;
+    private TextField player2TimeoutTextField;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -70,16 +80,73 @@ public class JavaFxGame extends Application {
     }
 
     private Parent createControlArea() {
+        // Start game button.
         startGameButton = new Button("Start Game");
         startGameButton.setPrefWidth(200);
+        VBox.setMargin(startGameButton, new Insets(10));
+
+        // Stop game button.
         stopGameButton = new Button("Stop Game");
         stopGameButton.setPrefWidth(200);
-        VBox vBox = new VBox(startGameButton, stopGameButton);
+        VBox.setMargin(stopGameButton, new Insets(0, 10, 10, 10));
+
+        // Player 1 settings.
+        Parent player1SettingsControls = createPlayer1SettingsControls();
+        VBox.setMargin(player1SettingsControls, new Insets(50, 0, 0, 0));
+
+        // Player 2 settings.
+        Parent player2SettingsControls =createPlayer2SettingsControls();
+        VBox.setMargin(player2SettingsControls, new Insets(50, 0, 0, 0));
+
+        VBox vBox = new VBox(startGameButton, stopGameButton, player1SettingsControls, player2SettingsControls);
         vBox.setAlignment(Pos.TOP_CENTER);
-        vBox.setSpacing(10);
         vBox.setBackground(new Background(new BackgroundFill(Color.LIGHTGREY, null, null)));
-        vBox.setPadding(new Insets(10));
         return vBox;
+    }
+
+    // TODO: Refactor!
+    private Parent createPlayer1SettingsControls() {
+        Label label = new Label("Player 1");
+        label.setPrefWidth(200);
+        label.setAlignment(Pos.CENTER_LEFT);
+        VBox.setMargin(label, new Insets(0, 10, 0, 10));
+
+        player1ComboBox = new ComboBox<>();
+        player1ComboBox.getItems().addAll("Real player", "Iterative deepening", "Plain Minimax");
+        player1ComboBox.setPrefWidth(200);
+        VBox.setMargin(player1ComboBox, new Insets(5, 10, 0, 10));
+
+        player1DepthTextField = new TextField("10");
+        player1TimeoutTextField = new TextField("1000");
+        HBox depthTimeoutHBox = new HBox(
+                new VBox(new Label("Depth"), player1DepthTextField),
+                new VBox(new Label("Timeout"), player1TimeoutTextField));
+        depthTimeoutHBox.setPrefWidth(200);
+        VBox.setMargin(depthTimeoutHBox, new Insets(5, 10, 10, 10));
+
+        return new VBox(label, player1ComboBox, depthTimeoutHBox);
+    }
+
+    private Parent createPlayer2SettingsControls() {
+        Label label = new Label("Player 2");
+        label.setPrefWidth(200);
+        label.setAlignment(Pos.CENTER_LEFT);
+        VBox.setMargin(label, new Insets(0, 10, 0, 10));
+
+        player2ComboBox = new ComboBox<>();
+        player2ComboBox.getItems().addAll("Real player", "Iterative deepening", "Plain Minimax");
+        player2ComboBox.setPrefWidth(200);
+        VBox.setMargin(player2ComboBox, new Insets(5, 10, 0, 10));
+
+        player2DepthTextField = new TextField("10");
+        player2TimeoutTextField = new TextField("1000");
+        HBox depthTimeoutHBox = new HBox(
+                new VBox(new Label("Depth"), player2DepthTextField),
+                new VBox(new Label("Timeout"), player2TimeoutTextField));
+        depthTimeoutHBox.setPrefWidth(200);
+        VBox.setMargin(depthTimeoutHBox, new Insets(5, 10, 10, 10));
+
+        return new VBox(label, player2ComboBox, depthTimeoutHBox);
     }
 
     private Parent createGameArea() {
