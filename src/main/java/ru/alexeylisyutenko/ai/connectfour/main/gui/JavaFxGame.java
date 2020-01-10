@@ -1,6 +1,8 @@
 package ru.alexeylisyutenko.ai.connectfour.main.gui;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -21,6 +23,10 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.*;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.IterativeDeepeningSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.player.*;
+import ru.alexeylisyutenko.ai.connectfour.player.factory.PlayerFactory;
+import ru.alexeylisyutenko.ai.connectfour.player.factory.PlayerFactoryRegistry;
+
+import java.util.Map;
 
 public class JavaFxGame extends Application {
     private GameRunner gameRunner;
@@ -32,11 +38,11 @@ public class JavaFxGame extends Application {
     private Label timeLabel;
     private Label movesLabel;
 
-    private ComboBox<String> player1ComboBox;
+    private ComboBox<PlayerFactory> player1ComboBox;
     private TextField player1DepthTextField;
     private TextField player1TimeoutTextField;
 
-    private ComboBox<String> player2ComboBox;
+    private ComboBox<PlayerFactory> player2ComboBox;
     private TextField player2DepthTextField;
     private TextField player2TimeoutTextField;
 
@@ -54,10 +60,14 @@ public class JavaFxGame extends Application {
     }
 
     private GameRunner createGameRunner() {
-        Player player1 = new GuiPlayer(boardControl);
-//        Player player2 = new GuiPlayer(boardControl);
-//        Player player1 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(100), new CachingEvaluationFunction(new InternalEvaluationFunction()), 17);
-        Player player2 = new MinimaxBasedPlayer(new IterativeDeepeningSearchFunction(1000), new CachingEvaluationFunction(new InternalEvaluationFunction()), 13);
+        PlayerFactory player1Factory = player1ComboBox.getSelectionModel().getSelectedItem();
+        Player player1 = player1Factory.create(Integer.parseInt(player1DepthTextField.getText()),
+                Integer.parseInt(player1TimeoutTextField.getText()), Map.of("boardControl", boardControl));
+
+        PlayerFactory player2Factory = player2ComboBox.getSelectionModel().getSelectedItem();
+        Player player2 = player2Factory.create(Integer.parseInt(player2DepthTextField.getText()),
+                Integer.parseInt(player2TimeoutTextField.getText()), Map.of("boardControl", boardControl));
+
         return new DefaultGameRunner(player1, player2, new GuiGameEventListener(boardControl, gameStateLabel, timeLabel, movesLabel));
     }
 
@@ -104,7 +114,6 @@ public class JavaFxGame extends Application {
         return vBox;
     }
 
-    // TODO: Refactor!
     private Parent createPlayer1SettingsControls() {
         Label label = new Label("Player 1");
         label.setPrefWidth(200);
@@ -112,7 +121,6 @@ public class JavaFxGame extends Application {
         VBox.setMargin(label, new Insets(0, 10, 0, 10));
 
         player1ComboBox = new ComboBox<>();
-        player1ComboBox.getItems().addAll("Real player", "Iterative deepening", "Plain Minimax");
         player1ComboBox.setPrefWidth(200);
         VBox.setMargin(player1ComboBox, new Insets(5, 10, 0, 10));
 
@@ -124,7 +132,18 @@ public class JavaFxGame extends Application {
         depthTimeoutHBox.setPrefWidth(200);
         VBox.setMargin(depthTimeoutHBox, new Insets(5, 10, 10, 10));
 
-        return new VBox(label, player1ComboBox, depthTimeoutHBox);
+        VBox playerSettingsRoot = new VBox(label, player1ComboBox, depthTimeoutHBox);
+
+        player1ComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            player1DepthTextField.setDisable(!newValue.isDepthArgumentRequired());
+            player1TimeoutTextField.setDisable(!newValue.isTimeoutArgumentRequited());
+        });
+        player1ComboBox.getItems().addAll(PlayerFactoryRegistry.getAll());
+        player1ComboBox.getSelectionModel().selectFirst();
+        addOnlyIntegerTextFieldRestriction(player1DepthTextField);
+        addOnlyIntegerTextFieldRestriction(player1TimeoutTextField);
+
+        return playerSettingsRoot;
     }
 
     private Parent createPlayer2SettingsControls() {
@@ -134,7 +153,6 @@ public class JavaFxGame extends Application {
         VBox.setMargin(label, new Insets(0, 10, 0, 10));
 
         player2ComboBox = new ComboBox<>();
-        player2ComboBox.getItems().addAll("Real player", "Iterative deepening", "Plain Minimax");
         player2ComboBox.setPrefWidth(200);
         VBox.setMargin(player2ComboBox, new Insets(5, 10, 0, 10));
 
@@ -146,7 +164,29 @@ public class JavaFxGame extends Application {
         depthTimeoutHBox.setPrefWidth(200);
         VBox.setMargin(depthTimeoutHBox, new Insets(5, 10, 10, 10));
 
-        return new VBox(label, player2ComboBox, depthTimeoutHBox);
+        VBox playerSettingsRoot = new VBox(label, player2ComboBox, depthTimeoutHBox);
+
+        player2ComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            player2DepthTextField.setDisable(!newValue.isDepthArgumentRequired());
+            player2TimeoutTextField.setDisable(!newValue.isTimeoutArgumentRequited());
+        });
+        player2ComboBox.getItems().addAll(PlayerFactoryRegistry.getAll());
+        player2ComboBox.getSelectionModel().select(1);
+        addOnlyIntegerTextFieldRestriction(player2DepthTextField);
+        addOnlyIntegerTextFieldRestriction(player2TimeoutTextField);
+
+        return playerSettingsRoot;
+    }
+
+    private void addOnlyIntegerTextFieldRestriction(TextField textField) {
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                textField.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+            if (newValue.isBlank()) {
+                textField.setText(oldValue);
+            }
+        });
     }
 
     private Parent createGameArea() {

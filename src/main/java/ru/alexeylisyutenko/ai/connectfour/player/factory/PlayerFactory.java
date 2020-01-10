@@ -5,7 +5,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.Player;
 import java.util.Map;
 
 /**
- * Various {@link Player} implementations factory.
+ * A factory of various {@link Player} interface implementations.
  */
 public interface PlayerFactory {
     /**

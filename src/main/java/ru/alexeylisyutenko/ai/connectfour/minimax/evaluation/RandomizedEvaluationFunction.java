@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour.minimax.helper;
+package ru.alexeylisyutenko.ai.connectfour.minimax.evaluation;
 
 import org.apache.commons.lang3.RandomUtils;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;

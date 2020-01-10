@@ -24,7 +24,7 @@ public class TranspositionTableAlphaBetaSearchFunction implements SearchFunction
     private final BestMoveTable bestMovesTable;
 
     public TranspositionTableAlphaBetaSearchFunction() {
-        this(new ConcurrentHashMapTranspositionTable(), new ConcurrentHashMapBestMoveTable());
+        this(new CacheBasedTranspositionTable(), new CacheBasedBestMoveTable());
     }
 
     public TranspositionTableAlphaBetaSearchFunction(TranspositionTable transpositionTable, BestMoveTable bestMovesTable) {

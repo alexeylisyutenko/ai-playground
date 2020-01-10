@@ -5,6 +5,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.RandomizedEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MinimaxSearchFunction;
 
 public class Game {
