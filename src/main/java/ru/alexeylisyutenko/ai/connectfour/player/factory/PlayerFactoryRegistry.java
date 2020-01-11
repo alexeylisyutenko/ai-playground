@@ -20,6 +20,7 @@ public final class PlayerFactoryRegistry {
         factories.add(new EmptyEvaluationPlayer());
         factories.add(new BetterEvaluationPlayer());
         factories.add(new RandomizedEvaluationPlayer());
+        factories.add(new InternalEvaluationPlayer());
         FACTORIES = Collections.unmodifiableList(factories);
     }
 

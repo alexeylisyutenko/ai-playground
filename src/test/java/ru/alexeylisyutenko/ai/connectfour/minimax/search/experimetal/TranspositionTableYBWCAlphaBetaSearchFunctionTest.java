@@ -38,6 +38,7 @@ class TranspositionTableYBWCAlphaBetaSearchFunctionTest {
         depth = RandomUtils.nextInt(4, 6);
     }
 
+    @Disabled
     @Test
     @RepeatedTest(1000)
     void transpositionTableYbwcAlphaBetaSearchFunctionMustProduceSameMovesAsMinimaxSearchFunction() {

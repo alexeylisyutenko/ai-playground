@@ -1,5 +1,6 @@
 package ru.alexeylisyutenko.ai.connectfour.demo;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.concurrent.RecursiveTask;
 
 public class ForkJoinPoolDemo {
 
+    @Disabled
     @Test
     void demo() throws InterruptedException {
         ForkJoinPool forkJoinPool = new ForkJoinPool();
