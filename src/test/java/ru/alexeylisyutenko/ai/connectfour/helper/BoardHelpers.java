@@ -91,7 +91,7 @@ public final class BoardHelpers {
         Board board;
         boolean success;
         do {
-            board = new DefaultBoard();
+            board = new BitBoard();
             success = true;
             for (int i = 0; i < moves; i++) {
                 Optional<Board> boardOptional = findRandomNonFinishingMove(board);

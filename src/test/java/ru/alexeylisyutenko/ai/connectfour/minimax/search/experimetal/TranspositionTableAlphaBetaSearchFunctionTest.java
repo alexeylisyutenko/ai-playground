@@ -39,7 +39,6 @@ class TranspositionTableAlphaBetaSearchFunctionTest {
     }
 
     @Disabled
-    @Test
     @RepeatedTest(1000)
     void transpositionTableYbwcAlphaBetaSearchFunctionMustProduceSameMovesAsMinimaxSearchFunction() {
         Board board = BoardHelpers.constructRandomNonFinishedBoard();
@@ -60,7 +59,6 @@ class TranspositionTableAlphaBetaSearchFunctionTest {
     }
 
     @Disabled
-    @Test
     @RepeatedTest(10)
     void genuine() {
         List<Board> boards = generateGenuineGameBoardSequence();

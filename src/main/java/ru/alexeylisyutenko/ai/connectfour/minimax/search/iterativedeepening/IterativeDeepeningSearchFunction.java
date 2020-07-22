@@ -2,29 +2,35 @@ package ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening;
 
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
-import ru.alexeylisyutenko.ai.connectfour.minimax.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
+import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
+import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableAlphaBetaTimeoutBasedSearchFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.DefaultTimeoutBasedSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.TimeoutBasedSearchFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.CacheBasedBestMoveTable;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.CacheBasedTranspositionTable;
 
 import java.util.Optional;
-import java.util.concurrent.ForkJoinPool;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
 public class IterativeDeepeningSearchFunction implements SearchFunction {
-    private static final ForkJoinPool forkJoinPool = new ForkJoinPool();
 
     private final int timeout;
     private final TimeoutBasedSearchFunction timeoutBasedSearchFunction;
+    private final boolean verbose;
     private Move bestMove;
 
     public IterativeDeepeningSearchFunction(int timeout) {
+        this(timeout, true);
+    }
+
+    public IterativeDeepeningSearchFunction(int timeout, boolean verbose) {
         this.timeout = timeout;
         this.timeoutBasedSearchFunction = createTimeBaseSearchFunction();
+        this.verbose = verbose;
     }
 
     private TimeoutBasedSearchFunction createTimeBaseSearchFunction() {
@@ -44,7 +50,9 @@ public class IterativeDeepeningSearchFunction implements SearchFunction {
         while (System.currentTimeMillis() < endMillis && currentDepth <= depthLimit) {
             Optional<Move> moveOptional = timeoutBasedSearchFunction.search(board, currentDepth, evaluationFunction, (int) (endMillis - System.currentTimeMillis()));
             moveOptional.ifPresent(move -> bestMove = move);
-            System.out.println(String.format("ITERATIVE DEEPENING: Depth: %d, result: %s", currentDepth, moveOptional));
+            if (verbose) {
+                System.out.println(String.format("ITERATIVE DEEPENING: Depth: %d, result: %s", currentDepth, moveOptional));
+            }
             currentDepth++;
         }
 

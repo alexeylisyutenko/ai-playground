@@ -14,7 +14,6 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MinimaxSearchFunc
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OnlyEvalFunctionReorderingYBWCAlphaBetaSearchFunctionTest {
-    @Test
     @RepeatedTest(1000)
     void experimentalYbwcAlphaBetaSearchFunctionMustProduceSameMovesAsMinimaxSearchFunction() {
         int depth = RandomUtils.nextInt(4, 6);

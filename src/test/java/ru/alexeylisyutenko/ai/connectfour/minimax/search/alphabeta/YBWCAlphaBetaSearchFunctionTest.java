@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class YBWCAlphaBetaSearchFunctionTest {
 
-    @Test
     @RepeatedTest(1000)
     void ybwcAlphaBetaSearchFunctionMustProduceSameMovesAsMinimaxSearchFunction() {
         int depth = RandomUtils.nextInt(4, 6);
