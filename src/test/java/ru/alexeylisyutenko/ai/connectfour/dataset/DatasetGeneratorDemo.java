@@ -22,6 +22,7 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.Cach
 import ru.alexeylisyutenko.ai.connectfour.player.MinimaxBasedPlayer;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,6 +36,8 @@ public class DatasetGeneratorDemo {
 
     @Test
     public void generateDataset() {
+        // TODO: Construct a board stream.
+
         // Generate random boards.
 //        Set<Board> boards = generateBoards();
         System.out.println("Generating boards...");
@@ -112,11 +115,9 @@ public class DatasetGeneratorDemo {
         HashSet<Board> boards = new HashSet<>();
         while (boards.size() < count) {
             try {
-                gameRunner.startGame();
-                // Game stops even before we call awaitGameStart.
-                gameRunner.awaitGameStart();
+                gameRunner.startGame().get();
                 gameRunner.awaitGameStop();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
             boards.addAll(gameRunner.getBoardHistory());

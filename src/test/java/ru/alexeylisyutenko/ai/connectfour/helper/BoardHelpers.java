@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
@@ -134,11 +135,10 @@ public final class BoardHelpers {
         Player player2 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new BasicEvaluationFunction()), 4);
 
         GameRunner gameRunner = new DefaultGameRunner(player1, player2, null);
-        gameRunner.startGame();
         try {
-            gameRunner.awaitGameStart();
+            gameRunner.startGame().get();
             gameRunner.awaitGameStop();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
         List<Board> boards = new ArrayList<>(gameRunner.getBoardHistory());

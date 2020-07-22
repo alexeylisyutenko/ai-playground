@@ -4,15 +4,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.util.concurrent.*;
 import lombok.Value;
 import ru.alexeylisyutenko.ai.connectfour.exception.InvalidMoveException;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public class DefaultGameRunner implements GameRunner {
     private static final int DEFAULT_TIMEOUT = 10;
 
@@ -68,24 +69,33 @@ public class DefaultGameRunner implements GameRunner {
 
     @Subscribe
     private void gameStartRequestedEvent(GameStartRequestedEvent event) {
-        if (getGameState() != GameState.STOPPED) {
-            return;
+        try {
+            if (getGameState() != GameState.STOPPED) {
+                return;
+            }
+
+            mutableState.getBoardHistory().clear();
+            mutableState.getBoardHistory().add(initialBoard);
+            mutableState.setBoard(initialBoard);
+            notifyPlayersGameStarted();
+            invokeGameStartedEvent();
+        } finally {
+            event.getFuture().finish();
         }
 
-        mutableState.getBoardHistory().clear();
-        mutableState.getBoardHistory().add(initialBoard);
-        mutableState.setBoard(initialBoard);
-        notifyPlayersGameStarted();
-        invokeGameStartedEvent();
         processGameStateTransition();
     }
 
     @Subscribe
     private void gameStopRequestedEvent(GameStopRequestedEvent event) {
-        if (getGameState() == GameState.STOPPED) {
-            return;
+        try {
+            if (getGameState() == GameState.STOPPED) {
+                return;
+            }
+            finishGame(GameResult.stoppedGame());
+        } finally {
+            event.getFuture().finish();
         }
-        finishGame(GameResult.stoppedGame());
     }
 
     @Subscribe
@@ -109,23 +119,22 @@ public class DefaultGameRunner implements GameRunner {
     }
 
     @Override
-    public void startGame() {
-        eventBus.post(new GameStartRequestedEvent());
+    public Future<Void> startGame() {
+        GameRunnerFuture future = new GameRunnerFuture();
+        eventBus.post(new GameStartRequestedEvent(future));
+        return future;
     }
 
     @Override
-    public void stopGame() {
-        eventBus.post(new GameStopRequestedEvent());
+    public Future<Void> stopGame() {
+        GameRunnerFuture future = new GameRunnerFuture();
+        eventBus.post(new GameStopRequestedEvent(future));
+        return future;
     }
 
     @Override
     public void shutdown() {
         eventExecutorService.shutdown();
-    }
-
-    @Override
-    public void awaitGameStart() throws InterruptedException {
-        mutableState.awaitGameStart();
     }
 
     @Override
@@ -209,7 +218,6 @@ public class DefaultGameRunner implements GameRunner {
         }
     }
 
-
     /**
      * Class which contains mutable state of the {@link DefaultGameRunner} and contains all required synchronization.
      */
@@ -243,12 +251,6 @@ public class DefaultGameRunner implements GameRunner {
 
         public synchronized void setBoard(Board board) {
             this.board = board;
-        }
-
-        public synchronized void awaitGameStart() throws InterruptedException {
-            while (gameState == GameState.STOPPED) {
-                wait();
-            }
         }
 
         public synchronized void awaitGameStop() throws InterruptedException {
@@ -300,21 +302,67 @@ public class DefaultGameRunner implements GameRunner {
     /**
      * Event that occurs when user request game start.
      */
-    private final static class GameStartRequestedEvent {
+    @Value
+    private static class GameStartRequestedEvent {
+        GameRunnerFuture future;
     }
 
     /**
      * Event that occurs when user request game stop.
      */
-    private final static class GameStopRequestedEvent {
+    @Value
+    private static class GameStopRequestedEvent {
+        GameRunnerFuture future;
     }
 
     /**
      * Event that occurs when a player {@link Player} makes a move.
      */
     @Value
-    private final static class MoveRequestedEvent {
-        private final int column;
-        private final int playerId;
+    private static class MoveRequestedEvent {
+        int column;
+        int playerId;
+    }
+
+    /**
+     * A {@link Future} which doesn't have any result and which is used in {@link GameRunner#startGame()} and
+     * {@link GameRunner#stopGame()} methods to report completion of start and stop operations.
+     */
+    private static class GameRunnerFuture implements Future<Void> {
+        private final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isDone() {
+            return countDownLatch.getCount() == 0;
+        }
+
+        @Override
+        public Void get() throws InterruptedException {
+            countDownLatch.await();
+            return null;
+        }
+
+        @Override
+        public Void get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+            if (countDownLatch.await(timeout, unit)) {
+                return null;
+            } else {
+                throw new TimeoutException();
+            }
+        }
+
+        public void finish() {
+            countDownLatch.countDown();
+        }
     }
 }

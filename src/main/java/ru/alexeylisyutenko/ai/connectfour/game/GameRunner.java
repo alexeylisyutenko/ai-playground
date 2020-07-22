@@ -1,6 +1,7 @@
 package ru.alexeylisyutenko.ai.connectfour.game;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * Runs a game of Connect Four.
@@ -44,23 +45,22 @@ public interface GameRunner {
 
     /**
      * Start a game.
+     *
+     * @return future representing pending completion of the start operation
      */
-    void startGame();
+    Future<Void> startGame();
 
     /**
      * Stop a game.
+     *
+     * @return future representing pending completion of the stop operation
      */
-    void stopGame();
+    Future<Void> stopGame();
 
     /**
      * Close this {@link GameRunner} releasing all resources used by this {@link GameRunner}.
      */
     void shutdown();
-
-    /**
-     * Blocks until the current game starts.
-     */
-    void awaitGameStart() throws InterruptedException;
 
     /**
      * Blocks until the current game stops.

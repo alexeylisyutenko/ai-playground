@@ -8,7 +8,7 @@ import ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BestEvaluationFunctionTest {
-    @RepeatedTest(100000)
+    @RepeatedTest(10000)
     void bestEvaluationFunctionMustProduceSameResultsAsEventBetter() {
         BestEvaluationFunction bestEvaluationFunction = new BestEvaluationFunction();
         EvenBetterEvaluationFunction evenBetterEvaluationFunction = new EvenBetterEvaluationFunction();

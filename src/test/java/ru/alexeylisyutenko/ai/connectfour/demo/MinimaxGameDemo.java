@@ -10,6 +10,7 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.Transpositi
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.player.MinimaxBasedPlayer;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction.DEFAULT_CACHE_SIZE;
@@ -32,7 +33,6 @@ public class MinimaxGameDemo {
         System.out.println(competitionResult);
         System.out.println();
 
-
         System.out.println(player1EvaluationFunction.getCacheStats());
         System.out.println(player2EvaluationFunction.getCacheStats());
     }
@@ -52,8 +52,11 @@ public class MinimaxGameDemo {
         CompetitionGameEventListener competitionGameEventListener = new CompetitionGameEventListener();
         GameRunner gameRunner = new DefaultGameRunner(player1, player2, competitionGameEventListener);
         for (int i = 0; i < games; i++) {
-            gameRunner.startGame();
-            gameRunner.awaitGameStart();
+            try {
+                gameRunner.startGame().get();
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
             gameRunner.awaitGameStop();
         }
         return new CompetitionResult(competitionGameEventListener.getPlayer1Wins(), competitionGameEventListener.getPlayer2Wins(),
