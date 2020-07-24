@@ -1,25 +1,30 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset;
+package ru.alexeylisyutenko.ai.connectfour.dataset.generator;
 
-import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
+import ru.alexeylisyutenko.ai.connectfour.dataset.model.BoardWithMove;
+import ru.alexeylisyutenko.ai.connectfour.dataset.evaluator.DefaultBoardSetEvaluator;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
-import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
-import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.InternalEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.IterativeDeepeningSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
+// TODO: Refactor the code.
 public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGenerator {
+    public static final int ITERATIVE_DEEPENING_TIMEOUT = 10;
+
     private final AlphaBetaSearchFunction searchFunction = new AlphaBetaSearchFunction();
     private final InternalEvaluationFunction evaluationFunction = new InternalEvaluationFunction();
 
@@ -33,49 +38,83 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
         Set<Board> trainingSetBoards = boards.getLeft();
         Set<Board> testSetBoards = boards.getRight();
 
-        //!!!
-        System.out.println();
-        printBoardsInfo(trainingSetBoards);
-        System.out.println();
-        printBoardsInfo(testSetBoards);
-        System.out.println();
-        //!!!
+        printBoardSetsInformation(trainingSetBoards, testSetBoards);
 
         // Evaluate boards.
-        List<BoardWithMove > evaluatedTrainingSetBoards = evaluateBoards(trainingSetBoards, "Training set");
+        System.out.println("Evaluating boards...");
+        List<BoardWithMove> evaluatedTrainingSetBoards = evaluateBoards(trainingSetBoards, "Training set");
         List<BoardWithMove> evaluatedTestSetBoards = evaluateBoards(testSetBoards, "Test set");
 
-        //!!!
+        printEvaluatedBoardSetsInformation(evaluatedTrainingSetBoards, evaluatedTestSetBoards);
+
+        // Save boards.
+        saveDataset(evaluatedTrainingSetBoards, evaluatedTestSetBoards, trainingDataFileName, testDataFileName);
+    }
+
+    private void saveDataset(List<BoardWithMove> evaluatedTrainingSetBoards, List<BoardWithMove> evaluatedTestSetBoards,
+                             String trainingDataFileName, String testDataFileName) {
+        try(OutputStream fileOutputStream = new FileOutputStream(trainingDataFileName)) {
+            evaluatedTestSetBoards.forEach(boardWithMove -> {
+                try {
+                    fileOutputStream.write(serializeBoardWithMove(boardWithMove));
+                } catch (IOException e) {
+                    System.err.println(e.getMessage());
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private byte[] serializeBoardWithMove(BoardWithMove boardWithMove) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        // Serialize a move as a first byte in a sample.
+        os.write(boardWithMove.getMove());
+
+        // Serialize a board.
+        Board board = boardWithMove.getBoard();
+        for (int row = 0; row < BOARD_HEIGHT; row++) {
+            for (int column = 0; column < BOARD_WIDTH; column++) {
+                int cellByte;
+                int cellPlayerId = board.getCellPlayerId(row, column);
+                if (cellPlayerId == board.getCurrentPlayerId()) {
+                    cellByte = 1;
+                } else if (cellPlayerId == board.getOtherPlayerId()) {
+                    cellByte = 2;
+                } else {
+                    cellByte = 0;
+                }
+                os.write(cellByte);
+            }
+        }
+        return os.toByteArray();
+    }
+
+    private void printEvaluatedBoardSetsInformation(List<BoardWithMove> evaluatedTrainingSetBoards, List<BoardWithMove> evaluatedTestSetBoards) {
         System.out.println();
         printMovesDistribution(evaluatedTrainingSetBoards);
         printMovesDistribution(evaluatedTestSetBoards);
-        //!!!
+    }
 
-        // Save boards.
-
+    private void printBoardSetsInformation(Set<Board> trainingSetBoards, Set<Board> testSetBoards) {
+        System.out.println("Training set boards:");
+        printSingleBoardSetInformation(trainingSetBoards);
+        System.out.println();
+        System.out.println("Test set boards:");
+        printSingleBoardSetInformation(testSetBoards);
+        System.out.println();
     }
 
     private void printMovesDistribution(List<BoardWithMove> evaluatedBoards) {
-        Map<Integer, Long> columnStats = evaluatedBoards.stream().map(BoardWithMove::getMove).map(Move::getColumn)
+        Map<Integer, Long> columnStats = evaluatedBoards.stream().map(BoardWithMove::getMove)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        System.out.println();
-        System.out.println("Column histogram:");
-        System.out.println(columnStats);
+        System.out.println("Move distribution = " + columnStats);
     }
 
-    private List<BoardWithMove> evaluateBoards(Set<Board> boards, String setName) {
-        EvaluationFunction evaluationFunction = new InternalEvaluationFunction();
-        AtomicInteger counter = new AtomicInteger();
-        return boards.stream().parallel().map(board -> {
-            ThreadLocal<SearchFunction> threadLocal =
-                    ThreadLocal.withInitial(() -> new IterativeDeepeningSearchFunction(5, false));
-            Move move = threadLocal.get().search(board, 1, evaluationFunction);
-            if ((counter.get() % 100) == 0) {
-                System.out.println(String.format("%s evaluation:\t%d/%d", setName, counter.get(), boards.size()));
-            }
-            counter.incrementAndGet();
-            return new BoardWithMove(board, move);
-        }).collect(Collectors.toList());
+    private List<BoardWithMove> evaluateBoards(Set<Board> boards, String boardSetName) {
+        DefaultBoardSetEvaluator boardSetEvaluator = new DefaultBoardSetEvaluator(ITERATIVE_DEEPENING_TIMEOUT);
+        return boardSetEvaluator.evaluate(boards, boardSetName);
     }
 
     private void validateArguments(int samplesInEachClassCount, int testSamplesCount, String trainingDataFileName, String testDataFileName) {
@@ -104,10 +143,9 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
         return false;
     }
 
-    private void printBoardsInfo(Set<Board> boards) {
-        System.out.println("Boards statistics:");
+    private void printSingleBoardSetInformation(Set<Board> boards) {
         IntSummaryStatistics statistics = boards.stream().mapToInt(Board::getNumberOfTokensOnBoard).summaryStatistics();
-        System.out.println(statistics);
+        System.out.println("Boards statistics = " + statistics);
 
         Map<Integer, Long> tokensStatistics = boards.stream()
                 .collect(Collectors.groupingBy(
@@ -115,8 +153,7 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
                         Collectors.counting()));
         System.out.println("Number of tokens distribution = " + tokensStatistics);
 
-        Map<Boolean, Long> canBeFinishedInOneStep = boards.stream()
-                .collect(Collectors.groupingBy(this::canBeFinishedInOneMove, Collectors.counting()));
+        Map<Boolean, Long> canBeFinishedInOneStep = boards.stream().collect(Collectors.groupingBy(this::canBeFinishedInOneMove, Collectors.counting()));
         System.out.println("Can be finished in one step distribution = " + canBeFinishedInOneStep);
     }
 
@@ -149,40 +186,4 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
         return Pair.of(trainingSet, testSet);
     }
 
-    private static class Evaluator {
-        private final AtomicInteger progressCounter;
-        private final Set<Board> boards;
-        private final String boardSetName;
-
-        public Evaluator(Set<Board> boards, String boardSetName) {
-            this.progressCounter = new AtomicInteger();
-            this.boards = boards;
-            this.boardSetName = boardSetName;
-        }
-
-        // Print the results and estimate time.
-        public static List<BoardWithMove> evaluateBoards(Set<Board> boards, String boardSetName) {
-            return new Evaluator(boards, boardSetName).doEvaluate();
-        }
-
-        private List<BoardWithMove> doEvaluate() {
-            return List.of();
-        }
-
-//        private List<BoardWithMove> doEvaluateBoards(Set<Board> boards, String setName) {
-//            EvaluationFunction evaluationFunction = new InternalEvaluationFunction();
-//            return boards.stream().parallel().map(board -> {
-//                ThreadLocal<SearchFunction> threadLocal = ThreadLocal.withInitial(() -> new IterativeDeepeningSearchFunction(5, false));
-//                Move move = threadLocal.get().search(board, 1, evaluationFunction);
-//                return new BoardWithMove(board, move);
-//            }).collect(Collectors.toList());
-//        }
-
-    }
-
-    @Value
-    private static class BoardWithMove {
-        Board board;
-        Move move;
-    }
 }
