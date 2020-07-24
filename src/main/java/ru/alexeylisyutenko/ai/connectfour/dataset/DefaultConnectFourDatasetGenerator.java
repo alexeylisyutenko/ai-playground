@@ -1,14 +1,20 @@
 package ru.alexeylisyutenko.ai.connectfour.dataset;
 
+import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
+import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.InternalEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.IterativeDeepeningSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
@@ -24,17 +30,52 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
         // Generate boards.
         System.out.println("Generating boards...");
         Pair<Set<Board>, Set<Board>> boards = generateBoards(samplesInEachClassCount, testSamplesCount);
+        Set<Board> trainingSetBoards = boards.getLeft();
+        Set<Board> testSetBoards = boards.getRight();
 
+        //!!!
         System.out.println();
-        printBoardsInfo(boards.getLeft());
+        printBoardsInfo(trainingSetBoards);
         System.out.println();
-        printBoardsInfo(boards.getRight());
+        printBoardsInfo(testSetBoards);
         System.out.println();
+        //!!!
 
         // Evaluate boards.
+        List<BoardWithMove > evaluatedTrainingSetBoards = evaluateBoards(trainingSetBoards, "Training set");
+        List<BoardWithMove> evaluatedTestSetBoards = evaluateBoards(testSetBoards, "Test set");
+
+        //!!!
+        System.out.println();
+        printMovesDistribution(evaluatedTrainingSetBoards);
+        printMovesDistribution(evaluatedTestSetBoards);
+        //!!!
 
         // Save boards.
 
+    }
+
+    private void printMovesDistribution(List<BoardWithMove> evaluatedBoards) {
+        Map<Integer, Long> columnStats = evaluatedBoards.stream().map(BoardWithMove::getMove).map(Move::getColumn)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        System.out.println();
+        System.out.println("Column histogram:");
+        System.out.println(columnStats);
+    }
+
+    private List<BoardWithMove> evaluateBoards(Set<Board> boards, String setName) {
+        EvaluationFunction evaluationFunction = new InternalEvaluationFunction();
+        AtomicInteger counter = new AtomicInteger();
+        return boards.stream().parallel().map(board -> {
+            ThreadLocal<SearchFunction> threadLocal =
+                    ThreadLocal.withInitial(() -> new IterativeDeepeningSearchFunction(5, false));
+            Move move = threadLocal.get().search(board, 1, evaluationFunction);
+            if ((counter.get() % 100) == 0) {
+                System.out.println(String.format("%s evaluation:\t%d/%d", setName, counter.get(), boards.size()));
+            }
+            counter.incrementAndGet();
+            return new BoardWithMove(board, move);
+        }).collect(Collectors.toList());
     }
 
     private void validateArguments(int samplesInEachClassCount, int testSamplesCount, String trainingDataFileName, String testDataFileName) {
@@ -96,7 +137,6 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
         }
 
         // Generate test set.
-        // TODO: Test boards must be evenly distributed by sizes and classes.
         Set<Board> testSet = new HashSet<>();
         while (testSet.size() < testSetSize) {
             Board board = boardIterator.next();
@@ -107,5 +147,42 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
         }
 
         return Pair.of(trainingSet, testSet);
+    }
+
+    private static class Evaluator {
+        private final AtomicInteger progressCounter;
+        private final Set<Board> boards;
+        private final String boardSetName;
+
+        public Evaluator(Set<Board> boards, String boardSetName) {
+            this.progressCounter = new AtomicInteger();
+            this.boards = boards;
+            this.boardSetName = boardSetName;
+        }
+
+        // Print the results and estimate time.
+        public static List<BoardWithMove> evaluateBoards(Set<Board> boards, String boardSetName) {
+            return new Evaluator(boards, boardSetName).doEvaluate();
+        }
+
+        private List<BoardWithMove> doEvaluate() {
+            return List.of();
+        }
+
+//        private List<BoardWithMove> doEvaluateBoards(Set<Board> boards, String setName) {
+//            EvaluationFunction evaluationFunction = new InternalEvaluationFunction();
+//            return boards.stream().parallel().map(board -> {
+//                ThreadLocal<SearchFunction> threadLocal = ThreadLocal.withInitial(() -> new IterativeDeepeningSearchFunction(5, false));
+//                Move move = threadLocal.get().search(board, 1, evaluationFunction);
+//                return new BoardWithMove(board, move);
+//            }).collect(Collectors.toList());
+//        }
+
+    }
+
+    @Value
+    private static class BoardWithMove {
+        Board board;
+        Move move;
     }
 }

@@ -4,9 +4,8 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.*;
 import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
-import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BasicEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CachingEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.EvenBetterEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MultithreadedMinimaxSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.player.MinimaxBasedPlayer;
 
@@ -130,8 +129,8 @@ public final class BoardGenerators {
      * @return
      */
     public static List<Board> generateGenuineGameBoardSequence() {
-        Player player1 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new EvenBetterEvaluationFunction()), 3, false);
-        Player player2 = new MinimaxBasedPlayer(new MultithreadedMinimaxSearchFunction(), new CachingEvaluationFunction(new BasicEvaluationFunction()), 3, false);
+        Player player1 = new MinimaxBasedPlayer(new AlphaBetaSearchFunction(), new RandomizedEvaluationFunction(), 3, false);
+        Player player2 = new MinimaxBasedPlayer(new AlphaBetaSearchFunction(), new RandomizedEvaluationFunction(), 3, false);
 
         GameRunner gameRunner = new DefaultGameRunner(player1, player2, null);
         try {
@@ -170,7 +169,7 @@ public final class BoardGenerators {
 
         private Iterator<Board> generateNextPortion() {
             List<Board> realGameBoards = generateGenuineGameBoardSequence();
-            List<Board> randomBoards = generateRandomNonFinishedBoards(realGameBoards.size() / 4);
+            List<Board> randomBoards = generateRandomNonFinishedBoards(realGameBoards.size());
             ArrayList<Board> boards = new ArrayList<>();
             boards.addAll(realGameBoards);
             boards.addAll(randomBoards);
