@@ -11,6 +11,7 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CountingEvaluationF
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MinimaxSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,7 +26,7 @@ class AlphaBetaSearchFunctionTest {
         CountingEvaluationFunction minimaxEvaluationFunction = new CountingEvaluationFunction(new FocusedEvaluationFunction());
         CountingEvaluationFunction alphaBetaEvaluationFunction = new CountingEvaluationFunction(new FocusedEvaluationFunction());
 
-        Board board = BoardHelpers.constructRandomNonFinishedBoard();
+        Board board = BoardGenerators.constructRandomNonFinishedBoard();
         ConsoleBoardVisualizer consoleBoardVisualizer = new ConsoleBoardVisualizer();
         consoleBoardVisualizer.visualize(board);
 

@@ -5,12 +5,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;
-import ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers;
 import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BetterEvaluationFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.EvenBetterEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 
 import java.util.List;
 
@@ -31,7 +29,7 @@ public class EvaluationFunctionDemo {
     void evaluateSomeRandomBoards() {
         int boards = 5;
         for (int i = 0; i < boards; i++) {
-            Board board = BoardHelpers.constructRandomNonFinishedBoard(2, 20);
+            Board board = BoardGenerators.constructRandomNonFinishedBoard(2, 20);
 
             consoleBoardVisualizer.visualize(board);
             System.out.println();

@@ -6,11 +6,11 @@ import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVi
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CountingEvaluationFunction;
+import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.constructRandomNonFinishedBoard;
 
 class IterativeDeepeningSearchFunctionTest {
 
@@ -18,7 +18,7 @@ class IterativeDeepeningSearchFunctionTest {
 
     @Test
     void searchDemo() {
-        Board board = constructRandomNonFinishedBoard(0, 5);
+        Board board = BoardGenerators.constructRandomNonFinishedBoard(0, 5);
         consoleBoardVisualizer.visualize(board);
         System.out.println("Current player: " + board.getCurrentPlayerId());
         System.out.println();

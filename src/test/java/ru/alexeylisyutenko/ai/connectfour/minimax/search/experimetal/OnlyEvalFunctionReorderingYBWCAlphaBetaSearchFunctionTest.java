@@ -2,14 +2,13 @@ package ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
-import ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers;
 import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CountingEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MinimaxSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,7 +23,7 @@ class OnlyEvalFunctionReorderingYBWCAlphaBetaSearchFunctionTest {
         CountingEvaluationFunction minimaxEvaluationFunction = new CountingEvaluationFunction(new FocusedEvaluationFunction());
         CountingEvaluationFunction alphaBetaEvaluationFunction = new CountingEvaluationFunction(new FocusedEvaluationFunction());
 
-        Board board = BoardHelpers.constructRandomNonFinishedBoard();
+        Board board = BoardGenerators.constructRandomNonFinishedBoard();
         ConsoleBoardVisualizer consoleBoardVisualizer = new ConsoleBoardVisualizer();
         consoleBoardVisualizer.visualize(board);
 

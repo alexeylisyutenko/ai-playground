@@ -13,11 +13,11 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.SearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.CountingEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.FocusedEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.plain.MinimaxSearchFunction;
+import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.generateGenuineGameBoardSequence;
 
 class TranspositionTableYBWCAlphaBetaSearchFunctionTest {
 
@@ -41,7 +41,7 @@ class TranspositionTableYBWCAlphaBetaSearchFunctionTest {
     @Disabled
     @RepeatedTest(1000)
     void transpositionTableYbwcAlphaBetaSearchFunctionMustProduceSameMovesAsMinimaxSearchFunction() {
-        Board board = BoardHelpers.constructRandomNonFinishedBoard();
+        Board board = BoardGenerators.constructRandomNonFinishedBoard();
         ConsoleBoardVisualizer consoleBoardVisualizer = new ConsoleBoardVisualizer();
         consoleBoardVisualizer.visualize(board);
 
@@ -61,7 +61,7 @@ class TranspositionTableYBWCAlphaBetaSearchFunctionTest {
     @Disabled
     @RepeatedTest(50)
     void genuine() {
-        List<Board> boards = generateGenuineGameBoardSequence();
+        List<Board> boards = BoardGenerators.generateGenuineGameBoardSequence();
         for (Board board : boards) {
             Move minimaxMove = minimaxSearchFunction.search(board, depth, minimaxEvaluationFunction);
             System.out.println("Minimax move: " + minimaxMove);

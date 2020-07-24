@@ -79,11 +79,10 @@ public class DefaultGameRunner implements GameRunner {
             mutableState.setBoard(initialBoard);
             notifyPlayersGameStarted();
             invokeGameStartedEvent();
+            processGameStateTransition();
         } finally {
             event.getFuture().finish();
         }
-
-        processGameStateTransition();
     }
 
     @Subscribe

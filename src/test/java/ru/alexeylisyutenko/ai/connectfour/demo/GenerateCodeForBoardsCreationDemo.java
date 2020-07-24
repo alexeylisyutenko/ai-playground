@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers;
 import ru.alexeylisyutenko.ai.connectfour.main.console.visualizer.ConsoleBoardVisualizer;
+import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
-import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.generateGenuineGameBoardSequence;
+import static ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators.generateGenuineGameBoardSequence;
 
 public class GenerateCodeForBoardsCreationDemo {
 
@@ -34,7 +35,7 @@ public class GenerateCodeForBoardsCreationDemo {
         List<Board> boards = new ArrayList<>();
 //        boards.addAll(Stream.generate(BoardHelpers::constructRandomTieBoard).distinct().limit(10).collect(Collectors.toList()));
 //        boards.addAll(Stream.generate(BoardHelpers::constructRandomFinishedBoard).distinct().limit(10).collect(Collectors.toList()));
-        boards.addAll(Stream.generate(BoardHelpers::constructRandomNonFinishedBoard).distinct().limit(30).collect(Collectors.toList()));
+        boards.addAll(Stream.generate(BoardGenerators::constructRandomNonFinishedBoard).distinct().limit(30).collect(Collectors.toList()));
         String s = generateListOfCreationCodeForBoardArrays(boards);
         System.out.println(s);
     }
@@ -44,7 +45,7 @@ public class GenerateCodeForBoardsCreationDemo {
     void generateCode() {
         int boardsCount = 100;
 
-        List<Board> boards = Stream.generate(BoardHelpers::constructRandomNonFinishedBoard)
+        List<Board> boards = Stream.generate(BoardGenerators::constructRandomNonFinishedBoard)
                 .distinct().limit(boardsCount).collect(Collectors.toList());
 
         ConsoleBoardVisualizer consoleBoardVisualizer = new ConsoleBoardVisualizer();

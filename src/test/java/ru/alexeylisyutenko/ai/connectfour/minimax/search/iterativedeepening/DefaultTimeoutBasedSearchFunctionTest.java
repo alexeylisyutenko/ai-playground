@@ -8,25 +8,26 @@ import ru.alexeylisyutenko.ai.connectfour.minimax.StoppableSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.BestEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.experimetal.TranspositionTableYBWCAlphaBetaSearchFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.iterativedeepening.timeoutbasedsearchfunction.DefaultTimeoutBasedSearchFunction;
-import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.*;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.BestMoveTable;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.ConcurrentHashMapBestMoveTable;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.ConcurrentHashMapTranspositionTable;
+import ru.alexeylisyutenko.ai.connectfour.minimax.search.transpositiontable.TranspositionTable;
+import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ForkJoinPool;
 
-import static ru.alexeylisyutenko.ai.connectfour.helper.BoardHelpers.constructRandomNonFinishedBoard;
 
 class DefaultTimeoutBasedSearchFunctionTest {
     private final ConsoleBoardVisualizer consoleBoardVisualizer = new ConsoleBoardVisualizer();
 
     @Test
     void stoppableSearchDemo() throws InterruptedException {
-        Board board = constructRandomNonFinishedBoard(0, 5);
+        Board board = BoardGenerators.constructRandomNonFinishedBoard(0, 5);
         consoleBoardVisualizer.visualize(board);
-        System.out.println("Current player: " +board.getCurrentPlayerId());
+        System.out.println("Current player: " + board.getCurrentPlayerId());
         System.out.println();
 
         TranspositionTable transpositionTable = new ConcurrentHashMapTranspositionTable();
