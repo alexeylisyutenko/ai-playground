@@ -45,9 +45,8 @@ public class DefaultBoardSetEvaluator implements BoardSetEvaluator {
                                                          int boardsSize,
                                                          AtomicInteger progressCounter,
                                                          ScheduledExecutorService scheduledExecutorService) {
-        scheduledExecutorService.scheduleAtFixedRate(() -> {
-            System.out.printf("%s evaluation: %d/%d\r", boardSetName, progressCounter.get(), boardsSize);
-        }, 0, CONSOLE_REFRESH_PERIOD, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(
+                () -> System.out.printf("%s evaluation: %d/%d\r", boardSetName, progressCounter.get(), boardsSize), 0, CONSOLE_REFRESH_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     private void shutdownExecutorServiceAndAwaitTermination(ScheduledExecutorService scheduledExecutorService) {
