@@ -1,6 +1,6 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset.serializer;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.serializer;
 
-import ru.alexeylisyutenko.ai.connectfour.dataset.model.BoardWithMove;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
 import ru.alexeylisyutenko.ai.connectfour.exception.ConnectFourDatasetException;
 import ru.alexeylisyutenko.ai.connectfour.game.BitBoard;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;

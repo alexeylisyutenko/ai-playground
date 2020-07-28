@@ -1,10 +1,10 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset.generator;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.generator;
 
 import org.apache.commons.lang3.tuple.Pair;
-import ru.alexeylisyutenko.ai.connectfour.dataset.evaluator.BoardSetEvaluator;
-import ru.alexeylisyutenko.ai.connectfour.dataset.helper.BoardSetHelpers;
-import ru.alexeylisyutenko.ai.connectfour.dataset.model.BoardWithMove;
-import ru.alexeylisyutenko.ai.connectfour.dataset.serializer.BoardWithMoveSerializer;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.evaluator.BoardSetEvaluator;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.helper.BoardSetHelpers;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.serializer.BoardWithMoveSerializer;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.InternalEvaluationFunction;

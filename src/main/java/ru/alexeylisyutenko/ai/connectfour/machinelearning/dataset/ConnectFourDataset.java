@@ -1,6 +1,6 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset;
 
-import ru.alexeylisyutenko.ai.connectfour.dataset.model.BoardWithMove;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
 
 import java.util.Set;
 

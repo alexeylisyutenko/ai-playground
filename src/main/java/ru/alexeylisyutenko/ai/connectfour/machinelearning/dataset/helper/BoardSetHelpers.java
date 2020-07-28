@@ -1,7 +1,7 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset.helper;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.helper;
 
 import org.apache.commons.lang3.tuple.Pair;
-import ru.alexeylisyutenko.ai.connectfour.dataset.model.BoardWithMove;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 

@@ -1,7 +1,7 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset.evaluator;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.evaluator;
 
 import lombok.AllArgsConstructor;
-import ru.alexeylisyutenko.ai.connectfour.dataset.model.BoardWithMove;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.EvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;

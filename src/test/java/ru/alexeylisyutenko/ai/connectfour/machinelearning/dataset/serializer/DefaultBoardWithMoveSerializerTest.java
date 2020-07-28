@@ -1,7 +1,7 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset.serializer;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.serializer;
 
 import org.junit.jupiter.api.Test;
-import ru.alexeylisyutenko.ai.connectfour.dataset.model.BoardWithMove;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
 import ru.alexeylisyutenko.ai.connectfour.game.BitBoard;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.game.DefaultBoard;

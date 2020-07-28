@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset.model;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model;
 
 import lombok.Value;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;

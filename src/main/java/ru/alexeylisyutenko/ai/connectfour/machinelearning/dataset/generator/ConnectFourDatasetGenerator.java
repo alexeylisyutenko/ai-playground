@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset.generator;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.generator;
 
 /**
  * Connect Four game board dataset generator.

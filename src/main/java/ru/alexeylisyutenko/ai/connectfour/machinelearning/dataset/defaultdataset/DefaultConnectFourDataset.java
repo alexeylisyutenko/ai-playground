@@ -1,8 +1,8 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset.defaultdataset;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.defaultdataset;
 
 import lombok.AllArgsConstructor;
-import ru.alexeylisyutenko.ai.connectfour.dataset.ConnectFourDataset;
-import ru.alexeylisyutenko.ai.connectfour.dataset.model.BoardWithMove;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDataset;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
 
 import java.util.Set;
 

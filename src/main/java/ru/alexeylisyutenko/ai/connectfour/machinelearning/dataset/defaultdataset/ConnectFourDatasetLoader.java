@@ -1,7 +1,7 @@
-package ru.alexeylisyutenko.ai.connectfour.dataset.defaultdataset;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.defaultdataset;
 
-import ru.alexeylisyutenko.ai.connectfour.dataset.model.BoardWithMove;
-import ru.alexeylisyutenko.ai.connectfour.dataset.serializer.DefaultBoardWithMoveSerializer;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.serializer.DefaultBoardWithMoveSerializer;
 import ru.alexeylisyutenko.ai.connectfour.exception.ConnectFourDatasetException;
 
 import java.io.FileInputStream;
@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import static ru.alexeylisyutenko.ai.connectfour.dataset.serializer.DefaultBoardWithMoveSerializer.RECORD_SIZE;
+import static ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.serializer.DefaultBoardWithMoveSerializer.RECORD_SIZE;
 
 public class ConnectFourDatasetLoader {
     public Set<BoardWithMove> load(String fileName) {
