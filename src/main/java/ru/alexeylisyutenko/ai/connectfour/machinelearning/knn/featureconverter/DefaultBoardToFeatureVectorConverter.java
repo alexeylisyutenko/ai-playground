@@ -1,6 +1,8 @@
-package ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.feature;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter;
 
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.feature.ArrayListFeatureVector;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.feature.FeatureVector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
-public class NaiveBoardToFeatureVectorConverter implements BoardToFeatureVectorConverter {
+public class DefaultBoardToFeatureVectorConverter implements BoardToFeatureVectorConverter {
     @Override
     public FeatureVector convert(Board board) {
         List<Double> vector = new ArrayList<>(BOARD_WIDTH * BOARD_HEIGHT);
