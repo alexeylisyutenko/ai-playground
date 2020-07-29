@@ -1,25 +1,27 @@
 package ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-// TODO: Implement and test.
 public class QuickSelector<T> {
     private final ArrayList<T> arrayList;
     private final Comparator<T> comparator;
 
-    public QuickSelector(List<T> list, Comparator<T> comparator)  {
-        this.arrayList = new ArrayList<>(list);
+    public QuickSelector(Collection<T> collection, Comparator<T> comparator)  {
+        this.arrayList = new ArrayList<>(collection);
         this.comparator = comparator;
     }
 
     public List<T> kSmallest(int k) {
-        partialSort(0, arrayList.size() - 1, k);
+        partialSort(k);
         return arrayList.subList(0, k);
     }
 
-    private void partialSort(int lo, int hi, int index) {
+    private void partialSort(int index) {
+        int lo = 0;
+        int hi = arrayList.size() - 1;
         while (true) {
             if (lo == hi) {
                 return;
