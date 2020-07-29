@@ -1,21 +1,23 @@
 package ru.alexeylisyutenko.ai.connectfour.machinelearning.knn;
 
+import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDataset;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.DistanceFunction;
-import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter.BoardToFeatureVectorConverter;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.feature.FeatureVector;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter.BoardToFeatureVectorConverter;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.util.QuickSelector;
+import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NearestNeighbor {
     private final DistanceFunction distanceFunction;
     private final BoardToFeatureVectorConverter featureVectorConverter;
-    private final Set<Pair<FeatureVector, Integer>> vectorsWithMoves;
+    private final Set<FutureVectorWithMove> vectorsWithMoves;
 
     public NearestNeighbor(ConnectFourDataset connectFourDataset, DistanceFunction distanceFunction, BoardToFeatureVectorConverter featureVectorConverter) {
         this.distanceFunction = distanceFunction;
@@ -30,28 +32,47 @@ public class NearestNeighbor {
         }
 
         FeatureVector featureVector = featureVectorConverter.convert(board);
-        double minimumDistance = Double.MAX_VALUE;
-        Pair<FeatureVector, Integer> best = null;
 
-        // Find k nearest neighbors.
+        // Filter impossible moves.
+        Set<Integer> possibleMoves = MinimaxHelper.getAllNextMoves(board)
+                .stream().map(Pair::getLeft).collect(Collectors.toSet());
 
-        for (Pair<FeatureVector, Integer> vectorWithMove : vectorsWithMoves) {
-            Double currentDistance = distanceFunction.distance(featureVector, vectorWithMove.getLeft());
-            if (currentDistance < minimumDistance) {
-                minimumDistance = currentDistance;
-                best = vectorWithMove;
-            }
-        }
-        return best.getRight();
+        // Calculate distances.
+        ArrayList<DistanceWithMove> distancesWithMoves = vectorsWithMoves.parallelStream()
+                .filter(futureVectorWithMove -> possibleMoves.contains(futureVectorWithMove.getMove()))
+                .map(futureVectorWithMove -> {
+                    double distance = distanceFunction.distance(featureVector, futureVectorWithMove.getFeatureVector());
+                    return new DistanceWithMove(distance, futureVectorWithMove.getMove());
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        // Find k smallest elements.
+        List<DistanceWithMove> kNearestNeighbors =
+                new QuickSelector<>(distancesWithMoves, Comparator.comparing(DistanceWithMove::getDistance)).kSmallest(k);
+
+        // Take average of k nearest neighbors.
+        double average = kNearestNeighbors.stream().mapToInt(DistanceWithMove::getMove).average().orElseThrow();
+        return (int) Math.round(average);
     }
 
-    private Set<Pair<FeatureVector, Integer>> convertDatasetToVectorsWithMoves(Set<BoardWithMove> dataset, BoardToFeatureVectorConverter featureVectorConverter) {
+    private Set<FutureVectorWithMove> convertDatasetToVectorsWithMoves(Set<BoardWithMove> dataset, BoardToFeatureVectorConverter featureVectorConverter) {
         return dataset.stream()
                 .map(boardWithMove -> {
                     FeatureVector featureVector = featureVectorConverter.convert(boardWithMove.getBoard());
-                    return Pair.of(featureVector, boardWithMove.getMove());
+                    return new FutureVectorWithMove(featureVector, boardWithMove.getMove());
                 })
                 .collect(Collectors.toSet());
     }
 
+    @Value
+    private static class FutureVectorWithMove {
+        FeatureVector featureVector;
+        int move;
+    }
+
+    @Value
+    private static class DistanceWithMove {
+        double distance;
+        int move;
+    }
 }

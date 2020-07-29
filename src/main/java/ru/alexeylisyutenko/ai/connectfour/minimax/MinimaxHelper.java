@@ -10,8 +10,6 @@ import java.util.Objects;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
-// TODO: Test this class.
-
 /**
  * Helper methods used in minimax algorithms.
  */

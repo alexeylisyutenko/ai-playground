@@ -14,13 +14,14 @@ public final class PlayerFactoryRegistry {
         ArrayList<PlayerFactory> factories = new ArrayList<>();
         factories.add(new HumanPlayerFactory());
         factories.add(new IterativeDeepeningPlayerFactory());
-        factories.add(new RandomPlayerFactory());
-        factories.add(new BasicEvaluationPlayer());
-        factories.add(new FocusedEvaluationPlayer());
-        factories.add(new EmptyEvaluationPlayer());
-        factories.add(new BetterEvaluationPlayer());
-        factories.add(new RandomizedEvaluationPlayer());
-        factories.add(new InternalEvaluationPlayer());
+        factories.add(new RandomPlayerFactoryFactory());
+        factories.add(new BasicEvaluationPlayerFactory());
+        factories.add(new FocusedEvaluationPlayerFactory());
+        factories.add(new EmptyEvaluationPlayerFactory());
+        factories.add(new BetterEvaluationPlayerFactory());
+        factories.add(new RandomizedEvaluationPlayerFactory());
+        factories.add(new InternalEvaluationPlayerFactory());
+        factories.add(new NearestNeighborsPlayerFactory());
         FACTORIES = Collections.unmodifiableList(factories);
     }
 
