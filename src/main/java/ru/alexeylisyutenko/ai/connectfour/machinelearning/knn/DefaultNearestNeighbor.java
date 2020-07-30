@@ -3,7 +3,6 @@ package ru.alexeylisyutenko.ai.connectfour.machinelearning.knn;
 import lombok.Value;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
-import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDataset;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.DistanceFunction;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.feature.FeatureVector;
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
 public class DefaultNearestNeighbor implements NearestNeighbor {
     private final DistanceFunction distanceFunction;
     private final BoardToFeatureVectorConverter featureVectorConverter;
-    private final Set<FutureVectorWithMove> vectorsWithMoves;
+    private final Set<FeatureVectorWithMove> vectorsWithMoves;
 
     public DefaultNearestNeighbor(Set<BoardWithMove> trainingSet, DistanceFunction distanceFunction, BoardToFeatureVectorConverter featureVectorConverter) {
         this.distanceFunction = distanceFunction;
@@ -40,32 +39,32 @@ public class DefaultNearestNeighbor implements NearestNeighbor {
 
         // Calculate distances.
         ArrayList<DistanceWithMove> distancesWithMoves = vectorsWithMoves.parallelStream()
-                .filter(futureVectorWithMove -> possibleMoves.contains(futureVectorWithMove.getMove()))
-                .map(futureVectorWithMove -> {
-                    double distance = distanceFunction.distance(featureVector, futureVectorWithMove.getFeatureVector());
-                    return new DistanceWithMove(distance, futureVectorWithMove.getMove());
+                .filter(featureVectorWithMove -> possibleMoves.contains(featureVectorWithMove.getMove()))
+                .map(featureVectorWithMove -> {
+                    double distance = distanceFunction.distance(featureVector, featureVectorWithMove.getFeatureVector());
+                    return new DistanceWithMove(distance, featureVectorWithMove.getMove());
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
 
         // Find k smallest elements.
-        List<DistanceWithMove> kNearestNeighbors = SortUtils.kSmallest(distancesWithMoves, Comparator.comparing(DistanceWithMove::getDistance), k);
+        Collection<DistanceWithMove> kNearestNeighbors = SortUtils.kSmallest(distancesWithMoves, Comparator.comparing(DistanceWithMove::getDistance), k);
 
         // Take average of k nearest neighbors.
         double average = kNearestNeighbors.stream().mapToInt(DistanceWithMove::getMove).average().orElseThrow();
         return (int) Math.round(average);
     }
 
-    private Set<FutureVectorWithMove> convertDatasetToVectorsWithMoves(Set<BoardWithMove> dataset, BoardToFeatureVectorConverter featureVectorConverter) {
+    private Set<FeatureVectorWithMove> convertDatasetToVectorsWithMoves(Set<BoardWithMove> dataset, BoardToFeatureVectorConverter featureVectorConverter) {
         return dataset.stream()
                 .map(boardWithMove -> {
                     FeatureVector featureVector = featureVectorConverter.convert(boardWithMove.getBoard());
-                    return new FutureVectorWithMove(featureVector, boardWithMove.getMove());
+                    return new FeatureVectorWithMove(featureVector, boardWithMove.getMove());
                 })
                 .collect(Collectors.toSet());
     }
 
     @Value
-    private static class FutureVectorWithMove {
+    private static class FeatureVectorWithMove {
         FeatureVector featureVector;
         int move;
     }

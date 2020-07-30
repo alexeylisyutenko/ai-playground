@@ -12,15 +12,15 @@ public final class SortUtils {
     /**
      * Find k smallest elements in the collection.
      * <br>
-     * Resulting list is not sorted.
+     * Resulting collection is unordered.
      *
      * @param collection collection where we're looking smallest elements at
      * @param comparator comparator for collection's element type
      * @param k number of smallest elements
      * @param <T> type of elements
-     * @return list of k smallest elements
+     * @return collection of k smallest elements
      */
-    public static <T> List<T> kSmallest(Collection<T> collection, Comparator<T> comparator, int k) {
+    public static <T> Collection<T> kSmallest(Collection<T> collection, Comparator<T> comparator, int k) {
         Objects.requireNonNull(collection, "collection cannot be null");
         Objects.requireNonNull(comparator, "comparator cannot be null");
         if (k < 1 || k > collection.size()) {
@@ -34,14 +34,14 @@ public final class SortUtils {
     /**
      * Find k smallest elements in the collection.
      * <br>
-     * Resulting list is not sorted.
+     * Resulting collection is unordered.
      *
      * @param collection collection where we're looking smallest elements at
      * @param k number of smallest elements
      * @param <T> type of elements
-     * @return list of k smallest elements
+     * @return collection of k smallest elements
      */
-    public static <T extends Comparable<? super T>> List<T> kSmallest(Collection<T> collection, int k) {
+    public static <T extends Comparable<? super T>> Collection<T> kSmallest(Collection<T> collection, int k) {
         return kSmallest(collection, Comparator.comparing(Function.identity()), k);
     }
 }
