@@ -10,7 +10,7 @@ import java.util.List;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
-public class DefaultBoardToFeatureVectorConverter implements BoardToFeatureVectorConverter {
+public class PlainBoardToFeatureVectorConverter implements BoardToFeatureVectorConverter {
     @Override
     public FeatureVector convert(Board board) {
         List<Double> vector = new ArrayList<>(BOARD_WIDTH * BOARD_HEIGHT);

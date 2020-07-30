@@ -4,17 +4,18 @@ import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.game.GameContext;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDatasets;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.DefaultNearestNeighbor;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.NearestNeighbor;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.ManhattanDistanceFunction;
-import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter.DefaultBoardToFeatureVectorConverter;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter.PlainBoardToFeatureVectorConverter;
 import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 
 import java.util.List;
 
 public class KNearestNeighborsPlayer extends AbstractPlayer {
     private final NearestNeighbor nearestNeighbor =
-            new NearestNeighbor(ConnectFourDatasets.connectFourDataset(),
-                    new ManhattanDistanceFunction(), new DefaultBoardToFeatureVectorConverter());
+            new DefaultNearestNeighbor(ConnectFourDatasets.connectFourDataset().getTrainingSet(),
+                    new ManhattanDistanceFunction(), new PlainBoardToFeatureVectorConverter());
 
     @Override
     public void requestMove(GameContext gameContext) {

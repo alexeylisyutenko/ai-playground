@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-public class QuickSelector<T> {
+class QuickSelector<T> {
     private final ArrayList<T> arrayList;
     private final Comparator<T> comparator;
 
