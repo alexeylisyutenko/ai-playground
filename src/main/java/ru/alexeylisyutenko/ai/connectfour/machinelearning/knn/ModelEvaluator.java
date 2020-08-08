@@ -23,7 +23,7 @@ public class ModelEvaluator {
             Pair.of("manhattan distance", new ManhattanDistanceFunction()),
             Pair.of("euclidean distance", new EuclideanDistanceFunction()),
             Pair.of("max distance", new MaxDistanceFunction()),
-            Pair.of("hamming distance", new HammingDistanceFunction()),
+            Pair.of("hamming distance", new HammingDistanceFunction())
     );
 
     private final List<Pair<String, BoardToFeatureVectorConverter>> converters = List.of(
