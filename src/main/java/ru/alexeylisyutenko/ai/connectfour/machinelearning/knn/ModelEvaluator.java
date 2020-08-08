@@ -7,10 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDataset;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDatasets;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
-import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.DistanceFunction;
-import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.EuclideanDistanceFunction;
-import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.ManhattanDistanceFunction;
-import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.MaxDistanceFunction;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.*;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter.BoardToFeatureVectorConverter;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter.ChainBoardToFeatureVectorConverter;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter.PlainBoardToFeatureVectorConverter;
@@ -25,12 +22,12 @@ public class ModelEvaluator {
     private final List<Pair<String, DistanceFunction>> distanceFunctions = List.of(
             Pair.of("manhattan distance", new ManhattanDistanceFunction()),
             Pair.of("euclidean distance", new EuclideanDistanceFunction()),
-            Pair.of("max distance", new MaxDistanceFunction())
+            Pair.of("max distance", new MaxDistanceFunction()),
+            Pair.of("hamming distance", new HammingDistanceFunction()),
     );
 
     private final List<Pair<String, BoardToFeatureVectorConverter>> converters = List.of(
-            Pair.of("plain converter", new PlainBoardToFeatureVectorConverter()),
-            Pair.of("chain converter", new ChainBoardToFeatureVectorConverter())
+            Pair.of("plain converter", new PlainBoardToFeatureVectorConverter())
     );
 
     private final List<Integer> kValues = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20);

@@ -16,7 +16,7 @@ import java.util.List;
 public class KNearestNeighborsPlayer extends AbstractPlayer {
     private final NearestNeighbor nearestNeighbor =
             new DefaultNearestNeighbor(ConnectFourDatasets.connectFourDataset().getTrainingSet(),
-                    new ManhattanDistanceFunction(), new ChainBoardToFeatureVectorConverter());
+                    new ManhattanDistanceFunction(), new PlainBoardToFeatureVectorConverter());
 
     @Override
     public void requestMove(GameContext gameContext) {

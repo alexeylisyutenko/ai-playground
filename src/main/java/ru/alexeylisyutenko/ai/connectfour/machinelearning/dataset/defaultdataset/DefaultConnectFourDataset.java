@@ -9,11 +9,17 @@ import java.util.Set;
 @AllArgsConstructor
 public class DefaultConnectFourDataset implements ConnectFourDataset {
     private final Set<BoardWithMove> trainingDataset;
+    private final Set<BoardWithMove> validationDataset;
     private final Set<BoardWithMove> testDataset;
 
     @Override
     public Set<BoardWithMove> getTrainingSet() {
         return trainingDataset;
+    }
+
+    @Override
+    public Set<BoardWithMove> getValidationSet() {
+        return validationDataset;
     }
 
     @Override

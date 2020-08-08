@@ -1,11 +1,12 @@
 package ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.generator;
 
-import org.apache.commons.lang3.tuple.Pair;
+import lombok.Builder;
+import lombok.Value;
+import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.evaluator.BoardSetEvaluator;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.helper.BoardSetHelpers;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.model.BoardWithMove;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.serializer.BoardWithMoveSerializer;
-import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.minimax.Move;
 import ru.alexeylisyutenko.ai.connectfour.minimax.evaluation.InternalEvaluationFunction;
 import ru.alexeylisyutenko.ai.connectfour.minimax.search.alphabeta.AlphaBetaSearchFunction;
@@ -14,7 +15,10 @@ import ru.alexeylisyutenko.ai.connectfour.util.BoardGenerators;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
@@ -28,30 +32,27 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
     }
 
     @Override
-    public void generate(int samplesInEachClassCount, int testSamplesCount, String trainingDataFileName, String testDataFileName) {
-        validateArguments(samplesInEachClassCount, testSamplesCount, trainingDataFileName, testDataFileName);
+    public void generate(ConnectFourDatasetGeneratorConfig config) {
+        validateConfig(config);
 
         // Generate boards.
         System.out.println("Generating boards...");
-        Pair<Set<Board>, Set<Board>> boards = generateBoards(samplesInEachClassCount, testSamplesCount);
-        Set<Board> trainingSetBoards = boards.getLeft();
-        Set<Board> testSetBoards = boards.getRight();
-
-        printBoardSetsInformation(trainingSetBoards, testSetBoards);
+        GeneratedBoards boards = generateBoards(config);
+        printBoardSetsInformation(boards);
 
         // Evaluate boards.
         System.out.println("Evaluating boards...");
-        List<BoardWithMove> evaluatedTrainingSetBoards = boardSetEvaluator.evaluate(trainingSetBoards, "Training set");
-        List<BoardWithMove> evaluatedTestSetBoards = boardSetEvaluator.evaluate(testSetBoards, "Test set");
-        printEvaluatedBoardSetsInformation(evaluatedTrainingSetBoards, evaluatedTestSetBoards);
+        EvaluatedBoards evaluatedBoards = evaluateBoards(boards);
+        printEvaluatedBoardSetsInformation(evaluatedBoards);
 
         // Save boards.
-        saveBoardWithMoves(evaluatedTrainingSetBoards, trainingDataFileName);
-        saveBoardWithMoves(evaluatedTestSetBoards, testDataFileName);
+        saveBoardWithMoves(evaluatedBoards.getEvaluatedTrainingSet(), config.getTrainingDataFileName());
+        saveBoardWithMoves(evaluatedBoards.getEvaluatedValidationSet(), config.getValidationDataFileName());
+        saveBoardWithMoves(evaluatedBoards.getEvaluatedTestSet(), config.getTestDataFileName());
     }
 
     private void saveBoardWithMoves(List<BoardWithMove> boardWithMoves, String fileName) {
-        try(OutputStream fileOutputStream = new FileOutputStream(fileName)) {
+        try (OutputStream fileOutputStream = new FileOutputStream(fileName)) {
             boardWithMoves.forEach(boardWithMove -> {
                 try {
                     fileOutputStream.write(boardWithMoveSerializer.serialize(boardWithMove));
@@ -64,37 +65,54 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
         }
     }
 
-    private void printEvaluatedBoardSetsInformation(List<BoardWithMove> evaluatedTrainingSetBoards, List<BoardWithMove> evaluatedTestSetBoards) {
+    private void printEvaluatedBoardSetsInformation(EvaluatedBoards evaluatedBoards) {
         System.out.println();
-        BoardSetHelpers.printMovesDistribution(evaluatedTrainingSetBoards);
-        BoardSetHelpers.printMovesDistribution(evaluatedTestSetBoards);
+        System.out.println();
+        System.out.println("Training set boards moves distribution:");
+        BoardSetHelpers.printMovesDistribution(evaluatedBoards.getEvaluatedTrainingSet());
+        System.out.println();
+        System.out.println("Validation set boards moves distribution:");
+        BoardSetHelpers.printMovesDistribution(evaluatedBoards.getEvaluatedValidationSet());
+        System.out.println();
+        System.out.println("Test set boards moves distribution:");
+        BoardSetHelpers.printMovesDistribution(evaluatedBoards.getEvaluatedTestSet());
+        System.out.println();
     }
 
-    private void printBoardSetsInformation(Set<Board> trainingSetBoards, Set<Board> testSetBoards) {
+    private void printBoardSetsInformation(GeneratedBoards boards) {
         System.out.println("Training set boards:");
-        BoardSetHelpers.printSingleBoardSetInformation(trainingSetBoards);
+        BoardSetHelpers.printSingleBoardSetInformation(boards.getTrainingSet());
+        System.out.println();
+        System.out.println("Validation set boards:");
+        BoardSetHelpers.printSingleBoardSetInformation(boards.getValidationSet());
         System.out.println();
         System.out.println("Test set boards:");
-        BoardSetHelpers.printSingleBoardSetInformation(testSetBoards);
+        BoardSetHelpers.printSingleBoardSetInformation(boards.getTestSet());
         System.out.println();
     }
 
-    private void validateArguments(int samplesInEachClassCount, int testSamplesCount, String trainingDataFileName, String testDataFileName) {
-        if (samplesInEachClassCount <= 0) {
+    private void validateConfig(ConnectFourDatasetGeneratorConfig config) {
+        if (config.getTrainingSamplesInEachClassCount() <= 0) {
             throw new IllegalArgumentException("samplesInEachClassCount must be greater or equal to zero");
         }
-        if (testSamplesCount <= 0) {
+        if (config.getValidationSamplesCount() <= 0) {
+            throw new IllegalArgumentException("validationSamplesCount must be greater or equal to zero");
+        }
+        if (config.getTestSamplesCount() <= 0) {
             throw new IllegalArgumentException("testSamplesCount must be greater or equal to zero");
         }
-        if (trainingDataFileName.isBlank()) {
+        if (config.getTrainingDataFileName().isBlank()) {
             throw new IllegalArgumentException("trainingDataFileName cannot be blank");
         }
-        if (testDataFileName.isBlank()) {
+        if (config.getValidationDataFileName().isBlank()) {
+            throw new IllegalArgumentException("validationDataFileName cannot be blank");
+        }
+        if (config.getTestDataFileName().isBlank()) {
             throw new IllegalArgumentException("testDataFileName cannot be blank");
         }
     }
 
-    private Pair<Set<Board>, Set<Board>> generateBoards(int trainingSetSizeForEachClass, int testSetSize) {
+    private GeneratedBoards generateBoards(ConnectFourDatasetGeneratorConfig config) {
         AlphaBetaSearchFunction searchFunction = new AlphaBetaSearchFunction();
         InternalEvaluationFunction evaluationFunction = new InternalEvaluationFunction();
 
@@ -102,23 +120,60 @@ public class DefaultConnectFourDatasetGenerator implements ConnectFourDatasetGen
         Set<Board> trainingSet = new HashSet<>();
         int[] sizes = new int[BOARD_WIDTH];
         Iterator<Board> boardIterator = BoardGenerators.distinctBoards().iterator();
-        while (trainingSet.size() < trainingSetSizeForEachClass * BOARD_WIDTH) {
+        while (trainingSet.size() < config.getTrainingSamplesInEachClassCount() * BOARD_WIDTH) {
             Board board = boardIterator.next();
             Move move = searchFunction.search(board, 6, evaluationFunction);
 
-            if (sizes[move.getColumn()] < trainingSetSizeForEachClass) {
+            if (sizes[move.getColumn()] < config.getTrainingSamplesInEachClassCount()) {
                 sizes[move.getColumn()]++;
                 trainingSet.add(board);
             }
         }
 
+        // Generate validation set.
+        Set<Board> validationSet = new HashSet<>();
+        while (validationSet.size() < config.getValidationSamplesCount()) {
+            validationSet.add(boardIterator.next());
+        }
+
         // Generate test set.
         Set<Board> testSet = new HashSet<>();
-        while (testSet.size() < testSetSize) {
+        while (testSet.size() < config.getTestSamplesCount()) {
             testSet.add(boardIterator.next());
         }
 
-        return Pair.of(trainingSet, testSet);
+        return GeneratedBoards.builder()
+                .trainingSet(trainingSet)
+                .validationSet(validationSet)
+                .testSet(testSet)
+                .build();
     }
 
+    private EvaluatedBoards evaluateBoards(GeneratedBoards boards) {
+        List<BoardWithMove> evaluatedTrainingSetBoards = boardSetEvaluator.evaluate(boards.getTrainingSet(), "Training set");
+        List<BoardWithMove> evaluatedValidationSetBoards = boardSetEvaluator.evaluate(boards.getValidationSet(), "Validation set");
+        List<BoardWithMove> evaluatedTestSetBoards = boardSetEvaluator.evaluate(boards.getTestSet(), "Test set");
+
+        return EvaluatedBoards.builder()
+                .evaluatedTrainingSet(evaluatedTrainingSetBoards)
+                .evaluatedValidationSet(evaluatedValidationSetBoards)
+                .evaluatedTestSet(evaluatedTestSetBoards)
+                .build();
+    }
+
+    @Builder
+    @Value
+    private static class GeneratedBoards {
+        Set<Board> trainingSet;
+        Set<Board> validationSet;
+        Set<Board> testSet;
+    }
+
+    @Builder
+    @Value
+    private static class EvaluatedBoards {
+        List<BoardWithMove> evaluatedTrainingSet;
+        List<BoardWithMove> evaluatedValidationSet;
+        List<BoardWithMove> evaluatedTestSet;
+    }
 }

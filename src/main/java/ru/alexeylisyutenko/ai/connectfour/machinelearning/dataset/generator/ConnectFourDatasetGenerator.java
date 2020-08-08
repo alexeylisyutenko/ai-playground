@@ -10,10 +10,7 @@ public interface ConnectFourDatasetGenerator {
     /**
      * Generate Connect Four game board dataset.
      *
-     * @param samplesInEachClassCount number of training samples for each class
-     * @param testSamplesCount        number of test samples
-     * @param trainingDataFileName    training set file name
-     * @param testDataFileName        test set file name
+     * @param config generator configuration
      */
-    void generate(int samplesInEachClassCount, int testSamplesCount, String trainingDataFileName, String testDataFileName);
+    void generate(ConnectFourDatasetGeneratorConfig config);
 }

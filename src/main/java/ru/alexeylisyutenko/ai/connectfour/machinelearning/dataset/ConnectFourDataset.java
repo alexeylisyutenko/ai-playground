@@ -16,6 +16,13 @@ public interface ConnectFourDataset {
     Set<BoardWithMove> getTrainingSet();
 
     /**
+     * Get a validation set.
+     *
+     * @return validation dataset
+     */
+    Set<BoardWithMove> getValidationSet();
+
+    /**
      * Get a test set.
      *
      * @return test dataset

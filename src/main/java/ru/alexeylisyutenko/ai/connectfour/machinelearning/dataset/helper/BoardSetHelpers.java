@@ -16,7 +16,7 @@ public class BoardSetHelpers {
     public static void printMovesDistribution(List<BoardWithMove> evaluatedBoards) {
         Map<Integer, Long> columnStats = evaluatedBoards.stream().map(BoardWithMove::getMove)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        System.out.println("Move distribution = " + columnStats);
+        System.out.println(columnStats);
     }
 
     public static void printSingleBoardSetInformation(Set<Board> boards) {
