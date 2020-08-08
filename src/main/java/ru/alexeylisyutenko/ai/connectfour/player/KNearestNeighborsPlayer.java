@@ -6,6 +6,7 @@ import ru.alexeylisyutenko.ai.connectfour.game.GameContext;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDatasets;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.DefaultNearestNeighbor;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.NearestNeighbor;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.HammingDistanceFunction;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.distance.ManhattanDistanceFunction;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter.ChainBoardToFeatureVectorConverter;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.knn.featureconverter.PlainBoardToFeatureVectorConverter;
@@ -16,7 +17,7 @@ import java.util.List;
 public class KNearestNeighborsPlayer extends AbstractPlayer {
     private final NearestNeighbor nearestNeighbor =
             new DefaultNearestNeighbor(ConnectFourDatasets.connectFourDataset().getTrainingSet(),
-                    new ManhattanDistanceFunction(), new PlainBoardToFeatureVectorConverter());
+                    new HammingDistanceFunction(), new PlainBoardToFeatureVectorConverter());
 
     @Override
     public void requestMove(GameContext gameContext) {

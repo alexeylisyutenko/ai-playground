@@ -35,7 +35,8 @@ public class ModelEvaluator {
 
     public static void main(String[] args) {
         ModelEvaluator modelEvaluator = new ModelEvaluator();
-        modelEvaluator.findBetterHyperparameters();
+//        modelEvaluator.findBetterHyperparameters();
+        modelEvaluator.evaluateModel(new HammingDistanceFunction(), new PlainBoardToFeatureVectorConverter(), 1, CONNECT_FOUR_DATASET.getTestSet());
     }
 
     /**
@@ -51,7 +52,7 @@ public class ModelEvaluator {
                     NearestNeighbor nearestNeighbor = new DefaultNearestNeighbor(CONNECT_FOUR_DATASET.getTrainingSet(), distanceFunction.getValue(), converter.getValue());
                     System.out.printf("Evaluation started: %s + %s + %s...%n", converter.getKey(), distanceFunction.getKey(), k);
 
-                    ModelEvaluationResult modelEvaluationResult = doEvaluateModel(nearestNeighbor, k, CONNECT_FOUR_DATASET.getTestSet());
+                    ModelEvaluationResult modelEvaluationResult = doEvaluateModel(nearestNeighbor, k, CONNECT_FOUR_DATASET.getValidationSet());
                     printModelEvaluationResult(modelEvaluationResult);
 
                     results.add(HyperparametersSearchResult.builder()

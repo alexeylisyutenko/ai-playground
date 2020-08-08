@@ -17,7 +17,7 @@ public class ConnectFourDatasets {
     public static ConnectFourDataset connectFourDataset() {
         ConnectFourDatasetLoader loader = new ConnectFourDatasetLoader();
         Set<BoardWithMove> trainingDataset = loader.load(DATASETS_TRAINING_SET_FILE);
-        Set<BoardWithMove> validationDataset = loader.load(DATASETS_TRAINING_SET_FILE);
+        Set<BoardWithMove> validationDataset = loader.load(DATASETS_VALIDATION_SET_FILE);
         Set<BoardWithMove> testDataset = loader.load(DATASETS_TEST_SET_FILE);
         return new DefaultConnectFourDataset(trainingDataset, validationDataset, testDataset);
     }
