@@ -37,6 +37,12 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.9'
     implementation 'com.google.guava:guava:29.0-jre'
     implementation 'com.jakewharton.fliptables:fliptables:1.1.0'
+
+    implementation "org.deeplearning4j:deeplearning4j-core:1.0.0-beta7"
+    implementation 'org.nd4j:nd4j-native:1.0.0-beta7'
+    implementation 'org.nd4j:nd4j-native:1.0.0-beta7:linux-x86_64-avx2'
+    implementation 'org.slf4j:slf4j-simple:1.7.24'
+
     compileOnly 'org.projectlombok:lombok:1.18.10'
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
 
