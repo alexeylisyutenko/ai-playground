@@ -27,7 +27,7 @@ public class ChainBoardToFeatureVectorConverter implements BoardToFeatureVectorC
 
         List<Double> vector = new ArrayList<>(BOARD_WIDTH * BOARD_HEIGHT);
         for (int row = 0; row < BOARD_HEIGHT; row++) {
-            for (int column = 0; column < BOARD_HEIGHT; column++) {
+            for (int column = 0; column < BOARD_WIDTH; column++) {
                 Cell cell = new Cell(row, column);
                 double val;
                 if (currentPlayerCells.containsKey(cell)) {

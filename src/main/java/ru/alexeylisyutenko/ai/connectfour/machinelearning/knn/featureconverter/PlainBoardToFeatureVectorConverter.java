@@ -15,7 +15,7 @@ public class PlainBoardToFeatureVectorConverter implements BoardToFeatureVectorC
     public FeatureVector convert(Board board) {
         List<Double> vector = new ArrayList<>(BOARD_WIDTH * BOARD_HEIGHT);
         for (int row = 0; row < BOARD_HEIGHT; row++) {
-            for (int column = 0; column < BOARD_HEIGHT; column++) {
+            for (int column = 0; column < BOARD_WIDTH; column++) {
                 if (board.getCellPlayerId(row, column) == board.getCurrentPlayerId()) {
                     vector.add(1.0);
                 } else if (board.getCellPlayerId(row, column) == board.getOtherPlayerId()) {
