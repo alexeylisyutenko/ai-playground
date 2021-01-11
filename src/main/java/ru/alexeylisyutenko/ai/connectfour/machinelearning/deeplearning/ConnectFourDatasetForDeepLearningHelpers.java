@@ -1,4 +1,4 @@
-package ru.alexeylisyutenko.ai.connectfour.demo.deeplearing;
+package ru.alexeylisyutenko.ai.connectfour.machinelearning.deeplearning;
 
 import org.deeplearning4j.datasets.iterator.INDArrayDataSetIterator;
 import org.nd4j.common.primitives.Pair;
@@ -16,8 +16,8 @@ import java.util.Set;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
 
-public final class ConnectFourDatasetHelpers {
-    private ConnectFourDatasetHelpers() {
+public final class ConnectFourDatasetForDeepLearningHelpers {
+    private ConnectFourDatasetForDeepLearningHelpers() {
     }
 
     public static INDArray constructMeanBoardArrayFlattened(Set<BoardWithMove> dataset) {
@@ -56,6 +56,8 @@ public final class ConnectFourDatasetHelpers {
     }
 
     public static INDArray boardToINDArray(Board board) {
+        Objects.requireNonNull(board, "board cannot be null");
+
         INDArray indArray = Nd4j.create(BOARD_HEIGHT, BOARD_WIDTH);
         for (int row = 0; row < BOARD_HEIGHT; row++) {
             for (int column = 0; column < BOARD_WIDTH; column++) {
@@ -69,5 +71,9 @@ public final class ConnectFourDatasetHelpers {
             }
         }
         return indArray;
+    }
+
+    public static INDArray boardToINDArrayFlattened(Board board) {
+        return boardToINDArray(board).reshape(-1);
     }
 }

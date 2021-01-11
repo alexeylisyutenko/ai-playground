@@ -2,14 +2,6 @@ package ru.alexeylisyutenko.ai.connectfour.demo.deeplearing;
 
 import org.deeplearning4j.core.storage.StatsStorage;
 import org.deeplearning4j.datasets.iterator.INDArrayDataSetIterator;
-import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
-import org.deeplearning4j.earlystopping.EarlyStoppingResult;
-import org.deeplearning4j.earlystopping.saver.LocalFileModelSaver;
-import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
-import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationCondition;
-import org.deeplearning4j.earlystopping.termination.MaxTimeIterationTerminationCondition;
-import org.deeplearning4j.earlystopping.trainer.EarlyStoppingTrainer;
-import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
@@ -22,22 +14,25 @@ import org.deeplearning4j.ui.model.stats.StatsListener;
 import org.deeplearning4j.ui.model.storage.InMemoryStatsStorage;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.nd4j.common.primitives.Pair;
 import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import ru.alexeylisyutenko.ai.connectfour.game.BitBoard;
+import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDataset;
 import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDatasets;
+import ru.alexeylisyutenko.ai.connectfour.machinelearning.deeplearning.ConnectFourDatasetForDeepLearningHelpers;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
 
-import static ru.alexeylisyutenko.ai.connectfour.demo.deeplearing.ConnectFourDatasetHelpers.constructINDArraysFor;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
+import static ru.alexeylisyutenko.ai.connectfour.machinelearning.deeplearning.ConnectFourDatasetForDeepLearningHelpers.boardToINDArrayFlattened;
+import static ru.alexeylisyutenko.ai.connectfour.machinelearning.deeplearning.ConnectFourDatasetForDeepLearningHelpers.constructMeanBoardArrayFlattened;
 
 public class TrainConnectFourNaiveDemo {
     @Test
@@ -45,14 +40,13 @@ public class TrainConnectFourNaiveDemo {
     void demo() throws IOException {
         ConnectFourDataset connectFourDataset = ConnectFourDatasets.connectFourDataset();
 
-
-        INDArray flattenedMeanBoard = ConnectFourDatasetHelpers.constructMeanBoardArrayFlattened(connectFourDataset.getTrainingSet());
+        INDArray flattenedMeanBoard = ConnectFourDatasetForDeepLearningHelpers.constructMeanBoardArrayFlattened(connectFourDataset.getTrainingSet());
         INDArrayDataSetIterator trainInterator =
-                ConnectFourDatasetHelpers.createINDArrayDataSetIterator(connectFourDataset.getTrainingSet(), flattenedMeanBoard, 200);
+                ConnectFourDatasetForDeepLearningHelpers.createINDArrayDataSetIterator(connectFourDataset.getTrainingSet(), flattenedMeanBoard, 200);
         INDArrayDataSetIterator validateIterator =
-                ConnectFourDatasetHelpers.createINDArrayDataSetIterator(connectFourDataset.getValidationSet(), flattenedMeanBoard, 200);
+                ConnectFourDatasetForDeepLearningHelpers.createINDArrayDataSetIterator(connectFourDataset.getValidationSet(), flattenedMeanBoard, 200);
         INDArrayDataSetIterator testIterator =
-                ConnectFourDatasetHelpers.createINDArrayDataSetIterator(connectFourDataset.getTestSet(), flattenedMeanBoard, 200);
+                ConnectFourDatasetForDeepLearningHelpers.createINDArrayDataSetIterator(connectFourDataset.getTestSet(), flattenedMeanBoard, 200);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(new Adam())
@@ -140,8 +134,30 @@ public class TrainConnectFourNaiveDemo {
             network.save(new File(String.format("deeplearing-models/naive-model-%d", i)), false);
         }
 
-        // TODO: evaluate
+        // evaluate
         Evaluation eval = network.evaluate(testIterator);
         System.out.println(eval);
+    }
+
+    @Test
+    @Disabled
+    void loadModelAndPredict() throws IOException {
+        Board board = new BitBoard(
+                new int[][]{
+                        {0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 2, 1, 2, 0, 0},
+                        {0, 0, 1, 2, 1, 0, 0},
+                        {2, 1, 2, 2, 2, 1, 0}
+                }, 1);
+        INDArray boardIndArray = boardToINDArrayFlattened(board);
+
+        INDArray meanBoardArrayFlattened = constructMeanBoardArrayFlattened(ConnectFourDatasets.connectFourDataset().getTrainingSet());
+        MultiLayerNetwork network = MultiLayerNetwork.load(new File("deeplearing-models/naive-model-199.bin"), false);
+
+        INDArray networkInput = boardIndArray.sub(meanBoardArrayFlattened).reshape(1, -1);
+        int[] predict = network.predict(networkInput);
+        System.out.println(Arrays.toString(predict));
     }
 }

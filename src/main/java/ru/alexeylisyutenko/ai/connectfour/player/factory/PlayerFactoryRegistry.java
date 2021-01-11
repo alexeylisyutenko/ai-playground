@@ -22,6 +22,7 @@ public final class PlayerFactoryRegistry {
         factories.add(new RandomizedEvaluationPlayerFactory());
         factories.add(new InternalEvaluationPlayerFactory());
         factories.add(new NearestNeighborsPlayerFactory());
+        factories.add(new NaiveDeepLearningPlayerFactory());
         FACTORIES = Collections.unmodifiableList(factories);
     }
 

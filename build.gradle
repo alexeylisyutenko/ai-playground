@@ -10,6 +10,9 @@ version '1.0'
 
 sourceCompatibility = 11
 
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
 repositories {
     mavenCentral()
 }
@@ -28,8 +31,6 @@ mainClassName = 'ru.alexeylisyutenko.ai.connectfour.main.gui.JavaFxGame'
 
 jmh {
     jvmArgs = ['-Djmh.separateClasspathJAR=true']
-//    exclude = ['SearchFunctionsBenchmark', 'EvaluationFunctionsBenchmark', 'SearchFunctionsWithGenuineBoardsBenchmark',
-//               'SearchFunctionsGameRunnerBasedBenchmark', 'BoardImplementationsBenchmark', 'InternalEvaluationFunctionBenchmark']
     include = ['SearchFunctionsGameRunnerBasedBenchmark']
 }
 
@@ -40,9 +41,10 @@ dependencies {
 
     implementation "org.deeplearning4j:deeplearning4j-core:1.0.0-beta7"
     implementation 'org.nd4j:nd4j-native:1.0.0-beta7'
-    implementation 'org.nd4j:nd4j-native:1.0.0-beta7:linux-x86_64-avx2'
-    implementation 'org.deeplearning4j:deeplearning4j-ui:1.0.0-beta7'
+
     implementation 'org.slf4j:slf4j-simple:1.7.24'
+    implementation 'org.nd4j:nd4j-native:1.0.0-beta7:windows-x86_64-avx2'
+    //    implementation 'org.nd4j:nd4j-native:1.0.0-beta7:linux-x86_64-avx2'
 
     compileOnly 'org.projectlombok:lombok:1.18.10'
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
@@ -53,4 +55,5 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter:2.23.0'
     testCompileOnly 'org.projectlombok:lombok:1.18.10'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
+    testImplementation 'org.deeplearning4j:deeplearning4j-ui:1.0.0-beta7'
 }

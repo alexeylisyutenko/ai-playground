@@ -9,7 +9,7 @@ import ru.alexeylisyutenko.ai.connectfour.machinelearning.dataset.ConnectFourDat
 
 import java.util.Arrays;
 
-import static ru.alexeylisyutenko.ai.connectfour.demo.deeplearing.ConnectFourDatasetHelpers.constructINDArraysFor;
+import static ru.alexeylisyutenko.ai.connectfour.machinelearning.deeplearning.ConnectFourDatasetForDeepLearningHelpers.constructINDArraysFor;
 
 public class Nd4jDemo {
     @Test
