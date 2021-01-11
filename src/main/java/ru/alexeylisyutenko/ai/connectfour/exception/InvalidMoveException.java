@@ -4,7 +4,7 @@ import lombok.Getter;
 import ru.alexeylisyutenko.ai.connectfour.game.Board;
 
 @Getter
-public class InvalidMoveException extends RuntimeException {
+public class InvalidMoveException extends ConnectFourException {
     private final int column;
     private final Board board;
 
