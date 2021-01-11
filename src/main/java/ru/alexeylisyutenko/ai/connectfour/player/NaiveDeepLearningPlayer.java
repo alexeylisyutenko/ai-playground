@@ -1,17 +1,13 @@
 package ru.alexeylisyutenko.ai.connectfour.player;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import ru.alexeylisyutenko.ai.connectfour.exception.ConnectFourException;
-import ru.alexeylisyutenko.ai.connectfour.game.Board;
 import ru.alexeylisyutenko.ai.connectfour.game.GameContext;
-import ru.alexeylisyutenko.ai.connectfour.minimax.MinimaxHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import static ru.alexeylisyutenko.ai.connectfour.machinelearning.deeplearning.ConnectFourDatasetForDeepLearningHelpers.boardToINDArrayFlattened;
 
@@ -45,13 +41,6 @@ public class NaiveDeepLearningPlayer extends AbstractPlayer {
     public void requestMove(GameContext gameContext) {
         INDArray boardIndArray = boardToINDArrayFlattened(gameContext.getBoard()).sub(MEAN_BOARD_ARRAY_FLATTENED).reshape(1, -1);
         int move = network.predict(boardIndArray)[0];
-
-        List<Pair<Integer, Board>> possibleMoves = MinimaxHelper.getAllNextMoves(gameContext.getBoard());
-        boolean moveIsValid = possibleMoves.stream().map(Pair::getLeft).anyMatch(m -> m == move);
-        if (moveIsValid) {
-            gameContext.makeMove(move);
-        } else {
-            gameContext.makeMove(possibleMoves.get(0).getLeft());
-        }
+        makeMoveIfPossibleOrAny(gameContext, move);
     }
 }
