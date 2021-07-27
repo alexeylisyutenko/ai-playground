@@ -35,25 +35,26 @@ jmh {
 }
 
 dependencies {
-    implementation 'org.apache.commons:commons-lang3:3.9'
-    implementation 'com.google.guava:guava:29.0-jre'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'com.google.guava:guava:30.1.1-jre'
     implementation 'com.jakewharton.fliptables:fliptables:1.1.0'
 
-    implementation "org.deeplearning4j:deeplearning4j-core:1.0.0-M1.1"
+    implementation 'org.deeplearning4j:deeplearning4j-core:1.0.0-beta7'
     implementation 'org.nd4j:nd4j-native:1.0.0-beta7'
 
-    implementation 'org.slf4j:slf4j-simple:1.7.24'
-    implementation 'org.nd4j:nd4j-native:1.0.0-beta7:windows-x86_64-avx2'
-    //    implementation 'org.nd4j:nd4j-native:1.0.0-beta7:linux-x86_64-avx2'
+    implementation 'org.slf4j:slf4j-simple:1.7.31'
+//    implementation 'org.nd4j:nd4j-native:1.0.0-beta7:windows-x86_64-avx2'
+        implementation 'org.nd4j:nd4j-native:1.0.0-beta7:linux-x86_64-avx2'
 
-    compileOnly 'org.projectlombok:lombok:1.18.10'
-    annotationProcessor 'org.projectlombok:lombok:1.18.10'
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
-    testImplementation 'org.mockito:mockito-core:2.21.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:2.23.0'
-    testCompileOnly 'org.projectlombok:lombok:1.18.10'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
-    testImplementation 'org.deeplearning4j:deeplearning4j-ui:1.0.0-M1.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testImplementation 'org.mockito:mockito-core:3.11.2'
+    testImplementation 'org.mockito:mockito-junit-jupiter:3.11.2'
+    testCompileOnly 'org.projectlombok:lombok:1.18.20'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+    testImplementation 'org.deeplearning4j:deeplearning4j-ui:1.0.0-beta7'
+    testImplementation 'org.nd4j:nd4j-native:1.0.0-beta7'
 }
