@@ -29,7 +29,7 @@ public class MinimaxBasedPlayer extends AbstractPlayer {
     public void requestMove(GameContext gameContext) {
         Move move = searchFunction.search(gameContext.getBoard(), depth, evaluationFunction);
         if (verbose) {
-            System.out.println(String.format("MINIMAX: Decided on column %d with rating %d", move.getColumn(), move.getScore()));
+            System.out.printf("MINIMAX: Decided on column %d with rating %d%n", move.getColumn(), move.getScore());
         }
         gameContext.makeMove(move.getColumn());
     }

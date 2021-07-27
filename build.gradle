@@ -39,7 +39,7 @@ dependencies {
     implementation 'com.google.guava:guava:29.0-jre'
     implementation 'com.jakewharton.fliptables:fliptables:1.1.0'
 
-    implementation "org.deeplearning4j:deeplearning4j-core:1.0.0-beta7"
+    implementation "org.deeplearning4j:deeplearning4j-core:1.0.0-M1.1"
     implementation 'org.nd4j:nd4j-native:1.0.0-beta7'
 
     implementation 'org.slf4j:slf4j-simple:1.7.24'
@@ -55,5 +55,5 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter:2.23.0'
     testCompileOnly 'org.projectlombok:lombok:1.18.10'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
-    testImplementation 'org.deeplearning4j:deeplearning4j-ui:1.0.0-beta7'
+    testImplementation 'org.deeplearning4j:deeplearning4j-ui:1.0.0-M1.1'
 }

@@ -13,6 +13,7 @@ import static ru.alexeylisyutenko.ai.connectfour.machinelearning.deeplearning.Co
 
 public class NaiveDeepLearningPlayer extends AbstractPlayer {
     private static final String DEEPLEARING_MODEL_FILENAME = "deeplearing-models/naive-model.bin";
+
     private final static double[] MEAN_BOARD_ARRAY = {
             -0.0094, -0.0128, -0.0125, -0.0177, -0.0141, -0.0117, -0.0138,
             -0.0156, -0.0102, -0.0107, -0.0158, -0.0127, -0.0115, -0.0120,
@@ -24,8 +25,14 @@ public class NaiveDeepLearningPlayer extends AbstractPlayer {
     private final static INDArray MEAN_BOARD_ARRAY_FLATTENED = Nd4j.create(MEAN_BOARD_ARRAY, MEAN_BOARD_ARRAY.length);
 
     private final MultiLayerNetwork network;
+    private final boolean verbose;
 
     public NaiveDeepLearningPlayer() {
+        this(true);
+    }
+
+    public NaiveDeepLearningPlayer(boolean verbose) {
+        this.verbose = verbose;
         this.network = loadNetwork();
     }
 
@@ -41,6 +48,12 @@ public class NaiveDeepLearningPlayer extends AbstractPlayer {
     public void requestMove(GameContext gameContext) {
         INDArray boardIndArray = boardToINDArrayFlattened(gameContext.getBoard()).sub(MEAN_BOARD_ARRAY_FLATTENED).reshape(1, -1);
         int move = network.predict(boardIndArray)[0];
+
+        INDArray output = network.output(boardIndArray);
+        if (verbose) {
+            System.out.println("NN output: " + output);
+        }
+
         makeMoveIfPossibleOrAny(gameContext, move);
     }
 }

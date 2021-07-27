@@ -2,6 +2,13 @@ package ru.alexeylisyutenko.ai.connectfour.demo.deeplearing;
 
 import org.deeplearning4j.core.storage.StatsStorage;
 import org.deeplearning4j.datasets.iterator.INDArrayDataSetIterator;
+import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
+import org.deeplearning4j.earlystopping.EarlyStoppingResult;
+import org.deeplearning4j.earlystopping.saver.LocalFileModelSaver;
+import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
+import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationCondition;
+import org.deeplearning4j.earlystopping.termination.MaxTimeIterationTerminationCondition;
+import org.deeplearning4j.earlystopping.trainer.EarlyStoppingTrainer;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
@@ -28,6 +35,7 @@ import ru.alexeylisyutenko.ai.connectfour.machinelearning.deeplearning.ConnectFo
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_HEIGHT;
 import static ru.alexeylisyutenko.ai.connectfour.game.Constants.BOARD_WIDTH;
@@ -48,41 +56,7 @@ public class TrainConnectFourNaiveDemo {
         INDArrayDataSetIterator testIterator =
                 ConnectFourDatasetForDeepLearningHelpers.createINDArrayDataSetIterator(connectFourDataset.getTestSet(), flattenedMeanBoard, 200);
 
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .updater(new Adam())
-                .l2(1e-4)
-                .list()
-                .layer(new DenseLayer.Builder()
-                        .nIn(BOARD_HEIGHT * BOARD_WIDTH) // Number of input datapoints.
-                        .nOut(3000) // Number of output datapoints.
-                        .activation(Activation.RELU) // Activation function.
-                        .weightInit(WeightInit.XAVIER) // Weight initialization.
-                        .build())
-                .layer(new DenseLayer.Builder()
-                        .nIn(3000)
-                        .nOut(2000)
-                        .activation(Activation.RELU)
-                        .weightInit(WeightInit.XAVIER)
-                        .build())
-                .layer(new DenseLayer.Builder()
-                        .nIn(2000)
-                        .nOut(1000)
-                        .activation(Activation.RELU)
-                        .weightInit(WeightInit.XAVIER)
-                        .build())
-                .layer(new DenseLayer.Builder()
-                        .nIn(1000)
-                        .nOut(300)
-                        .activation(Activation.RELU)
-                        .weightInit(WeightInit.XAVIER)
-                        .build())
-                .layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                        .nIn(300)
-                        .nOut(BOARD_WIDTH)
-                        .activation(Activation.SOFTMAX)
-                        .weightInit(WeightInit.XAVIER)
-                        .build())
-                .build();
+        MultiLayerConfiguration conf = createMultiLayerConfiguration();
 
         //Initialize the user interface backend
         UIServer uiServer = UIServer.getInstance();
@@ -133,6 +107,88 @@ public class TrainConnectFourNaiveDemo {
 
             network.save(new File(String.format("deeplearing-models/naive-model-%d", i)), false);
         }
+
+        // evaluate
+        Evaluation eval = network.evaluate(testIterator);
+        System.out.println(eval);
+    }
+
+    private MultiLayerConfiguration createMultiLayerConfiguration() {
+        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+                .updater(new Adam())
+                .l2(1e-4)
+                .list()
+                .layer(new DenseLayer.Builder()
+                        .nIn(BOARD_HEIGHT * BOARD_WIDTH) // Number of input datapoints.
+                        .nOut(3000) // Number of output datapoints.
+                        .activation(Activation.RELU) // Activation function.
+                        .weightInit(WeightInit.XAVIER) // Weight initialization.
+                        .build())
+                .layer(new DenseLayer.Builder()
+                        .nIn(3000)
+                        .nOut(2000)
+                        .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
+                        .build())
+                .layer(new DenseLayer.Builder()
+                        .nIn(2000)
+                        .nOut(1000)
+                        .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
+                        .build())
+                .layer(new DenseLayer.Builder()
+                        .nIn(1000)
+                        .nOut(300)
+                        .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
+                        .build())
+                .layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                        .nIn(300)
+                        .nOut(BOARD_WIDTH)
+                        .activation(Activation.SOFTMAX)
+                        .weightInit(WeightInit.XAVIER)
+                        .build())
+                .build();
+        return conf;
+    }
+
+    @Test
+    @Disabled
+    void trainWithEarlyStoppingTrainer() {
+        ConnectFourDataset connectFourDataset = ConnectFourDatasets.connectFourDataset();
+
+        INDArray flattenedMeanBoard = ConnectFourDatasetForDeepLearningHelpers.constructMeanBoardArrayFlattened(connectFourDataset.getTrainingSet());
+        INDArrayDataSetIterator trainInterator =
+                ConnectFourDatasetForDeepLearningHelpers.createINDArrayDataSetIterator(connectFourDataset.getTrainingSet(), flattenedMeanBoard, 200);
+        INDArrayDataSetIterator validateIterator =
+                ConnectFourDatasetForDeepLearningHelpers.createINDArrayDataSetIterator(connectFourDataset.getValidationSet(), flattenedMeanBoard, 200);
+        INDArrayDataSetIterator testIterator =
+                ConnectFourDatasetForDeepLearningHelpers.createINDArrayDataSetIterator(connectFourDataset.getTestSet(), flattenedMeanBoard, 200);
+
+        MultiLayerConfiguration conf = createMultiLayerConfiguration();
+
+        EarlyStoppingConfiguration<MultiLayerNetwork> esConf = new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
+                .epochTerminationConditions(new MaxEpochsTerminationCondition(1000))
+                .iterationTerminationConditions(new MaxTimeIterationTerminationCondition(20, TimeUnit.MINUTES))
+                .scoreCalculator(new DataSetLossCalculator(validateIterator, true))
+                .evaluateEveryNEpochs(1)
+                .modelSaver(new LocalFileModelSaver("deeplearing-models"))
+                .build();
+
+        EarlyStoppingTrainer trainer = new EarlyStoppingTrainer(esConf, conf, trainInterator);
+
+        //Conduct early stopping training:
+        EarlyStoppingResult<MultiLayerNetwork> result = trainer.fit();
+
+        //Print out the results:
+        System.out.println("Termination reason: " + result.getTerminationReason());
+        System.out.println("Termination details: " + result.getTerminationDetails());
+        System.out.println("Total epochs: " + result.getTotalEpochs());
+        System.out.println("Best epoch number: " + result.getBestModelEpoch());
+        System.out.println("Score at best epoch: " + result.getBestModelScore());
+
+        //Get the best model:
+        MultiLayerNetwork network = result.getBestModel();
 
         // evaluate
         Evaluation eval = network.evaluate(testIterator);
