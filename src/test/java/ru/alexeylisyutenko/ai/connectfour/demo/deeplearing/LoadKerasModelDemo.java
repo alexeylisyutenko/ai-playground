@@ -30,7 +30,7 @@ public class LoadKerasModelDemo {
                 if (board.getCellPlayerId(row, column) == board.getCurrentPlayerId()) {
                     indArray.putScalar(new int[]{0, row, column, 0}, 1.0);
                 } else if (board.getCellPlayerId(row, column) == board.getOtherPlayerId()) {
-                    indArray.putScalar(new int[]{0, row, column, 0}, 0.5);
+                    indArray.putScalar(new int[]{0, row, column, 0}, -1.0);
                 } else {
                     indArray.putScalar(new int[]{0, row, column, 0}, 0.0);
                 }

@@ -53,7 +53,7 @@ public class KerasDeepLearningPlayer extends AbstractPlayer {
         makeMoveIfPossibleOrAny(gameContext, move);
     }
 
-    private INDArray boardToINDArray(Board board) {
+    public INDArray boardToINDArray(Board board) {
         Objects.requireNonNull(board, "board cannot be null");
         INDArray indArray = Nd4j.create(1, BOARD_HEIGHT, BOARD_WIDTH, 1);
         for (int row = 0; row < BOARD_HEIGHT; row++) {
@@ -61,7 +61,7 @@ public class KerasDeepLearningPlayer extends AbstractPlayer {
                 if (board.getCellPlayerId(row, column) == board.getCurrentPlayerId()) {
                     indArray.putScalar(new int[]{0, row, column, 0}, 1.0);
                 } else if (board.getCellPlayerId(row, column) == board.getOtherPlayerId()) {
-                    indArray.putScalar(new int[]{0, row, column, 0}, 0.5);
+                    indArray.putScalar(new int[]{0, row, column, 0}, -1.0);
                 } else {
                     indArray.putScalar(new int[]{0, row, column, 0}, 0.0);
                 }
